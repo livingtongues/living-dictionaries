@@ -1,12 +1,12 @@
 <script lang="ts">
   import { getContext } from 'svelte'
-  import { mapKey } from '../context'
+  import { map_key } from '../context'
   import type { MapKeyContext } from '../context'
 
-  const { getMap } = getContext<MapKeyContext>(mapKey)
-  const map = getMap()
+  const { get_map } = getContext<MapKeyContext>(map_key)
+  const map = get_map()
 
-  const supportedLanguages = [
+  const supported_languages = [
     'ar',
     'en',
     'es',
@@ -22,7 +22,7 @@
     'vi',
   ] as const
 
-  type SupportedLanguages = typeof supportedLanguages[number]
+  type SupportedLanguages = typeof supported_languages[number]
   interface Props {
     bcp?: SupportedLanguages
   }

@@ -142,7 +142,7 @@
       </HeadlessButton>
       {#if show}
         <CoordinatesModal
-          initialCenter={first_longitude !== undefined ? { longitude: first_longitude, latitude: first_latitude } : undefined}
+          initial_center={first_longitude !== undefined ? { longitude: first_longitude, latitude: first_latitude } : undefined}
           on_update={addCoordinates}
           on_close={toggle} />
       {/if}
@@ -158,7 +158,7 @@
         </HeadlessButton>
         {#if show}
           <RegionModal
-            initialCenter={{ longitude: first_longitude, latitude: first_latitude }}
+            initial_center={{ longitude: first_longitude, latitude: first_latitude }}
             region={null}
             on_update={(new_region) => {
               const regions = (dictionary.coordinates.regions && [...dictionary.coordinates.regions, new_region]) || [new_region]

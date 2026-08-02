@@ -2,34 +2,34 @@
   import { getContext, onMount } from 'svelte'
   import IconFaSolidGlobeAsia from '~icons/fa-solid/globe-asia'
   import type { Style } from 'mapbox-gl'
-  import { mapKey } from '../context'
+  import { map_key } from '../context'
   import type { MapKeyContext } from '../context'
 
-  const { getMap } = getContext<MapKeyContext>(mapKey)
-  const map = getMap()
+  const { get_map } = getContext<MapKeyContext>(map_key)
+  const map = get_map()
 
   interface Props {
-    alternateStyle?: string // 'Mapbox Satellite Streets'
+    alternate_style?: string // 'Mapbox Satellite Streets'
   }
 
-  const { alternateStyle = 'mapbox://styles/mapbox/satellite-streets-v12?optimize=true' }: Props = $props()
-  let initialStyle: Style
+  const { alternate_style = 'mapbox://styles/mapbox/satellite-streets-v12?optimize=true' }: Props = $props()
+  let initial_style: Style
 
   onMount(() => {
-    initialStyle = map.getStyle()
+    initial_style = map.getStyle()
   })
 
-  function toggleStyle() {
+  function toggle_style() {
     const style = map.getStyle()
-    if (style.name === initialStyle.name)
-      map.setStyle(alternateStyle)
+    if (style.name === initial_style.name)
+      map.setStyle(alternate_style)
     else
-      map.setStyle(initialStyle)
+      map.setStyle(initial_style)
   }
 </script>
 
 <button
-  onclick={toggleStyle}
+  onclick={toggle_style}
   type="button"
   class="toggle-style"
   style="bottom: 40px; left: 8px; z-index: 1;">

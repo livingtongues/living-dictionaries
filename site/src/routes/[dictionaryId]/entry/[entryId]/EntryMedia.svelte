@@ -160,7 +160,7 @@
           addPoint={show === 'point'}
           addRegion={show === 'region'}
           coordinates={entry.main.coordinates}
-          initialCenter={dictionary.coordinates?.points?.[0]?.coordinates}
+          initial_center={dictionary.coordinates?.points?.[0]?.coordinates}
           on_close={toggle}
           on_update={async new_value => await dict_db?.entries.update({ id: entry.id, coordinates: new_value })} />
       {/if}

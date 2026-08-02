@@ -52,7 +52,7 @@
                   {#if geo_open}
                     <GeoTaggingModal
                       coordinates={dialect.coordinates}
-                      initialCenter={initial_center}
+                      initial_center={initial_center}
                       on_close={toggle_geo}
                       on_update={async new_value => await dict_db?.dialects.update({ id: dialect.id, coordinates: new_value })} />
                   {/if}

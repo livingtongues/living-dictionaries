@@ -22,7 +22,7 @@ export const shared_meta: StoryMeta = {
 export const WithPoint: Story<typeof Component> = {
   props: {
     coordinates: { points: [{ coordinates: { longitude: -71.5, latitude: -16.4 } }], regions: [] },
-    initialCenter: { longitude: -71.5, latitude: -16.4 },
+    initial_center: { longitude: -71.5, latitude: -16.4 },
     on_update: async () => {},
     on_close: () => {},
   },

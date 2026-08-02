@@ -1,11 +1,11 @@
 <script lang="ts">
   import { getContext, onMount } from 'svelte'
   import type { IControl } from 'mapbox-gl'
-  import { mapKey } from '../context'
+  import { map_key } from '../context'
   import type { MapKeyContext } from '../context'
 
-  const { getMap } = getContext<MapKeyContext>(mapKey)
-  const map = getMap()
+  const { get_map } = getContext<MapKeyContext>(map_key)
+  const map = get_map()
 
   interface Props {
     position?: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left'
@@ -17,7 +17,7 @@
   let el: HTMLDivElement = $state()
 
   onMount(() => {
-    const customControl: IControl = {
+    const custom_control: IControl = {
       onAdd(_map) {
         return el
       },
@@ -29,9 +29,9 @@
         el.remove()
       },
     }
-    map.addControl(customControl, position)
+    map.addControl(custom_control, position)
     return () => {
-      map.removeControl(customControl)
+      map.removeControl(custom_control)
     }
   })
 </script>

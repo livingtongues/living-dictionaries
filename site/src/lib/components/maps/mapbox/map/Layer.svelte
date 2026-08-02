@@ -7,14 +7,14 @@
     MapLayerMouseEvent,
     MapLayerTouchEvent,
   } from 'mapbox-gl'
-  import { mapKey, sourceKey } from '../context'
+  import { map_key, source_key } from '../context'
   import type { MapKeyContext, SourceKeyContext } from '../context'
   import { random_id } from '../../utils/random-id'
 
-  const { getMap } = getContext<MapKeyContext>(mapKey)
-  const map = getMap()
-  const { getSourceId, addChildLayer } = getContext<SourceKeyContext>(sourceKey)
-  const sourceId = getSourceId()
+  const { get_map } = getContext<MapKeyContext>(map_key)
+  const map = get_map()
+  const { get_source_id, add_child_layer } = getContext<SourceKeyContext>(source_key)
+  const source_id = get_source_id()
 
   interface Props {
     id?: any
@@ -22,7 +22,7 @@
     options?: Partial<AnyLayer>
     minzoom?: number // 0-24
     maxzoom?: number // 0-24
-    beforeLayerId?: string // see https://docs.mapbox.com/mapbox-gl-js/example/geojson-layer-in-stack/ to create a FindFirstSymbolLayer component.
+    before_layer_id?: string // see https://docs.mapbox.com/mapbox-gl-js/example/geojson-layer-in-stack/ to create a FindFirstSymbolLayer component.
     on_click?: (e: MapLayerMouseEvent) => void
     on_dblclick?: (e: MapLayerMouseEvent) => void
     on_mousedown?: (e: MapLayerMouseEvent) => void
@@ -49,20 +49,20 @@
     },
     minzoom = undefined,
     maxzoom = undefined,
-    beforeLayerId = undefined,
+    before_layer_id = undefined,
     ...callbacks
   }: Props = $props()
 
-  function addLayer() {
+  function add_layer() {
     map.addLayer(
       // @ts-ignore - CustomLayerInterface throws off types here
-      { ...(options as AnyLayer), id, source: sourceId },
-      beforeLayerId,
+      { ...(options as AnyLayer), id, source: source_id },
+      before_layer_id,
     )
   }
 
   // Cf https://docs.mapbox.com/mapbox-gl-js/api/#map#on
-  const eventNames = [
+  const event_names = [
     'click',
     'dblclick',
     'mousedown',
@@ -78,16 +78,16 @@
     'touchcancel',
   ]
 
-  const handlers: [keyof MapLayerEventType, (e: any) => any][] = eventNames.map((eventName) => {
+  const handlers: [keyof MapLayerEventType, (e: any) => any][] = event_names.map((event_name) => {
     return [
-      eventName as keyof MapLayerEventType,
-      e => callbacks[`on_${eventName}`]?.(e),
+      event_name as keyof MapLayerEventType,
+      e => callbacks[`on_${event_name}`]?.(e),
     ]
   })
 
   // If the style changes, check that source is defined, because many "styledata" events are triggered,
   // and source is not defined when the first one occurs, then re-create the layer
-  const handleStyledata = () => !map.getLayer(id) && map.getSource(sourceId) && addLayer()
+  const handle_styledata = () => !map.getLayer(id) && map.getSource(source_id) && add_layer()
 
   $effect(() => {
     const layer = map.getLayer(id)
@@ -108,12 +108,12 @@
         }
       }
     } else {
-      addLayer()
+      add_layer()
       for (const [name, handler] of handlers)
         map.on(name, id, handler)
 
-      map.on('styledata', handleStyledata)
-      addChildLayer(id)
+      map.on('styledata', handle_styledata)
+      add_child_layer(id)
     }
   })
 
@@ -121,7 +121,7 @@
     for (const [name, handler] of handlers)
       map.off(name, id, handler)
 
-    map.off('styledata', handleStyledata)
+    map.off('styledata', handle_styledata)
     // If <Layer> is child of <Source>, the layer will have been removed by the onDestroy of <Source>.
     // The following statement ensures layer is removed in other cases.
     if (map.getLayer(id))

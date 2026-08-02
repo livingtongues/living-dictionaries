@@ -1,0 +1,21 @@
+{
+  "note": "Committed targets for the monthly SEO/GEO audit (.claude/commands/seo-review.md). Dictionaries chosen from Google Search Console top-impression pages; entry ids are pulled live from each dictionary sitemap so they stay valid as content changes.",
+  "dictionaries": ["tutelo-saponi", "hazaragi", "louisiana-creole"],
+  "entries_per_dictionary": 2,
+  "site_pages": ["/", "/dictionaries", "/about", "/create-dictionary"],
+  "queries": [
+    { "query": "living dictionaries", "intent": "brand", "page_type": "home" },
+    { "query": "dictionary maker", "intent": "head", "page_type": "create-dictionary" },
+    { "query": "make your own dictionary", "intent": "head", "page_type": "create-dictionary" },
+    { "query": "endangered language dictionary online", "intent": "head", "page_type": "home" },
+    { "query": "tutelo saponi dictionary", "intent": "dictionary", "page_type": "dictionary" },
+    { "query": "hazaragi language", "intent": "dictionary", "page_type": "dictionary" },
+    { "query": "louisiana creole dictionary", "intent": "dictionary", "page_type": "dictionary" },
+    { "query": "kaqchikel dictionary", "intent": "dictionary", "page_type": "dictionary" },
+    { "query": "manchu dictionary", "intent": "dictionary", "page_type": "dictionary" },
+    { "query": "kouri vini dictionary", "intent": "dictionary", "page_type": "dictionary" },
+    { "query": "how do you say water in tutelo", "intent": "answer", "page_type": "entry" },
+    { "query": "how to say thank you in hazaragi", "intent": "answer", "page_type": "entry" },
+    { "query": "kaqchikel word for water", "intent": "answer", "page_type": "entry" }
+  ]
+}

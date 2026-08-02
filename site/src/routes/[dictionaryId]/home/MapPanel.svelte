@@ -76,7 +76,7 @@
         <Map
           lng={points[0]?.coordinates.longitude}
           lat={points[0]?.coordinates.latitude}
-          pointsToFit={points_to_fit}>
+          points_to_fit={points_to_fit}>
           <NavigationControl />
           {#each points as point, index (point)}
             <Marker

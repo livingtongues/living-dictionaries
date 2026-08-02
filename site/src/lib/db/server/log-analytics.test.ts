@@ -1992,7 +1992,7 @@ describe(get_log_analytics, () => {
 })
 
 describe(build_host_stats, () => {
-  const SAMPLE = { cpu_pct: 12.5, cpu_window_s: 300, load1: 0.4, load5: 0.2, load15: 0.1, cores: 2, mem_pct: 55, mem_used_mb: 2100, mem_total_mb: 3800, swap_pct: 1, swap_used_mb: 20, swap_total_mb: 2048, disk_pct: 40, disk_used_gb: 38.4, disk_total_gb: 96, data_dir_mb: 9000 }
+  const SAMPLE = { cpu_pct: 12.5, cpu_window_s: 300, load1: 0.4, load5: 0.2, load15: 0.1, cores: 2, mem_pct: 55, mem_used_mb: 2100, mem_total_mb: 3800, swap_pct: 1, swap_used_mb: 20, swap_total_mb: 2048, disk_pct: 40, disk_used_gb: 38.4, disk_total_gb: 96, data_dir_mb: 9000, loop_lag_max_ms: 12, loop_lag_p99_ms: 11 }
 
   function add_host_stats({ at, cpu_pct, mem_pct }: { at: string, cpu_pct: number, mem_pct: number }): void {
     insert_client_log({

@@ -56,8 +56,30 @@ meaning \<language\>"). Each run, check whether an LD entry/dict page **surfaces
 Google and in ≥1 AI answer engine, and whether the answer content on the page is **answer-first**
 (the gloss/definition readable in the first crawlable text, not buried behind client-render).
 
-Prefer to grow this into a committed script under `site/scripts/` (crawl + assert + benchmark) so the
-second observation is free; until then, run it inline with `curl` + a small node parse.
+**The check is a committed script — run it, don't rebuild it:**
+
+```bash
+cd ~/code/living-dictionaries/site
+node scripts/seo-audit/audit.mjs --json ../.cron/seo-reviews/data/$(date +%F).json
+```
+
+`scripts/seo-audit/audit.mjs` crawls the priority page-types, asserts every invariant above, fetches
+each page as five search/AI crawler user-agents, measures page-own crawlable text, and benchmarks the
+queries in `scripts/seo-audit/targets.json` (edit that file to change dictionaries or queries). It
+prints two markdown tables straight into the digest and writes a JSON for month-over-month diffing.
+`--no-search` / `--no-gsc` degrade gracefully. ~3 minutes.
+
+**Real Google data — use it.** mustang has Search Console access to `sc-domain:livingdictionaries.app`
+via the `gsc` CLI (`gsc analytics|inspect|sitemaps SITE …`, Search-Console-only OAuth scope,
+credentials in `~/.config/google-search-console/`; see house `.knowledge/integrations/google-search-console.md`).
+Ranking, CTR and index coverage are measurable, not guessable — segment CTR by page type and by query
+family (a `contains` filter needs a direct API call; the CLI only does `equals`), and sample URL
+Inspection for index coverage. Property data starts 2026-07-08.
+
+**Before recommending anything on entry pages, check for a live experiment.** A 50/50 entry-`<title>`
+A/B test ran from 2026-07-31 (`site/src/routes/[dictionaryId]/entry/[entryId]/seo_entry_title.ts`);
+verifying arm integrity in production — sample entries, re-derive the arm from the committed hash,
+compare to the served title — is a legitimate and high-value part of this loop.
 
 ## Each run
 

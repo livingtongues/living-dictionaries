@@ -58,15 +58,22 @@ export function build_monthly_summary({ metrics, previous }: {
   const dictionary_readers = metrics.mission_visitors + metrics.fenced_visitors
 
   const lines: string[] = [
-    `📊 ${month_label(metrics.month)} — Living Dictionaries`,
+    `${month_label(metrics.month)} stats`,
     with_delta(`Visitors: ~${n(visitors)}/month · ${pct(metrics.site_anon_visitors, metrics.site_visitors)}% not signed in`, delta(visitors, previous_visitors)),
-    `Mission dictionaries: ${pct(metrics.mission_visitors, dictionary_readers)}% of readers`,
+    `Public and unlisted dictionaries: ${pct(metrics.mission_visitors, dictionary_readers)}% of readers`,
     with_delta(
       `Entries added: ${n(entries)} — ${pct(metrics.mission_entries_agent, attributed)}% by agent, ${pct(metrics.mission_entries_hand, attributed)}% by hand`,
       delta(entries, previous ? previous.mission_entries_created : null),
     ),
-    `Public corpus: ${n(metrics.public_dictionaries)} dictionaries · ${n(metrics.public_entries)} entries`,
   ]
+
+  // Corpus over the SAME grouping as the readership line above — comparing a
+  // public+unlisted percentage against a public-only corpus was two different
+  // denominators in one message (Jacob, 2026-08-01). Skipped entirely when the
+  // row predates the columns rather than printing a wrong or partial number.
+  if (metrics.mission_dictionaries !== null && metrics.mission_entries !== null) {
+    lines.push(`Public and unlisted corpus: ${n(metrics.mission_dictionaries)} dictionaries · ${n(metrics.mission_entries)} entries`)
+  }
 
   if (is_partial_capture(metrics)) {
     lines.push(`(${metrics.days_counted} days of clean capture, ${metrics.window_start} → ${metrics.window_end}, scaled to ${NORMALIZED_MONTH_DAYS} days)`)
@@ -143,6 +150,8 @@ if (import.meta.vitest) {
     fenced_visitors: 365,
     public_dictionaries: 221,
     public_entries: 273581,
+    mission_dictionaries: 621,
+    mission_entries: 506615,
     platform_dictionaries: 1296,
     platform_entries: 590091,
     mission_entries_created: 28652,
@@ -158,13 +167,19 @@ if (import.meta.vitest) {
     it('reproduces the validated July baseline, with the partial-capture note', () => {
       const { text } = build_monthly_summary({ metrics: base, previous: null })
       expect(text).toBe([
-        '📊 July 2026 — Living Dictionaries',
+        'July 2026 stats',
         'Visitors: ~6,693/month · 97% not signed in',
-        'Mission dictionaries: 92% of readers',
+        'Public and unlisted dictionaries: 92% of readers',
         'Entries added: 28,652 — 93% by agent, 7% by hand',
-        'Public corpus: 221 dictionaries · 273,581 entries',
+        'Public and unlisted corpus: 621 dictionaries · 506,615 entries',
         '(24 days of clean capture, 2026-07-08 → 2026-07-31, scaled to 31 days)',
       ].join('\n'))
+    })
+
+    it('omits the corpus line rather than printing a wrong number when the row predates the columns', () => {
+      const { text } = build_monthly_summary({ metrics: { ...base, mission_dictionaries: null, mission_entries: null }, previous: null })
+      expect(text).not.toContain('corpus')
+      expect(text).toContain('Entries added: 28,652')
     })
 
     it('omits deltas when there is no previous month (July has nothing to compare to)', () => {

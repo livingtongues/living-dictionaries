@@ -1,5 +1,6 @@
 import { readdirSync, readFileSync, statfsSync, statSync } from 'node:fs'
 import { join } from 'node:path'
+import { monitorEventLoopDelay } from 'node:perf_hooks'
 import process from 'node:process'
 
 /**
@@ -49,6 +50,18 @@ export interface HostStats {
   disk_total_gb: number | null
   /** Recursive size of the app data dir (hourly-cached walk). */
   data_dir_mb: number | null
+  /**
+   * Worst event-loop stall (ms) in THIS PROCESS since the tracker's previous
+   * read; null on the first read. The direct trace of a frozen loop, and the
+   * only one there is: a fully blocked thread is INVISIBLE to every other field
+   * here — on 2026-08-01 the daily retention sweep held the loop for ~115 s
+   * (six connections reset, two editors served 502s) while host CPU averaged
+   * 3.0%, and a second suspected stall at 00:00 UTC could not be proven either
+   * way for lack of this number. Ported from house 2026-08-02.
+   */
+  loop_lag_max_ms: number | null
+  /** p99 event-loop delay (ms) over the same window. */
+  loop_lag_p99_ms: number | null
 }
 
 export interface CpuCounters { busy: number, total: number }
@@ -112,15 +125,57 @@ interface CpuBaseline { counters: CpuCounters, at_ms: number }
 interface GlobalWithHostStats {
   [CPU_STATE_KEY]?: Map<string, CpuBaseline>
   [DATA_DIR_CACHE_KEY]?: { bytes: number | null, at_ms: number }
+  [LOOP_LAG_KEY]?: Map<string, LoopLagMonitor>
 }
 const DATA_DIR_CACHE_KEY = Symbol.for('living.host-stats.data-dir-cache')
 const DATA_DIR_CACHE_MS = 60 * 60 * 1000 // the recursive walk is the only non-trivial read — hourly is plenty
+const LOOP_LAG_KEY = Symbol.for('living.host-stats.loop-lag-monitors')
+type LoopLagMonitor = ReturnType<typeof monitorEventLoopDelay>
 
 function cpu_baselines(): Map<string, CpuBaseline> {
   const slot = globalThis as unknown as GlobalWithHostStats
   if (!slot[CPU_STATE_KEY])
     slot[CPU_STATE_KEY] = new Map()
   return slot[CPU_STATE_KEY]
+}
+
+/**
+ * Per-tracker event-loop delay histograms, windowed exactly like the CPU
+ * baselines: the first read for a tracker ENABLES its monitor and reports null;
+ * every later read reports max/p99 since that tracker's previous read, then
+ * resets. Each tracker owns an independent `monitorEventLoopDelay()` histogram
+ * (they sample independently at ~10 ms resolution), so the 5-min cron and an
+ * ad-hoc /admin/health load can't shorten each other's windows — a single
+ * shared histogram would report a lifetime maximum forever.
+ */
+function loop_lag_monitors(): Map<string, LoopLagMonitor> {
+  const slot = globalThis as unknown as GlobalWithHostStats
+  if (!slot[LOOP_LAG_KEY])
+    slot[LOOP_LAG_KEY] = new Map()
+  return slot[LOOP_LAG_KEY]
+}
+
+function read_loop_lag(tracker: string): { loop_lag_max_ms: number | null, loop_lag_p99_ms: number | null } {
+  try {
+    const monitors = loop_lag_monitors()
+    const monitor = monitors.get(tracker)
+    if (!monitor) {
+      const fresh = monitorEventLoopDelay()
+      fresh.enable()
+      monitors.set(tracker, fresh)
+      return { loop_lag_max_ms: null, loop_lag_p99_ms: null }
+    }
+    // Histogram values are NANOSECONDS.
+    const max_ms = round1(monitor.max / 1e6)
+    const p99_ms = round1(monitor.percentile(99) / 1e6)
+    monitor.reset()
+    return {
+      loop_lag_max_ms: Number.isFinite(max_ms) ? max_ms : null,
+      loop_lag_p99_ms: Number.isFinite(p99_ms) ? p99_ms : null,
+    }
+  } catch {
+    return { loop_lag_max_ms: null, loop_lag_p99_ms: null } // no perf_hooks histograms — degrade like the /proc reads
+  }
 }
 
 function read_proc(file: string): string | null {
@@ -199,6 +254,7 @@ export function read_host_stats({ tracker, data_dir, now_ms = Date.now(), proc_s
 
   const swap_used_kb = meminfo ? meminfo.swap_total_kb - meminfo.swap_free_kb : null
   const data_bytes = data_dir_bytes({ ...(data_dir ? { dir: data_dir } : {}), now_ms })
+  const { loop_lag_max_ms, loop_lag_p99_ms } = read_loop_lag(tracker)
 
   return {
     cpu_pct,
@@ -217,14 +273,19 @@ export function read_host_stats({ tracker, data_dir, now_ms = Date.now(), proc_s
     disk_used_gb,
     disk_total_gb,
     data_dir_mb: data_bytes !== null ? Math.round(data_bytes / 1024 ** 2) : null,
+    loop_lag_max_ms,
+    loop_lag_p99_ms,
   }
 }
 
-/** Test-only: clear CPU baselines + the data-dir cache between tests. */
+/** Test-only: clear CPU baselines, loop-lag monitors + the data-dir cache between tests. */
 export function _reset_host_stats_state(): void {
   const slot = globalThis as unknown as GlobalWithHostStats
   delete slot[CPU_STATE_KEY]
   delete slot[DATA_DIR_CACHE_KEY]
+  for (const monitor of slot[LOOP_LAG_KEY]?.values() ?? [])
+    monitor.disable()
+  delete slot[LOOP_LAG_KEY]
 }
 
 function round1(value: number): number {
@@ -323,6 +384,28 @@ if (import.meta.vitest) {
       read_host_stats({ tracker: 'a', now_ms: 1000 })
       const other = read_host_stats({ tracker: 'b', now_ms: 2000 })
       expect(other.cpu_pct).toBeNull() // b has never read before — a's baseline must not leak
+      _reset_host_stats_state()
+    })
+
+    test('loop lag: first read enables the monitor and reports null; the second reports the window and catches a deliberate stall', async () => {
+      _reset_host_stats_state()
+      const first = read_host_stats({ tracker: 'lag-test', now_ms: 1000 })
+      expect(first.loop_lag_max_ms).toBeNull()
+      expect(first.loop_lag_p99_ms).toBeNull()
+      // Let the ~10ms-resolution monitor take a baseline sample, then park the
+      // loop for ~50ms so the window contains a real stall.
+      await new Promise(resolve => globalThis.setTimeout(resolve, 30))
+      const spin_until = performance.now() + 50
+      while (performance.now() < spin_until) { /* busy */ }
+      await new Promise(resolve => globalThis.setTimeout(resolve, 30))
+      const second = read_host_stats({ tracker: 'lag-test', now_ms: 2000 })
+      // eslint-disable-next-line no-restricted-syntax -- genuine range check: exact stall length is scheduler-dependent
+      expect(second.loop_lag_max_ms ?? 0).toBeGreaterThanOrEqual(40)
+      expect(second.loop_lag_p99_ms).not.toBeNull()
+      // …and the window resets: a third immediate read must not still carry the stall.
+      const third = read_host_stats({ tracker: 'lag-test', now_ms: 3000 })
+      // eslint-disable-next-line no-restricted-syntax -- genuine range check
+      expect(third.loop_lag_max_ms ?? Number.POSITIVE_INFINITY).toBeLessThan(40)
       _reset_host_stats_state()
     })
   })

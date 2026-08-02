@@ -21,4 +21,13 @@ this category is about the runtime.
   site has ever shown was raised in the BROWSER, not the server), the two SQL queries that tell them
   apart, why `error_id` must never live in the message, and why the client hook must NOT do recovery
   the way house's does.
+- [catch-blocks-that-fabricate-state.md](./catch-blocks-that-fabricate-state.md) — the standing rule
+  *"the catch block cannot recover what the throw destroyed"* (2026-08-02): the three properties that
+  make a silent catch dangerous, the media-deletion sweep as the worked instance (an empty in-use set
+  started a 30-day deletion clock on real user media), why house's shape was deliberately NOT copied,
+  and the catches in this repo that are legitimate and must not be "fixed".
+- [event-loop-stalls.md](./event-loop-stalls.md) — how to see (and how to fool yourself about) a
+  frozen event loop: the `loop_lag_*` fields on `host_stats`, the `reset()` blind spot that makes a
+  naive verification script report a clean loop straight through an 800 ms freeze, and the three
+  synchronous stalls measured and moved off the request thread on 2026-08-02.
 - [satori-fonts.md](./satori-fonts.md) — satori's script codes are version-specific AND `|`-joined, its FontLoader is cached by `options.fonts` array identity (so a same-array retry is a no-op and dynamic fonts accumulate), Noto Arabic is unparseable by its bundled opentype fork, colour emoji is not subsettable, and every font failure mode returns 200 with a valid-but-glyphless font. Also: what the 0.0.44 → 0.29 upgrade did and did not change visually.

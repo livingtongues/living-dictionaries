@@ -425,3 +425,32 @@ standing baselines); DELETE once shipped or obsolete. Keep it small — standing
 - **2026-07-31 — with a once-daily checkpoint, the dashboards' newest day is ALWAYS frozen at
   ~03:30 Pacific**, a stronger form of the 07-26 "last point is partial" caveat. Never read today's
   bar on `/admin/analytics` as a live number, and label it before anything else on that page.
+- **2026-08-01 — THE DAILY RETENTION SWEEP BLOCKS THE REQUEST THREAD ~115 s AND SERVES REAL USERS
+  5xx. Measured, don't re-derive.** Sweep start `db_metadata.log_retention_ran_at` 10:30:00.756Z →
+  analytics child spawn (its `after_sweep` hook) ≈10:31:56Z, with six Caddy `connection reset by
+  peer` at 10:31:19/10:31:45/10:32:13 and two signed-in users' sync 502s. A blocked event loop fills
+  the accept backlog, so the kernel RSTs — that is why this looks like resets, not slowness. NOT a
+  deploy (deploys were 03:20 and 11:16). Last known violation of the 07-27 "telemetry must never
+  block a request path" law: 07-30 moved only the analytics COMPUTE into the niced child, not the
+  sweep before it. `.issues/retention-sweep-blocks-request-thread.md`. house + tutor run the ported
+  cron — broadcast when fixed. Standing corollary: **a synthetic 5-min probe reading 100% while
+  users get 502s is now proven twice; only user-observed 5xx is honest.**
+- **2026-08-01 — every "Internal Error" LD serves is a STALE-BUNDLE NAVIGATION, not an SSR crash.**
+  First night of both error hooks (`f0b5e568`): the two post-deploy crash rows carry
+  `origin:"client"` + `cause: Failed to fetch dynamically imported module …/_app/immutable/nodes/*`,
+  `error_id: null`; zero server-origin rows. The 07-31 "zero crash rows ever written" finding is
+  CLOSED — there was nothing to write. Don't re-triage individual `Internal Error` rows; the open
+  piece is COPY (tell the tab to reload) on `+error.svelte`, deliberately not a second auto-reload
+  mechanism.
+- **2026-08-01 — Evelyn's `solari` zombie storm STOPPED on its own** (1,266 rows on 07-31 → 1 row).
+  Rebekah (`algonquin`, pre-fix bundle) wrote 12 rows in two minutes and nothing since. The
+  stuck-old-bundle population is real but tiny; enumerate it SERVER-side (see the accepted tutor
+  port) rather than watching client rows.
+- **2026-08-01 — a checkpoint file whose payload says `reason:"verify-deploy"` is a HUMAN running
+  the child by hand** (`docker exec -e ANALYTICS_SNAPSHOT_CHILD=1 …`), not a code path and not a
+  silent recompute. Read `generated_at` + `reason` INSIDE the JSON before treating a fresh mtime as
+  a telemetry gap.
+- **2026-08-01 — the entries RESULTS list has no duplicate-key guard** (`View.svelte` +
+  `EntriesTable` + `EntriesGallery` all key on `entry.id`), unlike the entry page's child lists.
+  One duplicate id renders the whole results area as NOTHING via the caught boundary.
+  `.issues/entries-list-duplicate-key-blank-results.md`.

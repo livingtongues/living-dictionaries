@@ -25,6 +25,17 @@ import { get_shared_db } from './shared-db'
  * Live references = dict.db audio/videos/photos storage_paths (+ derived photo
  * variant keys) + shared.db partner logos + dictionaries.featured_image. Only
  * Only valid R2 media keys participate.
+ *
+ * THE ONE INVARIANT OF THE MARKING PASS (2026-08-02): a FAILED READ MUST NEVER
+ * PRODUCE AN EMPTY IN-USE SET. Until now the dict.db read sat in a `try` whose
+ * `catch` body was a comment — any failure (missing file, locked db, renamed
+ * column) yielded zero live keys, which marked every one of that dictionary's
+ * stored files as an orphan and started a 30-day deletion countdown on real user
+ * media. The grace period made a BRIEF failure harmless; nothing made a QUIET
+ * PERSISTENT one distinguishable from a genuinely emptied dictionary. Now such a
+ * dictionary is logged and skipped, and a proportion brake refuses an implausible
+ * share of one dictionary going unreferenced at once. See
+ * `.knowledge/server/catch-blocks-that-fabricate-state.md`.
  */
 
 const RECONCILE_EVERY_MS = 6.5 * 24 * 60 * 60 * 1000
@@ -62,8 +73,26 @@ async function list_media_bucket(): Promise<Map<string, { bytes: number, last_mo
   return keys
 }
 
+/**
+ * What one dictionary's live rows reference — or an honest refusal to answer.
+ *
+ * `ok: false` means "I could not read this dictionary", NOT "it references
+ * nothing". The caller must skip such a dictionary entirely; see the marking
+ * pass for why that distinction is the whole safety property here.
+ */
+export interface LiveKeysResult {
+  ok: boolean
+  keys: Set<string>
+  /**
+   * The dictionary is gone from the catalog — an empty live set is then the
+   * TRUTH, not a failure, and its media is genuinely reclaimable.
+   */
+  dictionary_deleted: boolean
+  error?: string
+}
+
 /** Every new-convention key a dict's live rows reference (incl. derived photo variant keys). */
-function live_keys_for_dict(dict_id: string): Set<string> {
+export function live_keys_for_dict(dict_id: string): LiveKeysResult {
   const keys = new Set<string>()
   const add = (path: string | null | undefined) => {
     if (!path || !parse_media_key(path))
@@ -79,23 +108,35 @@ function live_keys_for_dict(dict_id: string): Set<string> {
       keys.add(photo_variant_key({ original_key: path, variant: 'thumb' }))
     }
   }
-  try {
-    const db = new Database(dictionary_db_path(dict_id), { readonly: true })
-    try {
-      for (const table of ['audio', 'videos', 'photos']) {
-        const has = db.prepare(`SELECT 1 FROM sqlite_master WHERE name = ?`).get(table)
-        if (!has)
-          continue
-        for (const row of db.prepare(`SELECT storage_path FROM ${table} WHERE storage_path IS NOT NULL`).all() as { storage_path: string }[])
-          add(row.storage_path)
-      }
-    } finally {
-      db.close()
-    }
-  } catch {
-    // dict.db unreadable/missing (deleted dict) — nothing is live; orphan grace still applies
-  }
   const shared = get_shared_db()
+  // A dictionary the catalog no longer knows is DELETED: its file is gone on
+  // purpose and its media should be reclaimed. Anything else that fails to read
+  // is a fault, and a fault must never be answered with an empty set.
+  const dictionary_deleted = !shared.prepare(`SELECT 1 FROM dictionaries WHERE id = ?`).get(dict_id)
+  if (!dictionary_deleted) {
+    try {
+      const db = new Database(dictionary_db_path(dict_id), { readonly: true, fileMustExist: true })
+      let tables_read = 0
+      try {
+        for (const table of ['audio', 'videos', 'photos']) {
+          const has = db.prepare(`SELECT 1 FROM sqlite_master WHERE name = ?`).get(table)
+          if (!has)
+            continue // a pre-migration file may predate a table; the proportion brake covers the rest
+          tables_read++
+          for (const row of db.prepare(`SELECT storage_path FROM ${table} WHERE storage_path IS NOT NULL`).all() as { storage_path: string }[])
+            add(row.storage_path)
+        }
+      } finally {
+        db.close()
+      }
+      // None of the three media tables present: this is not a dictionary db we
+      // understand, so we have not actually read anything.
+      if (tables_read === 0)
+        throw new Error('no audio/videos/photos table found')
+    } catch (err) {
+      return { ok: false, keys, dictionary_deleted, error: (err as Error)?.message ?? String(err) }
+    }
+  }
   for (const row of shared.prepare(`SELECT photo_storage_path FROM dictionary_partners WHERE dictionary_id = ? AND photo_storage_path IS NOT NULL`).all(dict_id) as { photo_storage_path: string }[])
     add(row.photo_storage_path)
   const dict_row = shared.prepare(`SELECT featured_image FROM dictionaries WHERE id = ?`).get(dict_id) as { featured_image: string | null } | undefined
@@ -104,7 +145,29 @@ function live_keys_for_dict(dict_id: string): Set<string> {
       add(JSON.parse(dict_row.featured_image)?.storage_path)
     } catch { /* malformed legacy JSON */ }
   }
-  return keys
+  return { ok: true, keys, dictionary_deleted }
+}
+
+/**
+ * How much of ONE dictionary's stored media may become newly-orphaned in a
+ * single sweep before we stop and ask a human. The 30-day grace already protects
+ * against a BRIEF fault; nothing protected against a QUIET one that persists —
+ * a renamed column, a half-restored file, a bug in the key derivation — which
+ * reads exactly like a genuinely emptied dictionary.
+ *
+ * A dictionary whose catalog row is gone is exempt: emptying is then the point.
+ */
+const BRAKE_MIN_OBJECTS = 20
+const BRAKE_MAX_NEWLY_ORPHANED_SHARE = 0.5
+
+export function orphan_brake_tripped({ objects, newly_orphaned, dictionary_deleted }: {
+  objects: number
+  newly_orphaned: number
+  dictionary_deleted: boolean
+}): boolean {
+  if (dictionary_deleted || objects < BRAKE_MIN_OBJECTS)
+    return false
+  return newly_orphaned / objects > BRAKE_MAX_NEWLY_ORPHANED_SHARE
 }
 
 export interface MediaReconcileSummary {
@@ -114,6 +177,10 @@ export interface MediaReconcileSummary {
   ledger_rows_dropped: number
   newly_orphaned: number
   unorphaned: number
+  /** Dictionaries skipped because their live rows could not be read (see `media_sweep_dict_unreadable`). */
+  dicts_unreadable: number
+  /** Dictionaries whose marking was refused by the proportion brake (see `media_orphan_brake_tripped`). */
+  dicts_braked: number
   deleted: number
   variants_healed: number
   variant_heal_failures: number
@@ -126,7 +193,7 @@ export async function run_media_reconcile_once(): Promise<MediaReconcileSummary>
   const { client, bucket } = get_r2_media()
   const now = Date.now()
   const now_iso = new Date(now).toISOString()
-  const summary: MediaReconcileSummary = { listed: 0, adopted: 0, size_fixed: 0, ledger_rows_dropped: 0, newly_orphaned: 0, unorphaned: 0, deleted: 0, variants_healed: 0, variant_heal_failures: 0, video_thumbs_healed: 0, video_thumb_heal_failures: 0 }
+  const summary: MediaReconcileSummary = { listed: 0, adopted: 0, size_fixed: 0, ledger_rows_dropped: 0, newly_orphaned: 0, unorphaned: 0, dicts_unreadable: 0, dicts_braked: 0, deleted: 0, variants_healed: 0, variant_heal_failures: 0, video_thumbs_healed: 0, video_thumb_heal_failures: 0 }
 
   const remote = await list_media_bucket()
   summary.listed = remote.size
@@ -169,20 +236,50 @@ export async function run_media_reconcile_once(): Promise<MediaReconcileSummary>
   })()
 
   // 2. Orphan marking per dict (live rows vs ledger).
+  //
+  // MARKING STARTS A 30-DAY DELETION CLOCK on real user media, so the input to it
+  // must be a set we actually read. Two brakes, both added 2026-08-02:
+  //   (a) a dictionary we could not READ is skipped whole and logged at error
+  //       level — never treated as "references nothing" (which is what the old
+  //       comment-only `catch` did, silently marking its entire library);
+  //   (b) even on a good read, an implausible share of one dictionary's objects
+  //       going unreferenced at once STOPS the marking and asks for a human.
+  // Un-orphaning always runs: clearing a mark can only ever be safe.
   const dict_ids = (db.prepare(`SELECT DISTINCT dict_id FROM media_objects`).all() as { dict_id: string }[]).map(row => row.dict_id)
   const mark_orphan = db.prepare(`UPDATE media_objects SET orphaned_at = ? WHERE key = ? AND orphaned_at IS NULL`)
   const clear_orphan = db.prepare(`UPDATE media_objects SET orphaned_at = NULL WHERE key = ? AND orphaned_at IS NOT NULL`)
   for (const dict_id of dict_ids) {
     const live = live_keys_for_dict(dict_id)
     const rows = db.prepare(`SELECT key, orphaned_at FROM media_objects WHERE dict_id = ?`).all(dict_id) as { key: string, orphaned_at: string | null }[]
+    if (!live.ok) {
+      summary.dicts_unreadable++
+      console.error(`[media-sweep] ${dict_id}: could not read live media rows (${live.error}) — skipping, nothing marked.`)
+      log_server_event({
+        level: 'error',
+        message: 'media_sweep_dict_unreadable',
+        context: { dict_id, objects: rows.length, detail: live.error },
+      })
+      continue
+    }
+    const newly_orphaned = rows.filter(row => !row.orphaned_at && !live.keys.has(row.key)).length
+    const braked = orphan_brake_tripped({ objects: rows.length, newly_orphaned, dictionary_deleted: live.dictionary_deleted })
+    if (braked) {
+      summary.dicts_braked++
+      console.error(`[media-sweep] ${dict_id}: ${newly_orphaned}/${rows.length} objects would be newly orphaned — refusing to mark.`)
+      log_server_event({
+        level: 'error',
+        message: 'media_orphan_brake_tripped',
+        context: { dict_id, objects: rows.length, newly_orphaned, live_keys: live.keys.size },
+      })
+    }
     db.transaction(() => {
       for (const row of rows) {
-        if (live.has(row.key)) {
+        if (live.keys.has(row.key)) {
           if (row.orphaned_at) {
             clear_orphan.run(row.key)
             summary.unorphaned++
           }
-        } else if (!row.orphaned_at) {
+        } else if (!row.orphaned_at && !braked) {
           mark_orphan.run(now_iso, row.key)
           summary.newly_orphaned++
         }
@@ -274,7 +371,13 @@ export async function run_media_sweep(): Promise<void> {
     if (due) {
       const summary = await run_media_reconcile_once()
       console.info(`[media-sweep] reconcile: ${JSON.stringify(summary)}`)
-      log_server_event({ level: 'info', message: 'media_sweep_reconciled', context: { ...summary } })
+      // A run that skipped a dictionary or hit the brake is NOT routine — the
+      // summary used to be one `info` row where nine numbers looked alike.
+      log_server_event({
+        level: summary.dicts_unreadable || summary.dicts_braked ? 'warn' : 'info',
+        message: 'media_sweep_reconciled',
+        context: { ...summary },
+      })
       const probe = await run_media_metadata_probe_once()
       if (probe.probed > 0) {
         console.info(`[media-sweep] metadata probe: ${JSON.stringify(probe)}`)

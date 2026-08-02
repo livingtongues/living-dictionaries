@@ -1,13 +1,13 @@
 import type { Map, Marker } from 'mapbox-gl'
 
-export interface MapKeyContext { getMap: () => Map, getMapbox: () => typeof import('mapbox-gl') }
-export const mapKey = {}
+export interface MapKeyContext { get_map: () => Map, get_mapbox: () => typeof import('mapbox-gl') }
+export const map_key = {}
 
-export interface MarkerKeyContext { getMarker: () => Marker }
-export const markerKey = {}
+export interface MarkerKeyContext { get_marker: () => Marker }
+export const marker_key = {}
 
 export interface SourceKeyContext {
-  getSourceId: () => string
-  addChildLayer: (id: string) => void
+  get_source_id: () => string
+  add_child_layer: (id: string) => void
 }
-export const sourceKey = {}
+export const source_key = {}

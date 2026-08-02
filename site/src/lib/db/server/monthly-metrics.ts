@@ -67,6 +67,11 @@ export interface MonthlyMetrics {
   fenced_visitors: number
   public_dictionaries: number
   public_entries: number
+  /** Mission = public + unlisted. STOCK (size now), vs `mission_entries_created`
+   *  which is FLOW (added during the month). NULL on the 2026-07 row, which
+   *  predates these columns. */
+  mission_dictionaries: number | null
+  mission_entries: number | null
   platform_dictionaries: number
   platform_entries: number
   mission_entries_created: number
@@ -79,7 +84,8 @@ export interface MonthlyMetrics {
 }
 
 type CorpusMetrics = Pick<MonthlyMetrics,
-  'public_dictionaries' | 'public_entries' | 'platform_dictionaries' | 'platform_entries'
+  'public_dictionaries' | 'public_entries' | 'mission_dictionaries' | 'mission_entries'
+  | 'platform_dictionaries' | 'platform_entries'
   | 'mission_entries_created' | 'mission_entries_agent' | 'mission_entries_hand'
   | 'mission_entries_unattributed' | 'fenced_entries_created'>
 
@@ -286,6 +292,8 @@ function compute_corpus({ month, shared_db }: { month: string, shared_db: Databa
   const totals: CorpusMetrics = {
     public_dictionaries: 0,
     public_entries: 0,
+    mission_dictionaries: 0,
+    mission_entries: 0,
     platform_dictionaries: dictionaries.length,
     platform_entries: 0,
     mission_entries_created: 0,
@@ -303,6 +311,10 @@ function compute_corpus({ month, shared_db }: { month: string, shared_db: Databa
     }
     const group = group_for_bucket(dictionary.bucket)
     if (group === 'other') continue
+    if (group === 'mission') {
+      totals.mission_dictionaries = (totals.mission_dictionaries ?? 0) + 1
+      totals.mission_entries = (totals.mission_entries ?? 0) + (dictionary.entry_count ?? 0)
+    }
 
     const dict_db = open_read_only(dictionary_db_path(dictionary.id))
     if (!dict_db) continue
@@ -356,7 +368,8 @@ export function save_monthly_metrics({ shared_db, metrics }: { shared_db: Databa
       month, window_start, window_end, days_counted,
       site_visitors, site_visits, site_anon_visitors, new_visitor_rate,
       mission_visitors, mission_visits, mission_anon_visitors, fenced_visitors,
-      public_dictionaries, public_entries, platform_dictionaries, platform_entries,
+      public_dictionaries, public_entries, mission_dictionaries, mission_entries,
+      platform_dictionaries, platform_entries,
       mission_entries_created, mission_entries_agent, mission_entries_hand,
       mission_entries_unattributed, fenced_entries_created, computed_at
     ) VALUES (
@@ -364,6 +377,7 @@ export function save_monthly_metrics({ shared_db, metrics }: { shared_db: Databa
       ?, ?, ?, ?,
       ?, ?, ?, ?,
       ?, ?, ?, ?,
+      ?, ?,
       ?, ?, ?,
       ?, ?, ?
     )
@@ -372,7 +386,8 @@ export function save_monthly_metrics({ shared_db, metrics }: { shared_db: Databa
     metrics.month, metrics.window_start, metrics.window_end, metrics.days_counted,
     metrics.site_visitors, metrics.site_visits, metrics.site_anon_visitors, metrics.new_visitor_rate,
     metrics.mission_visitors, metrics.mission_visits, metrics.mission_anon_visitors, metrics.fenced_visitors,
-    metrics.public_dictionaries, metrics.public_entries, metrics.platform_dictionaries, metrics.platform_entries,
+    metrics.public_dictionaries, metrics.public_entries, metrics.mission_dictionaries, metrics.mission_entries,
+    metrics.platform_dictionaries, metrics.platform_entries,
     metrics.mission_entries_created, metrics.mission_entries_agent, metrics.mission_entries_hand,
     metrics.mission_entries_unattributed, metrics.fenced_entries_created, metrics.computed_at,
   )

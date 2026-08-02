@@ -196,6 +196,8 @@ function build_host(): NonNullable<LogAnalytics['host']> {
     disk_used_gb: 39.6,
     disk_total_gb: 96.2,
     data_dir_mb: 12_680,
+    loop_lag_max_ms: 14,
+    loop_lag_p99_ms: 11,
   }
   return { now, samples: 4032, latest: { ...now, at: '2026-06-23T13:00:00.000Z' }, hourly }
 }

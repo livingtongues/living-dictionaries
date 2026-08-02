@@ -110,6 +110,30 @@ proposals against this lens.
 
 ## Open proposals
 
+- **★★★ NEW — Attribute the user-observed 5xx line to a CAUSE window: deploy · scheduled maintenance ·
+  unexplained** *(filed 2026-08-01 · MEDIUM cost, HIGH value · verified: `build_uptime` in
+  `log-analytics.ts:1364-1416` already collects `user_observed` failures/users/sessions/worst-hour
+  from `sync_failed` rows with `context.status` 500-599, and `deploy-metrics.ts` already reads one
+  line per finished deploy from `<DATA_DIR>/deploy-metrics.jsonl` for the /admin/health "Deploys"
+  panel — but nothing joins the two).* The raw count is not the question anyone asks. A 502 during a
+  30-second blue/green swap is the cost of shipping; a 502 at 10:32 UTC on an idle Friday is an
+  incident. Split each day's user-observed 5xx into three buckets and show only the third as a
+  verdict:
+
+  > **Availability: 8 user-visible 5xx today — 5 in deploy windows, 2 in the daily maintenance
+  > window, 1 unexplained.**
+
+  Evidence from the night it was filed (2026-08-01): exactly that. Five 502s at 03:23 sat inside the
+  03:20 deploy; two at 10:32 sat inside the 03:30-Pacific retention sweep, which blocked the request
+  thread for ~115 s (<File path=".issues/retention-sweep-blocks-request-thread.md" />); one at
+  00:00:13 is genuinely unexplained. Meanwhile the synthetic probe read **270/270 OK, 100%
+  availability** — the 2026-07-27 blind-spot ruling in one picture. Bucket rules: deploy window =
+  `[deploy.finished_at − 90 s, +90 s]` from `read_deploy_metrics()`; maintenance window = the
+  `log-retention` cron's fire time (`db_metadata.log_retention_ran_at`) + its duration once
+  `log_retention_swept` exists (until then, a fixed 5-minute window after the recorded fire time).
+  Aggregate health, no error list — it fits the standing directive. Do NOT build the deploy bucket
+  off client `app_version` first-seen; `deploy-metrics.jsonl` is the real record.
+
 - **★★ NEW — Self-heal outcome split on the existing boot-health panel** *(filed 2026-07-31 ·
   MEDIUM-HIGH · verified absent: `log-analytics.ts` contains ZERO references to `stale_bundle_reload`,
   `stale_bundle_reload_deferred` or `stale_bundle_reload_gave_up`).* The reload-once rule shipped
@@ -548,6 +572,33 @@ for a while. Stop listing house as behind on this.)*
 
 *Skipped as inapplicable to LD:* tutor's **Mobile-health / memory-OOM** RN panel (web-only) and
 house's **/admin/revenue** dashboard (no payments).
+
+### Cross-pollination update — 2026-08-01 (read house + tutor 07-31 reviews/backlogs)
+
+- **Inbound from tutor — ACCEPTED: log the sync REFUSAL server-side, because the client may be the
+  thing that's broken.** tutor's 07-31 review found two real handshake refusals whose only record
+  anywhere was a web-server access log. Verified as the same gap in LD tonight:
+  `site/src/routes/api/dictionary/[id]/changes/+server.ts:70` throws the 409 `schema_outdated`
+  with **no** `log_server_event` — the same file logs `dict_changes_pushed`, `dict_changes_failed`
+  and `dict_changes_orphans_skipped`, so the refusal is the one outcome that leaves no trace. This
+  matters more in LD than in tutor because of the 2026-07-31 standing law (*a client-side self-heal
+  can never reach the tabs that predate it*): a coalesced
+  `dict_changes_refused { reason, dict_id, user_id, client_migration, server_migration }` is the ONLY
+  way to enumerate stuck old clients that are too old to report themselves. Feeds the digest's
+  human-nudge list, not a panel (2026-07-14 no-wedged-panel ruling).
+- **Convergence, third night running — the sync-LIVENESS strip is the top ready item in all three
+  apps.** house and tutor both named it again on 07-31; LD's `build_sync_health`
+  (`log-analytics.ts:2375`) still reads only `message = 'sync_failed'`. LD is the best-placed of the
+  three to build it: the success side already exists as a server event (`dict_changes_pushed` — 522
+  rows in tonight's window across many dictionaries), so the strip is a second query, not new
+  telemetry. Count successes; don't chart their durations.
+- **Outbound to house + tutor — a SCHEDULED job, not just a deploy, can produce user-visible 5xx.**
+  LD measured its daily retention sweep blocking the request thread ~115 s and RST-ing live
+  connections (<File path=".issues/retention-sweep-blocks-request-thread.md" />). Both siblings run
+  the ported copy of that cron on the same daily schedule, and all three moved only the *analytics
+  compute* into a niced child. Also outbound: the `og_store_state` remote-tier counters house
+  proposed are now live in LD and reading cleanly (377 gets / 349 puts / 0 faults / breaker closed in
+  24 h).
 
 ### Cross-pollination update — 2026-07-05 (read house + tutor 07-04 reviews/backlogs)
 - **Convergence: all three apps now have the synthetic-uptime panel.** house shipped it 07-04

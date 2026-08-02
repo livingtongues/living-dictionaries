@@ -1,4 +1,7 @@
 import type Database from 'better-sqlite3'
+import { join } from 'node:path'
+import process from 'node:process'
+import SqliteDatabase from 'better-sqlite3'
 import { is_noise_error_message } from '$lib/debug/classify-error'
 import { DICTIONARY_OPENED } from '$lib/debug/log-events'
 import { is_bot_user_agent } from '$lib/utils/bot-user-agent'
@@ -7,8 +10,8 @@ import { log_server_event } from '$lib/server/log-server-event'
 import { get_admin_user_ids } from './admin-user-ids'
 import type { SessionActivity } from './bot-sessions'
 import { classify_ua_frequency_bot_sessions } from './bot-sessions'
-import { get_log_archive_db } from './log-archive-db'
-import { CLIENT_LOG_COLUMNS, get_logs_db } from './logs-db'
+import { get_log_archive_db, open_log_archive_db } from './log-archive-db'
+import { CLIENT_LOG_COLUMNS, get_logs_db, open_logs_db } from './logs-db'
 import { get_shared_db } from './shared-db'
 
 /**
@@ -623,16 +626,28 @@ export function run_log_retention_once({ shared_db = get_shared_db(), logs_db = 
   logs_db?: Database.Database
   archive_db?: Database.Database
   now?: Date
-} = {}): { days_rolled: number, archived: number, pruned: number } {
+} = {}): { days_rolled: number, archived: number, pruned: number, vacuumed: string[], step_ms: Record<string, number> } {
+  // Per-step wall clock: the sweep's cost is wildly uneven (a VACUUM of a
+  // multi-GB file dwarfs everything else) and until 2026-08-02 its only account
+  // of itself was a console.info that dies with the container — so the 115 s
+  // blocking measurement of 2026-08-01 had to be reconstructed from a child
+  // process's spawn time. Per-day rollups are summed under one `rollup_day` key
+  // so a 14-day catch-up doesn't produce 14 keys.
+  const step_ms: Record<string, number> = {}
   const step = <T>({ label, fallback, run }: { label: string, fallback: T, run: () => T }): T => {
+    const started = performance.now()
     try {
       return run()
     } catch (err) {
       console.error(`[log-retention] step '${label}' failed (continuing sweep):`, err)
       log_server_event({ level: 'error', message: 'log_retention_step_failed', error: err, context: { step: label }, db: logs_db })
       return fallback
+    } finally {
+      const key = label.startsWith('rollup_day:') ? 'rollup_day' : label
+      step_ms[key] = Math.round((step_ms[key] ?? 0) + performance.now() - started)
     }
   }
+  const vacuumed: string[] = []
 
   step({ label: 'reroll_archived_days_once', fallback: undefined, run: () => reroll_archived_days_once({ shared_db, logs_db, archive_db }) })
   const watermark = get_rollup_watermark(shared_db)
@@ -672,36 +687,86 @@ export function run_log_retention_once({ shared_db = get_shared_db(), logs_db = 
     run: () => archive_old_logs({ logs_db, archive_db, now }),
   })
   // Return pruned disk to the OS once a growth bulge drains (guarded — see helper).
-  step({ label: 'vacuum_logs_db', fallback: undefined, run: () => vacuum_if_worthwhile({ db: logs_db, label: 'logs.db' }) })
-  step({ label: 'vacuum_archive_db', fallback: undefined, run: () => vacuum_if_worthwhile({ db: archive_db, label: 'logs-archive.db' }) })
+  for (const { label, db } of [{ label: 'logs.db', db: logs_db }, { label: 'logs-archive.db', db: archive_db }]) {
+    const result = step({
+      label: `vacuum_${label === 'logs.db' ? 'logs_db' : 'archive_db'}`,
+      fallback: { vacuumed: false, reclaimable_bytes: 0 },
+      run: () => vacuum_if_worthwhile({ db, label }),
+    })
+    if (result.vacuumed)
+      vacuumed.push(label)
+  }
   step({ label: 'record_ran_at', fallback: undefined, run: () => {
     shared_db.prepare(`
       INSERT INTO db_metadata (key, value) VALUES ('log_retention_ran_at', ?)
       ON CONFLICT(key) DO UPDATE SET value = excluded.value
     `).run(now.toISOString())
   } })
-  return { days_rolled, archived, pruned }
+  return { days_rolled, archived, pruned, vacuumed, step_ms }
+}
+
+/** What one child-run sweep reports home; the PARENT turns this into telemetry. */
+export interface RetentionSweepSummary {
+  duration_ms: number
+  days_rolled: number
+  archived: number
+  pruned: number
+  /** Which log files were rewritten this run ('logs.db' / 'logs-archive.db'). */
+  vacuumed: string[]
+  /** Wall clock per `step()` label — where the time actually went. */
+  step_ms: Record<string, number>
+  /** Set only when the whole sweep failed (individual steps self-heal via `step()`). */
+  error?: string
 }
 
 /**
- * The roster's `run` (scheduled by `cron-scheduler.ts`, see `crons.ts`): one
- * retention sweep + the injected after-sweep hook, with its own queryable failure
- * event. No env flag — log retention always runs on the active node so trends never
- * silently stop accumulating.
+ * ONE retention sweep, run INSIDE the analytics child process (see
+ * `analytics-snapshot.ts`, which forks it and owns the telemetry write).
  *
- * The hook is where the daily analytics checkpoint gets kicked (a niced child
- * process — see `analytics-snapshot.ts`), and the ORDER matters: this sweep advances
- * the rollup watermark first, so the child's payload is built on finalized rollups
- * rather than re-scanning raw rows for a day that was about to be materialized
- * anyway. It's injected by the roster to keep this module free of a cycle.
+ * WHY IT LIVES IN A CHILD (2026-08-01, `.issues/retention-sweep-blocks-request-thread.md`):
+ * every part of this sweep is synchronous better-sqlite3 work, and in the serving
+ * process it held the event loop for a MEASURED 115 seconds — the kernel's accept
+ * queue filled, Caddy logged six connections reset, and two signed-in editors got
+ * HTTP 502 on their sync at 03:30 Pacific. It recurs daily, and a `VACUUM` of the
+ * 2.0 GB logs.db would dwarf it. The analytics compute made this move on
+ * 2026-07-30; this is the sweep that ran immediately before it.
+ *
+ * Handles are opened HERE rather than through `get_shared_db()` / `get_logs_db()`:
+ * the child must not run the shared.db migration runner (the server owns
+ * migrations), and it wants a LONG busy timeout — unlike the serving process it is
+ * allowed to wait for a lock, because nobody is waiting on it.
+ *
+ * Never throws: a dead sweep must not take the analytics checkpoint down with it.
  */
-export function run_log_retention_sweep({ after_sweep }: { after_sweep?: () => Promise<void> } = {}): void {
+export function sweep_log_retention_in_child({ data_dir = process.env.DATA_DIR || '.data', now = new Date() }: {
+  data_dir?: string
+  now?: Date
+} = {}): RetentionSweepSummary {
+  const started = performance.now()
+  const summary: RetentionSweepSummary = { duration_ms: 0, days_rolled: 0, archived: 0, pruned: 0, vacuumed: [], step_ms: {} }
+  let shared_db: Database.Database | null = null
+  let logs_db: Database.Database | null = null
+  let archive_db: Database.Database | null = null
   try {
-    const result = run_log_retention_once()
-    console.info(`[log-retention] rolled ${result.days_rolled} day(s), archived ${result.archived}, pruned ${result.pruned} (hot ${HOT_WINDOW_DAYS}d, archive ${ARCHIVE_WINDOW_DAYS}d).`)
-    after_sweep?.().catch(err => console.error('[log-retention] after-sweep hook failed:', err))
+    shared_db = new SqliteDatabase(join(data_dir, 'shared.db'), { fileMustExist: true })
+    shared_db.pragma(`busy_timeout = ${CHILD_BUSY_TIMEOUT_MS}`)
+    shared_db.pragma('foreign_keys = ON')
+    logs_db = open_logs_db(join(data_dir, 'logs.db'), { busy_timeout_ms: CHILD_BUSY_TIMEOUT_MS })
+    archive_db = open_log_archive_db(join(data_dir, 'logs-archive.db'), { busy_timeout_ms: CHILD_BUSY_TIMEOUT_MS })
+    const result = run_log_retention_once({ shared_db, logs_db, archive_db, now })
+    Object.assign(summary, result)
+    console.info(`[log-retention] rolled ${result.days_rolled} day(s), archived ${result.archived}, pruned ${result.pruned}${result.vacuumed.length ? `, VACUUMed ${result.vacuumed.join(' + ')}` : ''} (hot ${HOT_WINDOW_DAYS}d, archive ${ARCHIVE_WINDOW_DAYS}d).`)
   } catch (err) {
+    summary.error = (err as Error)?.message ?? String(err)
     console.error('[log-retention] sweep failed:', err)
-    log_server_event({ level: 'error', message: 'log_retention_sweep_failed', error: err })
+  } finally {
+    shared_db?.close()
+    logs_db?.close()
+    archive_db?.close()
+    summary.duration_ms = Math.round(performance.now() - started)
   }
+  return summary
 }
+
+/** The child may wait as long as it takes for a lock — it is serving nobody. */
+const CHILD_BUSY_TIMEOUT_MS = 60_000

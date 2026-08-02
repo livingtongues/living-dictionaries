@@ -123,11 +123,72 @@ The 2026-07 row must match the validated targets below. Then check the `notifica
 the posted summary (it should read `~6,693/month · 97% not signed in`, `92% of readers`,
 `28,652 — 93% by agent, 7% by hand`, `221 dictionaries · 273,581 entries`, plus the capture note).
 
-## Validated July targets (the row must reproduce these)
-Site window 2026-07-08 → 07-31, 24 days: **5,182** visitors · 12,320 visits · 5,012 anon (97%) ·
-new-rate **216/day** → normalized **≈6,694**. Mission: 4,048 · 8,761 · 3,940, rate 169 → ≈5,231.
-Fenced: 365. Corpus stock: public 221 / 273,581; platform 1,296 / 590,091. Flow: mission created
-28,652 (agent 26,553 / hand 1,932 / unattributed 167); fenced 1,407.
+## ✅ VERIFIED IN PRODUCTION (2026-08-01T11:23Z)
+Deployed (migration `20260801_monthly_metrics.sql` applied 11:18:49Z), then ran the real child
+directly to avoid waiting for the next sweep:
+
+```sh
+ssh living "docker exec -e ANALYTICS_SNAPSHOT_CHILD=1 -e ANALYTICS_SNAPSHOT_REASON=verify-deploy \
+  sveltekit_blue node /workspace/site/build/server/chunks/analytics-snapshot-<hash>.js"
+# → monthly_metrics 2026-07 computed in 34550ms (5182 visitors over 24d)
+```
+
+The July row reproduced every validated figure:
+window **2026-07-08 → 07-31, 24 days** · site **5,182** visitors / **12,318** visits / **5,012** anon
+· rate **215.9167/day** → normalized **6,693** · mission **4,048** / 8,755 / 3,940 · fenced **365** ·
+public **221** / **273,581** · mission created **28,652** (agent **26,553** / hand **1,932** /
+unattributed **167**) · fenced **1,407**.
+
+**Four apparent mismatches, all benign — do not chase them again:**
+- `site_visits` 12,318 and `mission_visits` 8,755 (not 12,320 / 8,761). The larger numbers came from a
+  throwaway script that summed per-DAY distinct sessions, double-counting sessions spanning UTC
+  midnight. A global set is correct; the module and `main.js` agree.
+- `platform_dictionaries` 1,297 and `platform_entries` 590,105 (not 1,296 / 590,091): live drift —
+  `kapampangan` was created 09:25:25Z, right after the earlier catalog query. Stock is "as of compute
+  time" by design. July's FLOW numbers were unaffected, as they must be.
+
+⚠️ Do NOT import the `hooks.server-*.js` chunk to poke at functions — it boots a second cron scheduler
+as an import side effect. (Verified harmless here: the process exited immediately, `cron_runs` was
+untouched and nothing was posted.) Run the `analytics-snapshot-*.js` chunk instead; it is self-contained.
+
+## ✅ POSTED 2026-08-01T11:33:49Z — message `c9af1146-8ae4-4128-ae9b-67314d9889a0`
+Posted as **System** into `notifications` via the loopback `/api/internal/system-chat` (see the
+`system-chat` command). Pinged Greg Anderson, Cailie Keating, Diego; Jacob skipped via
+`skip_user_id`. `announced_at` stamped immediately afterwards so the next sweep cannot double-post.
+
+```
+July 2026 stats
+Visitors: ~6,693/month · 97% not signed in
+Public and unlisted dictionaries: 92% of readers
+Entries added: 28,652 — 93% by agent, 7% by hand
+Public and unlisted corpus: 621 dictionaries · 506,615 entries
+(24 days of clean capture, 2026-07-08 → 2026-07-31, scaled to 31 days)
+```
+
+### Jacob's wording revisions (2026-08-01, now the shipped format)
+- Title is plain **"<Month> <Year> stats"** — no emoji, no product name.
+- **"Public and unlisted dictionaries"**, never "mission dictionaries", in user-facing copy.
+  (`mission` remains the internal column/group name.)
+- The corpus line covers **public + unlisted**, matching the readership line's grouping. Reporting a
+  public-only corpus against a public+unlisted readership percentage was two denominators in one
+  message.
+
+### ⚠️ ONE STEP OUTSTANDING — needs a deploy
+The wording changes + the new `mission_dictionaries` / `mission_entries` columns
+(`20260801a_monthly_metrics_mission_corpus.sql`) are **written and verified but NOT deployed**. The
+posted message was assembled by hand from live values (621 · 506,615, confirmed read-only). Until
+Jacob commits + pushes:
+- the **2026-07 row has NULL** for the two new columns (harmless — already announced, and
+  `build_monthly_summary` omits the corpus line rather than printing a wrong number);
+- **August's post on 2026-09-01 would use the OLD wording.** Deploy before then.
+
+Optional after deploying: `DELETE FROM monthly_metrics WHERE month='2026-07'`, re-run the analytics
+child, then re-stamp `announced_at` — refreshes July's row with the new columns. Stock would be
+as-of-then, not as-of-July, which is why it is optional rather than required.
+
+## Scheduled follow-ups
+- `c-7fd4d4` — **2026-09-01 18:00** — build the /admin/analytics monthly-trend charts (needs 2 months).
+- `c-1fc58c` — **2026-10-01 18:00** — decide + build the public visitors stat (needs 3 complete months).
 
 ## Deadline
 Must be deployed and July backfilled before **~2026-09-06** (when 07-08 raw prunes). Large margin, but

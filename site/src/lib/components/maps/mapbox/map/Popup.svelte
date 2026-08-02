@@ -2,13 +2,13 @@
   // from https://gitlab.com/jailbreak/svelte-mapbox-gl
   import { getContext, onMount } from 'svelte'
   import type { Marker, Popup, PopupOptions } from 'mapbox-gl'
-  import { mapKey, markerKey } from '../context'
+  import { map_key, marker_key } from '../context'
 
-  const { getMapbox } = getContext<{ getMapbox: () => typeof import('mapbox-gl') }>(mapKey)
-  const mapbox = getMapbox()
+  const { get_mapbox } = getContext<{ get_mapbox: () => typeof import('mapbox-gl') }>(map_key)
+  const mapbox = get_mapbox()
 
-  const { getMarker } = getContext<{ getMarker: () => Marker }>(markerKey)
-  const marker = getMarker()
+  const { get_marker } = getContext<{ get_marker: () => Marker }>(marker_key)
+  const marker = get_marker()
 
   interface Props {
     closeButton?: boolean

@@ -11,6 +11,8 @@ import { building, dev } from '$app/environment'
 import { log_server_event } from '$lib/server/log-server-event'
 import SqliteDatabase from 'better-sqlite3'
 import { get_log_analytics } from './log-analytics'
+import type { RetentionSweepSummary } from './log-retention-cron'
+import { sweep_log_retention_in_child } from './log-retention-cron'
 import { compute_monthly_metrics, missing_metric_months, save_monthly_metrics } from './monthly-metrics'
 
 /**
@@ -190,6 +192,8 @@ export interface SnapshotJobSummary {
   /** Months whose `monthly_metrics` row this run computed (usually none — only
    *  on the 1st, or on the first deploy that backfills). */
   monthly_metrics: string[]
+  /** The daily retention sweep, when this run was asked to do it first (cron only). */
+  retention?: RetentionSweepSummary
 }
 
 /**
@@ -223,14 +227,28 @@ function try_open_read_only(path: string): Database.Database | null {
  * there is no bundle to fork). Each payload is written as soon as it's computed,
  * so a crash on the last target still leaves the earlier ones fresh.
  */
-export async function run_analytics_snapshot_job({ reason, now = () => new Date() }: {
+export async function run_analytics_snapshot_job({ reason, sweep_retention = false, now = () => new Date() }: {
   reason: string
+  /**
+   * Run the daily log-retention sweep BEFORE computing (the daily cron only).
+   *
+   * One fork does both because the order is load-bearing and always has been:
+   * the sweep advances the rollup watermark, so the analytics payload is built
+   * on finalized rollups instead of re-scanning raw rows for a day that was
+   * about to be materialized anyway — and the monthly freeze below then measures
+   * a month the sweep has already closed.
+   */
+  sweep_retention?: boolean
   /** Test seam — the child stamps each payload with its own compute time. */
   now?: () => Date
 }): Promise<SnapshotJobSummary> {
   const started = performance.now()
   const data_dir = process.env.DATA_DIR || '.data'
   const summary: SnapshotJobSummary = { reason, duration_ms: 0, peak_rss_mb: 0, written: [], failed: [], pruned: [], monthly_metrics: [] }
+  // FIRST, and with its own handles: the sweep WRITES (rollups, archive moves,
+  // VACUUM), the compute below is strictly read-only. Never throws.
+  if (sweep_retention)
+    summary.retention = sweep_log_retention_in_child({ data_dir, now: now() })
   let shared_db: Database.Database | null = null
   let logs_db: Database.Database | null = null
   let archive_db: Database.Database | null = null
@@ -325,6 +343,35 @@ function freeze_monthly_metrics({ data_dir, shared_db, logs_db, archive_db, now 
 
 // ── Parent side: spawning the child ─────────────────────────────────────────
 
+/**
+ * Turn the child's retention half into telemetry. The PARENT writes it — same
+ * rule as the analytics half, and for the same reason: the child is a short-lived
+ * process whose own `console` dies with the container.
+ *
+ * Until 2026-08-02 the sweep's ONLY success-path account of itself was a
+ * `console.info`, which is why measuring its 115-second freeze took a
+ * reverse-proxy log correlation by hand. A success path that emits nothing is
+ * indistinguishable from a job that never ran.
+ */
+function report_retention_sweep({ reason, sweep_retention, summary }: {
+  reason: string
+  sweep_retention: boolean
+  summary: SnapshotJobSummary | null
+}): void {
+  if (!sweep_retention)
+    return
+  const retention = summary?.retention
+  if (!retention) {
+    log_server_event({ level: 'error', message: 'log_retention_sweep_failed', context: { reason, detail: 'child exited without reporting a sweep' } })
+    return
+  }
+  if (retention.error) {
+    log_server_event({ level: 'error', message: 'log_retention_sweep_failed', context: { reason, ...retention } })
+    return
+  }
+  log_server_event({ level: 'info', message: 'log_retention_swept', context: { reason, ...retention } })
+}
+
 /** Beyond this the compute is assumed wedged and the child is killed — a deadlock catcher, not a budget. */
 const CHILD_TIMEOUT_MS = 20 * 60_000
 
@@ -374,8 +421,10 @@ export type SpawnOutcome = 'spawned' | 'already-running' | 'ran-inline' | 'faile
  * run) so the job runs inline; a dev machine's `.data` is tiny and nothing
  * health-checks a dev server.
  */
-export async function spawn_analytics_snapshot_job({ reason, fork_impl = fork, inline = dev }: {
+export async function spawn_analytics_snapshot_job({ reason, sweep_retention = false, fork_impl = fork, inline = dev }: {
   reason: string
+  /** Have the child run the daily retention sweep before computing (cron only). */
+  sweep_retention?: boolean
   /** Test seam. */
   fork_impl?: typeof fork
   /**
@@ -388,14 +437,19 @@ export async function spawn_analytics_snapshot_job({ reason, fork_impl = fork, i
     return 'failed'
   const running = running_state()
   if (running) {
+    // The daily sweep rides this same guard: skipping it for a day is safe (the
+    // rollup watermark makes it a catch-up next run), but it must be visible.
     console.info(`[analytics-snapshot] already running (${running.reason}, ${Math.round((Date.now() - running.started_at) / 1000)}s) — skipping ${reason}.`)
+    if (sweep_retention)
+      log_server_event({ level: 'warn', message: 'log_retention_sweep_skipped', context: { reason, running: running.reason, running_for_s: Math.round((Date.now() - running.started_at) / 1000) } })
     return 'already-running'
   }
   set_running({ started_at: Date.now(), reason })
 
   if (inline) {
     try {
-      const summary = await run_analytics_snapshot_job({ reason })
+      const summary = await run_analytics_snapshot_job({ reason, sweep_retention })
+      report_retention_sweep({ reason, sweep_retention, summary })
       console.info(`[analytics-snapshot] inline run finished in ${summary.duration_ms}ms.`)
       return 'ran-inline'
     } catch (error) {
@@ -408,7 +462,7 @@ export async function spawn_analytics_snapshot_job({ reason, fork_impl = fork, i
 
   try {
     const child = fork_impl(fileURLToPath(import.meta.url), [], {
-      env: { ...process.env, ANALYTICS_SNAPSHOT_CHILD: '1', ANALYTICS_SNAPSHOT_REASON: reason },
+      env: { ...process.env, ANALYTICS_SNAPSHOT_CHILD: '1', ANALYTICS_SNAPSHOT_REASON: reason, ...(sweep_retention ? { ANALYTICS_SNAPSHOT_SWEEP: '1' } : {}) },
       execArgv: [`--max-old-space-size=${CHILD_MAX_HEAP_MB}`],
       // stdout/stderr ride the container log; `ipc` carries the summary home.
       stdio: ['ignore', 'inherit', 'inherit', 'ipc'],
@@ -456,11 +510,16 @@ export async function spawn_analytics_snapshot_job({ reason, fork_impl = fork, i
         message: 'analytics_snapshot_failed',
         context: { reason, code: null, signal: null, spawn_error: (error as Error)?.message ?? String(error), written: [], failed: [] },
       })
+      // A child that never launched never swept either. Node delivers `error`
+      // WITHOUT `exit` in that case, so this cannot be left to the exit handler —
+      // a day with no retention sweep must not pass silently.
+      report_retention_sweep({ reason, sweep_retention, summary: null })
     })
     child.on('exit', (code, signal) => {
       if (!settle())
         return
       // The child stays read-only, so the PARENT owns the telemetry write.
+      report_retention_sweep({ reason, sweep_retention, summary })
       if (code === 0 && summary) {
         log_server_event({
           level: 'info',
@@ -530,8 +589,11 @@ if (process.env.ANALYTICS_SNAPSHOT_CHILD === '1' && !building) {
       console.warn('[analytics-snapshot] could not self-nice:', (error as Error).message)
     }
     try {
-      const summary = await run_analytics_snapshot_job({ reason: process.env.ANALYTICS_SNAPSHOT_REASON || 'cron' })
-      console.info(`[analytics-snapshot] child finished in ${summary.duration_ms}ms: ${summary.written.length} written, ${summary.failed.length} failed.`)
+      const summary = await run_analytics_snapshot_job({
+        reason: process.env.ANALYTICS_SNAPSHOT_REASON || 'cron',
+        sweep_retention: process.env.ANALYTICS_SNAPSHOT_SWEEP === '1',
+      })
+      console.info(`[analytics-snapshot] child finished in ${summary.duration_ms}ms: ${summary.written.length} written, ${summary.failed.length} failed${summary.retention ? `, retention sweep ${summary.retention.duration_ms}ms` : ''}.`)
       const code = summary.failed.length ? 1 : 0
       // Exit from the send CALLBACK: the IPC write is not guaranteed synchronous,
       // and an immediate `process.exit()` can truncate the summary the parent logs.

@@ -21,7 +21,7 @@
 
   interface Props {
     coordinates: Coordinates
-    initialCenter: LngLatFull | undefined
+    initial_center: LngLatFull | undefined
     addPoint?: boolean
     addRegion?: boolean
     on_update: (new_value: Coordinates) => Promise<void>
@@ -30,7 +30,7 @@
 
   const {
     coordinates,
-    initialCenter,
+    initial_center,
     addPoint = false,
     addRegion = false,
     on_update,
@@ -59,8 +59,8 @@
       const [{ coordinates: [{ longitude, latitude }] }] = coordinates.regions
       lng = longitude
       lat = latitude
-    } else if (initialCenter) {
-      ({ longitude: lng, latitude: lat } = initialCenter)
+    } else if (initial_center) {
+      ({ longitude: lng, latitude: lat } = initial_center)
     } else if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         lng = +position.coords.longitude.toFixed(GPS_DECIMAL_PRECISION)
@@ -73,7 +73,7 @@
 
 <Modal on_close={on_close} noscroll>
   <div style="height: 24rem">
-    <Map pointsToFit={flatten_coordinates(coordinates)} {lng} {lat} zoom={6}>
+    <Map points_to_fit={flatten_coordinates(coordinates)} {lng} {lat} zoom={6}>
       <NavigationControl />
       {#each coordinates?.points || [] as point, index (point)}
         <Marker
@@ -121,7 +121,7 @@
               </HeadlessButton>
               {#if show}
                 <RegionModal
-                  initialCenter={initialCenter}
+                  initial_center={initial_center}
                   {region}
                   on_update={(updated_region) => {
                     const { regions } = coordinates
@@ -152,7 +152,7 @@
             </HeadlessButton>
             {#if show}
               <CoordinatesModal
-                {initialCenter}
+                {initial_center}
                 on_update={({ lng: new_lng, lat: new_lat }) => {
                   const newPoint = {
                     coordinates: { longitude: new_lng, latitude: new_lat },
@@ -173,7 +173,7 @@
             </HeadlessButton>
             {#if show}
               <RegionModal
-                initialCenter={initialCenter}
+                initial_center={initial_center}
                 region={null}
                 on_update={(new_region) => {
                   const regions = [...(coordinates?.regions || []), new_region]

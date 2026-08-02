@@ -2,7 +2,7 @@
   // from https://github.com/beyonk-adventures/svelte-mapbox
   import { onDestroy, onMount, setContext, tick } from 'svelte'
   import type { ErrorEvent, EventData, LngLat, LngLatBoundsLike, LngLatLike, Map, MapboxOptions } from 'mapbox-gl'
-  import { mapKey } from '../context'
+  import { map_key } from '../context'
   import { EventQueue } from '../queue'
   import { bind_events } from '../event-bindings'
   import { get_time_zone_longitude } from '../../utils/get-time-zone-longitude'
@@ -16,14 +16,14 @@
   interface Props {
     map?: Map
     version?: string
-    customStylesheetUrl?: string
-    accessToken?: any
+    custom_stylesheet_url?: string
+    access_token?: any
     options?: Partial<MapboxOptions>
     zoom?: number
     style?: string // 'Mapbox Streets' // light-v8, light-v9, light-v10, dark-v10, satellite-v9, streets-v11
     lng?: number
     lat?: number
-    pointsToFit?: number[][]
+    points_to_fit?: number[][]
     on_ready?: () => void
     on_dragend?: (center: LngLat) => void
     on_moveend?: (center: LngLat) => void
@@ -36,14 +36,14 @@
   let {
     map = $bindable(null),
     version = 'v3.13.0',
-    customStylesheetUrl = undefined,
-    accessToken = PUBLIC_mapboxAccessToken,
+    custom_stylesheet_url = undefined,
+    access_token = PUBLIC_mapboxAccessToken,
     options = {},
     zoom = 4,
     style = 'mapbox://styles/mapbox/streets-v11?optimize=true',
     lng = undefined,
     lat = undefined,
-    pointsToFit = undefined,
+    points_to_fit = undefined,
     on_ready,
     on_dragend,
     on_moveend,
@@ -64,9 +64,9 @@
   // graceful "map unavailable" message instead of an endless pulse.
   let webgl_failed = $state(false)
 
-  setContext(mapKey, {
-    getMap: () => map,
-    getMapbox: () => mapbox,
+  setContext(map_key, {
+    get_map: () => map,
+    get_mapbox: () => mapbox,
   })
 
   // More events at https://docs.mapbox.com/mapbox-gl-js/api/map/#map-events
@@ -99,15 +99,15 @@
     await load_styles_once(
       `//api.mapbox.com/mapbox-gl-js/${version}/mapbox-gl.css`,
     )
-    if (customStylesheetUrl) {
-      await load_styles_once(customStylesheetUrl)
+    if (custom_stylesheet_url) {
+      await load_styles_once(custom_stylesheet_url)
     }
 
-    window.mapboxgl.accessToken = accessToken
+    window.mapboxgl.accessToken = access_token
     // Dummy/missing tokens can't fetch Mapbox styles, so `load` never fires and
     // children (markers) never mount. Use a blank local style so CSR stories and
     // offline/dev can still verify marker DOM overlays.
-    const effective_style = (!accessToken || accessToken === 'dummy')
+    const effective_style = (!access_token || access_token === 'dummy')
       ? {
         version: 8 as const,
         sources: {},
@@ -154,11 +154,11 @@
   })
 
   // use via https://svelte.dev/tutorial/component-this
-  export function fitBounds(bbox: LngLatBoundsLike, data = {}) {
+  export function fit_bounds(bbox: LngLatBoundsLike, data = {}) {
     queue.send('fitBounds', [bbox, data])
   }
 
-  export function flyTo(destination, data = {}) {
+  export function fly_to(destination, data = {}) {
     queue.send('flyTo', [destination, data])
   }
 
@@ -166,43 +166,43 @@
     queue.send('resize')
   }
 
-  export function setCenter(coords, data = {}) {
+  export function set_center(coords, data = {}) {
     queue.send('setCenter', [coords, data])
   }
 
-  export function setZoom(value, data = {}) {
+  export function set_zoom(value, data = {}) {
     queue.send('setZoom', [value, data])
   }
 
-  export function getMap() {
+  export function get_map() {
     return map
   }
 
-  export function getMapbox() {
+  export function get_mapbox() {
     return mapbox
   }
 
-  async function fitPoints() {
-    if (pointsToFit.length === 1) {
-      setCenter(pointsToFit[0])
+  async function fit_points() {
+    if (points_to_fit.length === 1) {
+      set_center(points_to_fit[0])
       return
     }
     const { bbox_of_coordinates } = await import('../../utils/bbox-of-coordinates')
-    const box = bbox_of_coordinates(pointsToFit) as LngLatBoundsLike
+    const box = bbox_of_coordinates(points_to_fit) as LngLatBoundsLike
     // queued (not map.fitBounds directly) — this effect can fire before the map instance exists
-    fitBounds(box, {
+    fit_bounds(box, {
       padding: { top: 10, bottom: 10, left: 10, right: 10 },
       maxZoom: 6,
     })
   }
   $effect(() => {
-    if (zoom) setZoom(zoom)
+    if (zoom) set_zoom(zoom)
   })
   $effect(() => {
-    if (center) setCenter(center)
+    if (center) set_center(center)
   })
   $effect(() => {
-    if (pointsToFit?.length) fitPoints()
+    if (points_to_fit?.length) fit_points()
   })
 </script>
 

@@ -2,9 +2,9 @@
   // eslint-disable-next-line svelte/prefer-svelte-reactivity -- module-level registry of mounted markers, not reactive state
   const markers = new Set<Marker>()
 
-  function closeOtherPopups(currentMarker: Marker) {
+  function close_other_popups(current_marker: Marker) {
     markers.forEach((marker) => {
-      if (marker === currentMarker) return
+      if (marker === current_marker) return
       const popup = marker.getPopup()
       if (popup?.isOpen())
         marker.togglePopup()
@@ -15,12 +15,12 @@
 <script lang="ts">
   import { getContext, onMount, setContext } from 'svelte'
   import type { LngLat, Marker, MarkerOptions } from 'mapbox-gl'
-  import { mapKey, markerKey } from '../context'
+  import { map_key, marker_key } from '../context'
   import type { MapKeyContext, MarkerKeyContext } from '../context'
 
-  const { getMap, getMapbox } = getContext<MapKeyContext>(mapKey)
-  const map = getMap()
-  const mapbox = getMapbox()
+  const { get_map, get_mapbox } = getContext<MapKeyContext>(map_key)
+  const map = get_map()
+  const mapbox = get_mapbox()
 
   interface Props {
     lat: number
@@ -46,24 +46,24 @@
 
   let marker: Marker = $state()
   let element: HTMLDivElement = $state()
-  let markerEl: HTMLElement
+  let marker_el: HTMLElement
 
-  setContext<MarkerKeyContext>(markerKey, {
-    getMarker: () => marker,
+  setContext<MarkerKeyContext>(marker_key, {
+    get_marker: () => marker,
   })
 
   $effect(() => {
     marker?.setLngLat({ lng, lat })
   })
 
-  function handleClick(e) {
+  function handle_click(e) {
     e.stopPropagation()
-    closeOtherPopups(marker)
+    close_other_popups(marker)
     marker.togglePopup()
   }
 
-  function handleDragEnd() {
-    markerEl.removeEventListener('click', handleClick)
+  function handle_drag_end() {
+    marker_el.removeEventListener('click', handle_click)
     const coordinates = marker.getLngLat()
     on_dragend?.(coordinates);
     ({ lat, lng } = coordinates)
@@ -85,14 +85,14 @@
     })
     markers.add(marker)
 
-    markerEl = marker.getElement()
-    markerEl.addEventListener('click', handleClick) // addEventListener to element instead of using marker on 'click' to be able to call stopPropagation first, otherwise map click will also fire
-    marker.on('dragend', handleDragEnd)
+    marker_el = marker.getElement()
+    marker_el.addEventListener('click', handle_click) // addEventListener to element instead of using marker on 'click' to be able to call stopPropagation first, otherwise map click will also fire
+    marker.on('dragend', handle_drag_end)
     marker.setLngLat({ lng, lat }).addTo(map)
 
     return () => {
-      markerEl.removeEventListener('click', handleClick)
-      marker.off('dragend', handleDragEnd)
+      marker_el.removeEventListener('click', handle_click)
+      marker.off('dragend', handle_drag_end)
       marker.remove()
       markers.delete(marker)
     }

@@ -1,5 +1,6 @@
 import type { Handle, HandleServerError } from '@sveltejs/kit'
-import { dev } from '$app/environment'
+import process from 'node:process'
+import { dev, version } from '$app/environment'
 import { env } from '$env/dynamic/private'
 import { start_crons_once } from '$lib/db/server/cron-scheduler'
 import { CRONS } from '$lib/db/server/crons'
@@ -33,6 +34,36 @@ split_client_logs_from_shared({ shared_db: get_shared_db(), logs_db: get_logs_db
 // Mirror the code's English i18n catalog into `i18n_keys` (new/changed/removed
 // keys) and, on a virgin DB, seed translations from the committed locale files.
 boot_i18n_catalog()
+
+/**
+ * ONE row per process boot — the deploy boundary, stated by the server instead
+ * of inferred (asked for by four consecutive log reviews; landed 2026-08-02).
+ *
+ * Every review until now reconstructed "when did this build go live" from the
+ * first time a BROWSER reported a new `app_version`, which needs a human to load
+ * the site before the boundary exists, misses the standby container entirely, and
+ * cannot distinguish a deploy from a crash-restart. This row is written by the
+ * process itself, by both containers, at the moment it happens.
+ *
+ * `app_version` is SvelteKit's build id — the SAME value client rows carry, so
+ * the two join. Deliberately NO `commit`: nothing in the running container knows
+ * it (the deploy writes `build-commits.log` next to the data volume, which a
+ * later deploy overwrites — an old container restarting would then report a
+ * commit it was never built from, and a plausible wrong answer is worse than no
+ * answer).
+ */
+log_server_event({
+  level: 'info',
+  message: 'server_started',
+  context: {
+    app_version: version,
+    container: env.IS_STANDBY === 'true' ? 'standby' : 'primary',
+    is_standby: env.IS_STANDBY === 'true',
+    node: process.versions.node,
+    pid: process.pid,
+    dev,
+  },
+})
 
 // Boot ALL background crons through the wall-clock scheduler. The roster
 // (`$lib/db/server/crons.ts`) declares every job + cadence in one place; the

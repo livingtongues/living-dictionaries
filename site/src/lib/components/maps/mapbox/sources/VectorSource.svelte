@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getContext, onDestroy, setContext } from 'svelte'
   import type { VectorSource, VectorSourceImpl } from 'mapbox-gl'
-  import { mapKey, sourceKey } from '../context.js'
+  import { map_key, source_key } from '../context.js'
   import type { MapKeyContext, SourceKeyContext } from '../context.js'
 
   interface Props {
@@ -19,20 +19,20 @@
     children,
   }: Props = $props()
 
-  const { getMap } = getContext<MapKeyContext>(mapKey)
-  const map = getMap()
+  const { get_map } = getContext<MapKeyContext>(map_key)
+  const map = get_map()
 
   // Remember ID of all <Layer> children, in order to remove them in onDestroy, before removing the source.
-  const layerIds = []
+  const layer_ids = []
 
-  setContext<SourceKeyContext>(sourceKey, {
-    getSourceId: () => id,
-    addChildLayer: (id: string) => {
-      layerIds.push(id)
+  setContext<SourceKeyContext>(source_key, {
+    get_source_id: () => id,
+    add_child_layer: (id: string) => {
+      layer_ids.push(id)
     },
   })
 
-  function addSource() {
+  function add_source() {
     map.addSource(id, {
       ...options,
       type: 'vector',
@@ -40,9 +40,9 @@
     })
   }
 
-  function handleStyledata() {
+  function handle_styledata() {
     if (!map.getSource(id))
-      addSource()
+      add_source()
   }
 
   $effect(() => {
@@ -51,20 +51,20 @@
       source.setUrl(url)
     } else {
       // Add the source before "styledata" event occurs to make it available to child <Layer>.
-      addSource()
+      add_source()
 
       // Listen to "styledata" event to re-create the source if the style changes.
-      map.on('styledata', handleStyledata)
+      map.on('styledata', handle_styledata)
     }
   })
 
   onDestroy(() => {
-    map.off('styledata', handleStyledata)
+    map.off('styledata', handle_styledata)
 
     // Remove all <Layer> children of <VectorSource>.
-    for (const layerId of layerIds) {
-      if (map.getLayer(layerId))
-        map.removeLayer(layerId)
+    for (const layer_id of layer_ids) {
+      if (map.getLayer(layer_id))
+        map.removeLayer(layer_id)
     }
 
     if (map.getSource(id))

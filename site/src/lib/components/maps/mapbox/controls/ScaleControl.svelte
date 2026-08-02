@@ -1,11 +1,11 @@
 <script lang="ts">
   import { getContext, onDestroy } from 'svelte'
-  import { mapKey } from '../context'
+  import { map_key } from '../context'
   import type { MapKeyContext } from '../context'
 
-  const { getMap, getMapbox } = getContext<MapKeyContext>(mapKey)
-  const map = getMap()
-  const mapbox = getMapbox()
+  const { get_map, get_mapbox } = getContext<MapKeyContext>(map_key)
+  const map = get_map()
+  const mapbox = get_mapbox()
 
   interface Props {
     position?: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left'

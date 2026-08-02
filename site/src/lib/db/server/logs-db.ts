@@ -74,6 +74,25 @@ export const CLIENT_LOGS_TABLE_SQL = `
 
 let logs_singleton: Database.Database | null = null
 
+/**
+ * The SERVING process waits only a quarter second for logs.db's write lock, then
+ * drops the row. Deliberately much shorter than the usual 5 s (2026-08-02).
+ *
+ * better-sqlite3 is synchronous: waiting for a lock BLOCKS THE EVENT LOOP. Since
+ * the daily retention sweep moved into a child process, another process can now
+ * hold this file's write lock for a long stretch — a `VACUUM` of the 2.0 GB
+ * logs.db is minutes — and at 5 s per attempt a `/api/log` POST carrying 20
+ * entries would park the request thread for 100 s. That is the very thing the
+ * sweep was moved out to stop.
+ *
+ * A telemetry row is DROPPABLE (`insert_client_log` already returns false and
+ * counts it); a frozen request thread is not — the standing law of 2026-07-27.
+ * At LD's ~0.4 rows/s a maintenance window costs <10% of the loop instead of
+ * saturating it, and normal contention (sub-millisecond inserts) never comes
+ * near 250 ms.
+ */
+const SERVING_BUSY_TIMEOUT_MS = 250
+
 export function get_logs_db(): Database.Database {
   if (logs_singleton)
     return logs_singleton
@@ -81,16 +100,22 @@ export function get_logs_db(): Database.Database {
   // telemetry into the dev .data/logs.db file — give them a throwaway DB.
   logs_singleton = process.env.VITEST
     ? open_logs_db(':memory:')
-    : open_logs_db(`${process.env.DATA_DIR || '.data'}/logs.db`)
+    : open_logs_db(`${process.env.DATA_DIR || '.data'}/logs.db`, { busy_timeout_ms: SERVING_BUSY_TIMEOUT_MS })
   return logs_singleton
 }
 
-export function open_logs_db(path: string | ':memory:'): Database.Database {
+/**
+ * `busy_timeout_ms` — how long a write waits for another connection's lock.
+ * Callers that must not stall a request thread pass a short one (see
+ * `SERVING_BUSY_TIMEOUT_MS`); the retention child, which is allowed to wait as
+ * long as it takes, passes a long one.
+ */
+export function open_logs_db(path: string | ':memory:', { busy_timeout_ms = 5000 }: { busy_timeout_ms?: number } = {}): Database.Database {
   if (path !== ':memory:')
     mkdirSync(dirname(path), { recursive: true })
   const db = new Database(path)
   db.pragma('journal_mode = WAL')
-  db.pragma('busy_timeout = 5000')
+  db.pragma(`busy_timeout = ${busy_timeout_ms}`)
   db.exec(`
     ${CLIENT_LOGS_TABLE_SQL}
     CREATE INDEX IF NOT EXISTS idx_client_logs_received_at ON client_logs(received_at DESC);

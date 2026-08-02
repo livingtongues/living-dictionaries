@@ -1,9 +1,10 @@
 import Database from 'better-sqlite3'
-import { existsSync, readFileSync } from 'node:fs'
-import { unlink } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
+import { readFile, unlink } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { gzipSync } from 'node:zlib'
+import { promisify } from 'node:util'
+import { gzip } from 'node:zlib'
 import { DeleteObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3'
 import { env } from '$env/dynamic/private'
 import { r2_dict_snapshot_key, SNAPSHOT_EXPIRED_DAYS } from '$lib/constants'
@@ -35,6 +36,23 @@ import { get_shared_db } from './shared-db'
  * Singleton via globalThis guard (tutor's `start_worker_once` pattern) so
  * dev-server HMR doesn't accidentally double-start.
  */
+
+/**
+ * Compression on the libuv THREAD POOL, never on the event loop.
+ *
+ * MEASURED (parity review 2026-08-01, replaying two live dictionary files):
+ * `gzipSync` of the 54 MB `sora-language-project` db froze this process for
+ * **792 ms** (831 ms of unbroken freeze with the surrounding `readFileSync`),
+ * during which no request is parsed, no response written and no health check
+ * answered. The same build with `promisify(gzip)` + `readFile`: worst observed
+ * stall **42 ms**, total wall-clock essentially unchanged (986 → 1,089 ms). The
+ * work still costs the same; it just stops being exclusive.
+ *
+ * Both snapshot builders — this cron and the editor-boot `/api/dictionary/[id]/db`
+ * endpoint, which runs ON the request thread — use the async pair. Never
+ * reintroduce a `*Sync` here.
+ */
+const gzip_async = promisify(gzip)
 
 /** The roster's `disabled_reason`: only the designated builder node runs this. */
 export function r2_snapshot_disabled_reason(): string | null {
@@ -198,8 +216,8 @@ export async function build_and_upload_snapshot(dict_id: string) {
       temp_db.close()
     }
 
-    const bytes = readFileSync(temp_path)
-    const gzipped = gzipSync(bytes)
+    const bytes = await readFile(temp_path)
+    const gzipped = await gzip_async(bytes)
     await upload_to_r2({ key: r2_dict_snapshot_key(dict_id), bytes: gzipped })
   } finally {
     try { await unlink(temp_path) } catch { /* best-effort */ }

@@ -1,0 +1,2172 @@
+{
+  "generated_at": "2026-08-01T22:30:43.348Z",
+  "base": "https://livingdictionaries.app",
+  "sitemap_children": 222,
+  "robots_disallows": [
+    "/onondaga/"
+  ],
+  "gsc_window": {
+    "start_date": "2026-07-02",
+    "end_date": "2026-07-29",
+    "rows": 25000
+  },
+  "pages": [
+    {
+      "url": "https://livingdictionaries.app/",
+      "page_type": "home",
+      "status": 200,
+      "checks": [
+        {
+          "id": "http_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "title_present",
+          "ok": true,
+          "detail": "Living Dictionaries"
+        },
+        {
+          "id": "title_specific",
+          "ok": false,
+          "detail": "Living Dictionaries"
+        },
+        {
+          "id": "description_present",
+          "ok": true,
+          "detail": "Living Dictionaries are language documentation tools that support endangered and under-rep"
+        },
+        {
+          "id": "description_specific",
+          "ok": true,
+          "detail": "site boilerplate"
+        },
+        {
+          "id": "canonical_single",
+          "ok": true,
+          "detail": "1 canonical, robots=none"
+        },
+        {
+          "id": "canonical_clean",
+          "ok": true,
+          "detail": "https://livingdictionaries.app/"
+        },
+        {
+          "id": "canonical_self",
+          "ok": true,
+          "detail": "self"
+        },
+        {
+          "id": "not_noindex",
+          "ok": true,
+          "detail": "no robots meta"
+        },
+        {
+          "id": "jsonld_parses",
+          "ok": true,
+          "detail": "1/1 blocks parse"
+        },
+        {
+          "id": "jsonld_type",
+          "ok": true,
+          "detail": "WebSite, Organization"
+        },
+        {
+          "id": "og_image_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "twitter_image",
+          "ok": true,
+          "detail": "present"
+        },
+        {
+          "id": "in_sitemap",
+          "ok": true,
+          "detail": "listed"
+        },
+        {
+          "id": "robots_allows",
+          "ok": true,
+          "detail": "/"
+        },
+        {
+          "id": "ssr_content",
+          "ok": true,
+          "detail": "10452 chars of page-own text (min 300)"
+        },
+        {
+          "id": "ai_crawlers_allowed",
+          "ok": true,
+          "detail": "GPTBot, PerplexityBot, ClaudeBot, Googlebot, Bingbot"
+        }
+      ],
+      "head": {
+        "title": "Living Dictionaries",
+        "description": "Living Dictionaries are language documentation tools that support endangered and under-represented languages. This online platform was created by Living Tongues Institute for Endangered Languages as a free multimedia resource for community activists and linguists who want to build digital dictionaries and phrasebooks.",
+        "canonical": "https://livingdictionaries.app/",
+        "json_ld_types": [
+          "WebSite",
+          "Organization"
+        ]
+      },
+      "crawler_results": {
+        "GPTBot": {
+          "status": 200,
+          "bytes": 580445
+        },
+        "PerplexityBot": {
+          "status": 200,
+          "bytes": 580445
+        },
+        "ClaudeBot": {
+          "status": 200,
+          "bytes": 580445
+        },
+        "Googlebot": {
+          "status": 200,
+          "bytes": 580445
+        },
+        "Bingbot": {
+          "status": 200,
+          "bytes": 580445
+        }
+      },
+      "text_length": 10527
+    },
+    {
+      "url": "https://livingdictionaries.app/dictionaries",
+      "page_type": "site",
+      "status": 200,
+      "checks": [
+        {
+          "id": "http_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "title_present",
+          "ok": true,
+          "detail": "List of Dictionaries | Living Dictionaries"
+        },
+        {
+          "id": "title_specific",
+          "ok": true,
+          "detail": "List of Dictionaries | Living Dictionaries"
+        },
+        {
+          "id": "description_present",
+          "ok": true,
+          "detail": "A dynamically updated list of all the public dictionaries available on the Living Dictiona"
+        },
+        {
+          "id": "description_specific",
+          "ok": true,
+          "detail": "page-specific"
+        },
+        {
+          "id": "canonical_single",
+          "ok": true,
+          "detail": "1 canonical, robots=none"
+        },
+        {
+          "id": "canonical_clean",
+          "ok": true,
+          "detail": "https://livingdictionaries.app/dictionaries"
+        },
+        {
+          "id": "canonical_self",
+          "ok": true,
+          "detail": "self"
+        },
+        {
+          "id": "not_noindex",
+          "ok": true,
+          "detail": "no robots meta"
+        },
+        {
+          "id": "og_image_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "twitter_image",
+          "ok": true,
+          "detail": "present"
+        },
+        {
+          "id": "in_sitemap",
+          "ok": true,
+          "detail": "listed"
+        },
+        {
+          "id": "robots_allows",
+          "ok": true,
+          "detail": "/dictionaries"
+        },
+        {
+          "id": "ssr_content",
+          "ok": true,
+          "detail": "24567 chars of page-own text (min 300)"
+        },
+        {
+          "id": "ai_crawlers_allowed",
+          "ok": true,
+          "detail": "GPTBot, PerplexityBot, ClaudeBot, Googlebot, Bingbot"
+        }
+      ],
+      "head": {
+        "title": "List of Dictionaries | Living Dictionaries",
+        "description": "A dynamically updated list of all the public dictionaries available on the Living Dictionaries platform. This list includes the names, URLs, GPS coordinates, ISO 639-3 Codes and Glottocodes associated with the Living Dictionaries. Living Dictionaries are language documentation tools that support endangered and under-represented languages",
+        "canonical": "https://livingdictionaries.app/dictionaries",
+        "json_ld_types": []
+      },
+      "crawler_results": {
+        "GPTBot": {
+          "status": 200,
+          "bytes": 174402
+        },
+        "PerplexityBot": {
+          "status": 200,
+          "bytes": 174402
+        },
+        "ClaudeBot": {
+          "status": 200,
+          "bytes": 174402
+        },
+        "Googlebot": {
+          "status": 200,
+          "bytes": 174402
+        },
+        "Bingbot": {
+          "status": 200,
+          "bytes": 174402
+        }
+      },
+      "text_length": 24643
+    },
+    {
+      "url": "https://livingdictionaries.app/about",
+      "page_type": "site",
+      "status": 200,
+      "checks": [
+        {
+          "id": "http_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "title_present",
+          "ok": true,
+          "detail": "About Living Dictionaries | Living Dictionaries"
+        },
+        {
+          "id": "title_specific",
+          "ok": true,
+          "detail": "About Living Dictionaries | Living Dictionaries"
+        },
+        {
+          "id": "description_present",
+          "ok": true,
+          "detail": "Living Dictionaries are mobile-friendly web tools that support endangered, under-represent"
+        },
+        {
+          "id": "description_specific",
+          "ok": true,
+          "detail": "page-specific"
+        },
+        {
+          "id": "canonical_single",
+          "ok": true,
+          "detail": "1 canonical, robots=none"
+        },
+        {
+          "id": "canonical_clean",
+          "ok": true,
+          "detail": "https://livingdictionaries.app/about"
+        },
+        {
+          "id": "canonical_self",
+          "ok": true,
+          "detail": "self"
+        },
+        {
+          "id": "not_noindex",
+          "ok": true,
+          "detail": "no robots meta"
+        },
+        {
+          "id": "og_image_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "twitter_image",
+          "ok": true,
+          "detail": "present"
+        },
+        {
+          "id": "in_sitemap",
+          "ok": true,
+          "detail": "listed"
+        },
+        {
+          "id": "robots_allows",
+          "ok": true,
+          "detail": "/about"
+        },
+        {
+          "id": "ssr_content",
+          "ok": true,
+          "detail": "5180 chars of page-own text (min 300)"
+        },
+        {
+          "id": "ai_crawlers_allowed",
+          "ok": true,
+          "detail": "GPTBot, PerplexityBot, ClaudeBot, Googlebot, Bingbot"
+        }
+      ],
+      "head": {
+        "title": "About Living Dictionaries | Living Dictionaries",
+        "description": "Living Dictionaries are mobile-friendly web tools that support endangered, under-represented and diasporic languages. Led by community activists around the globe, Living Dictionaries are collaborative multimedia projects that help languages survive for generations to come.",
+        "canonical": "https://livingdictionaries.app/about",
+        "json_ld_types": []
+      },
+      "crawler_results": {
+        "GPTBot": {
+          "status": 200,
+          "bytes": 38233
+        },
+        "PerplexityBot": {
+          "status": 200,
+          "bytes": 38233
+        },
+        "ClaudeBot": {
+          "status": 200,
+          "bytes": 38233
+        },
+        "Googlebot": {
+          "status": 200,
+          "bytes": 38233
+        },
+        "Bingbot": {
+          "status": 200,
+          "bytes": 38233
+        }
+      },
+      "text_length": 5261
+    },
+    {
+      "url": "https://livingdictionaries.app/create-dictionary",
+      "page_type": "site",
+      "status": 200,
+      "checks": [
+        {
+          "id": "http_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "title_present",
+          "ok": true,
+          "detail": "Create New Dictionary | Living Dictionaries"
+        },
+        {
+          "id": "title_specific",
+          "ok": true,
+          "detail": "Create New Dictionary | Living Dictionaries"
+        },
+        {
+          "id": "description_present",
+          "ok": true,
+          "detail": "Build a new Living Dictionary in a few short steps. Create a title and set the URL, and th"
+        },
+        {
+          "id": "description_specific",
+          "ok": true,
+          "detail": "page-specific"
+        },
+        {
+          "id": "canonical_single",
+          "ok": true,
+          "detail": "1 canonical, robots=none"
+        },
+        {
+          "id": "canonical_clean",
+          "ok": true,
+          "detail": "https://livingdictionaries.app/create-dictionary"
+        },
+        {
+          "id": "canonical_self",
+          "ok": true,
+          "detail": "self"
+        },
+        {
+          "id": "not_noindex",
+          "ok": true,
+          "detail": "no robots meta"
+        },
+        {
+          "id": "og_image_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "twitter_image",
+          "ok": true,
+          "detail": "present"
+        },
+        {
+          "id": "in_sitemap",
+          "ok": false,
+          "detail": "absent"
+        },
+        {
+          "id": "robots_allows",
+          "ok": true,
+          "detail": "/create-dictionary"
+        },
+        {
+          "id": "ssr_content",
+          "ok": false,
+          "detail": "58 chars of page-own text (min 300)"
+        },
+        {
+          "id": "ai_crawlers_allowed",
+          "ok": true,
+          "detail": "GPTBot, PerplexityBot, ClaudeBot, Googlebot, Bingbot"
+        }
+      ],
+      "head": {
+        "title": "Create New Dictionary | Living Dictionaries",
+        "description": "Build a new Living Dictionary in a few short steps. Create a title and set the URL, and then configure the settings. Living Dictionaries are comprehensive, free, online technological tools integrating audio, images and video.",
+        "canonical": "https://livingdictionaries.app/create-dictionary",
+        "json_ld_types": []
+      },
+      "crawler_results": {
+        "GPTBot": {
+          "status": 200,
+          "bytes": 18584
+        },
+        "PerplexityBot": {
+          "status": 200,
+          "bytes": 18584
+        },
+        "ClaudeBot": {
+          "status": 200,
+          "bytes": 18584
+        },
+        "Googlebot": {
+          "status": 200,
+          "bytes": 18584
+        },
+        "Bingbot": {
+          "status": 200,
+          "bytes": 18584
+        }
+      },
+      "text_length": 135
+    },
+    {
+      "url": "https://livingdictionaries.app/tutelo-saponi",
+      "page_type": "dictionary",
+      "status": 200,
+      "checks": [
+        {
+          "id": "http_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "title_present",
+          "ok": true,
+          "detail": "Tutelo-Saponi Monacan Living Dictionary"
+        },
+        {
+          "id": "title_specific",
+          "ok": true,
+          "detail": "Tutelo-Saponi Monacan Living Dictionary"
+        },
+        {
+          "id": "description_present",
+          "ok": true,
+          "detail": "Tutelo-Saponi is a branch of Siouan once spoken by American Indians in central and eastern"
+        },
+        {
+          "id": "description_specific",
+          "ok": true,
+          "detail": "page-specific"
+        },
+        {
+          "id": "canonical_single",
+          "ok": true,
+          "detail": "1 canonical, robots=none"
+        },
+        {
+          "id": "canonical_clean",
+          "ok": true,
+          "detail": "https://livingdictionaries.app/tutelo-saponi"
+        },
+        {
+          "id": "canonical_self",
+          "ok": true,
+          "detail": "self"
+        },
+        {
+          "id": "not_noindex",
+          "ok": true,
+          "detail": "no robots meta"
+        },
+        {
+          "id": "jsonld_parses",
+          "ok": true,
+          "detail": "1/1 blocks parse"
+        },
+        {
+          "id": "jsonld_type",
+          "ok": true,
+          "detail": "DefinedTermSet, Language, Organization"
+        },
+        {
+          "id": "og_image_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "twitter_image",
+          "ok": true,
+          "detail": "present"
+        },
+        {
+          "id": "in_sitemap",
+          "ok": true,
+          "detail": "listed"
+        },
+        {
+          "id": "robots_allows",
+          "ok": true,
+          "detail": "/tutelo-saponi"
+        },
+        {
+          "id": "answer_first",
+          "ok": true,
+          "detail": "Tutelo-Saponi Monacan Living Dictionary"
+        },
+        {
+          "id": "ssr_content",
+          "ok": true,
+          "detail": "2704 chars of page-own text (min 300)"
+        },
+        {
+          "id": "ai_crawlers_allowed",
+          "ok": true,
+          "detail": "GPTBot, PerplexityBot, ClaudeBot, Googlebot, Bingbot"
+        }
+      ],
+      "head": {
+        "title": "Tutelo-Saponi Monacan Living Dictionary",
+        "description": "Tutelo-Saponi is a branch of Siouan once spoken by American Indians in central and eastern North Carolina and southeastern Virginia. As a trade language, Tutelo-Saponi was spoken by many tribes in the region including the Occaneechi around…",
+        "canonical": "https://livingdictionaries.app/tutelo-saponi",
+        "json_ld_types": [
+          "DefinedTermSet",
+          "Language",
+          "Organization"
+        ]
+      },
+      "crawler_results": {
+        "GPTBot": {
+          "status": 200,
+          "bytes": 52568
+        },
+        "PerplexityBot": {
+          "status": 200,
+          "bytes": 52568
+        },
+        "ClaudeBot": {
+          "status": 200,
+          "bytes": 52568
+        },
+        "Googlebot": {
+          "status": 200,
+          "bytes": 52568
+        },
+        "Bingbot": {
+          "status": 200,
+          "bytes": 52568
+        }
+      },
+      "text_length": 2980
+    },
+    {
+      "url": "https://livingdictionaries.app/tutelo-saponi/about",
+      "page_type": "about",
+      "status": 200,
+      "checks": [
+        {
+          "id": "http_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "title_present",
+          "ok": true,
+          "detail": "About | Tutelo-Saponi Monacan Living Dictionary"
+        },
+        {
+          "id": "title_specific",
+          "ok": true,
+          "detail": "About | Tutelo-Saponi Monacan Living Dictionary"
+        },
+        {
+          "id": "description_present",
+          "ok": true,
+          "detail": "Learn about the background and creation of this Living Dictionary."
+        },
+        {
+          "id": "description_specific",
+          "ok": true,
+          "detail": "page-specific"
+        },
+        {
+          "id": "canonical_single",
+          "ok": true,
+          "detail": "1 canonical, robots=none"
+        },
+        {
+          "id": "canonical_clean",
+          "ok": true,
+          "detail": "https://livingdictionaries.app/tutelo-saponi/about"
+        },
+        {
+          "id": "canonical_self",
+          "ok": true,
+          "detail": "self"
+        },
+        {
+          "id": "not_noindex",
+          "ok": true,
+          "detail": "no robots meta"
+        },
+        {
+          "id": "og_image_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "twitter_image",
+          "ok": true,
+          "detail": "present"
+        },
+        {
+          "id": "in_sitemap",
+          "ok": true,
+          "detail": "listed"
+        },
+        {
+          "id": "robots_allows",
+          "ok": true,
+          "detail": "/tutelo-saponi/about"
+        },
+        {
+          "id": "ssr_content",
+          "ok": true,
+          "detail": "2678 chars of page-own text (min 300)"
+        },
+        {
+          "id": "ai_crawlers_allowed",
+          "ok": true,
+          "detail": "GPTBot, PerplexityBot, ClaudeBot, Googlebot, Bingbot"
+        }
+      ],
+      "head": {
+        "title": "About | Tutelo-Saponi Monacan Living Dictionary",
+        "description": "Learn about the background and creation of this Living Dictionary.",
+        "canonical": "https://livingdictionaries.app/tutelo-saponi/about",
+        "json_ld_types": []
+      },
+      "crawler_results": {
+        "GPTBot": {
+          "status": 200,
+          "bytes": 34197
+        },
+        "PerplexityBot": {
+          "status": 200,
+          "bytes": 34197
+        },
+        "ClaudeBot": {
+          "status": 200,
+          "bytes": 34197
+        },
+        "Googlebot": {
+          "status": 200,
+          "bytes": 34197
+        },
+        "Bingbot": {
+          "status": 200,
+          "bytes": 34197
+        }
+      },
+      "text_length": 2954
+    },
+    {
+      "url": "https://livingdictionaries.app/tutelo-saponi/entry/IDPsMLO9qK4H0DnYBhgf",
+      "page_type": "entry",
+      "status": 200,
+      "checks": [
+        {
+          "id": "http_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "title_present",
+          "ok": true,
+          "detail": "kí:hnįde: means “He” in English | Tutelo-Saponi Monacan Living Dictionary"
+        },
+        {
+          "id": "title_specific",
+          "ok": true,
+          "detail": "kí:hnįde: means “He” in English | Tutelo-Saponi Monacan Living Dictionary"
+        },
+        {
+          "id": "description_present",
+          "ok": true,
+          "detail": "kihnindēwa, v., English: He, she, it is hungry"
+        },
+        {
+          "id": "description_specific",
+          "ok": true,
+          "detail": "page-specific"
+        },
+        {
+          "id": "canonical_single",
+          "ok": true,
+          "detail": "1 canonical, robots=none"
+        },
+        {
+          "id": "canonical_clean",
+          "ok": true,
+          "detail": "https://livingdictionaries.app/tutelo-saponi/entry/IDPsMLO9qK4H0DnYBhgf"
+        },
+        {
+          "id": "canonical_self",
+          "ok": true,
+          "detail": "self"
+        },
+        {
+          "id": "not_noindex",
+          "ok": true,
+          "detail": "no robots meta"
+        },
+        {
+          "id": "jsonld_parses",
+          "ok": true,
+          "detail": "1/1 blocks parse"
+        },
+        {
+          "id": "jsonld_type",
+          "ok": true,
+          "detail": "DefinedTerm, DefinedTermSet"
+        },
+        {
+          "id": "og_image_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "twitter_image",
+          "ok": true,
+          "detail": "present"
+        },
+        {
+          "id": "in_sitemap",
+          "ok": true,
+          "detail": "listed"
+        },
+        {
+          "id": "robots_allows",
+          "ok": true,
+          "detail": "/tutelo-saponi/entry/IDPsMLO9qK4H0DnYBhgf"
+        },
+        {
+          "id": "answer_first",
+          "ok": true,
+          "detail": "headword ✓, gloss \"He, she, it is hungry\" ✓ in crawlable text"
+        },
+        {
+          "id": "ssr_content",
+          "ok": true,
+          "detail": "143 chars of page-own text (min 60)"
+        },
+        {
+          "id": "ai_crawlers_allowed",
+          "ok": true,
+          "detail": "GPTBot, PerplexityBot, ClaudeBot, Googlebot, Bingbot"
+        }
+      ],
+      "head": {
+        "title": "kí:hnįde: means “He” in English | Tutelo-Saponi Monacan Living Dictionary",
+        "description": "kihnindēwa, v., English: He, she, it is hungry",
+        "canonical": "https://livingdictionaries.app/tutelo-saponi/entry/IDPsMLO9qK4H0DnYBhgf",
+        "json_ld_types": [
+          "DefinedTerm",
+          "DefinedTermSet"
+        ]
+      },
+      "crawler_results": {
+        "GPTBot": {
+          "status": 200,
+          "bytes": 40162
+        },
+        "PerplexityBot": {
+          "status": 200,
+          "bytes": 40162
+        },
+        "ClaudeBot": {
+          "status": 200,
+          "bytes": 40162
+        },
+        "Googlebot": {
+          "status": 200,
+          "bytes": 40162
+        },
+        "Bingbot": {
+          "status": 200,
+          "bytes": 40162
+        }
+      },
+      "text_length": 419
+    },
+    {
+      "url": "https://livingdictionaries.app/tutelo-saponi/entry/ePwSjYSxJLGwSdAiAOOw",
+      "page_type": "entry",
+      "status": 200,
+      "checks": [
+        {
+          "id": "http_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "title_present",
+          "ok": true,
+          "detail": "-há:ki | Tutelo-Saponi Monacan Living Dictionary"
+        },
+        {
+          "id": "title_specific",
+          "ok": true,
+          "detail": "-há:ki | Tutelo-Saponi Monacan Living Dictionary"
+        },
+        {
+          "id": "description_present",
+          "ok": true,
+          "detail": "English: hand, finger"
+        },
+        {
+          "id": "description_specific",
+          "ok": true,
+          "detail": "page-specific"
+        },
+        {
+          "id": "canonical_single",
+          "ok": true,
+          "detail": "1 canonical, robots=none"
+        },
+        {
+          "id": "canonical_clean",
+          "ok": true,
+          "detail": "https://livingdictionaries.app/tutelo-saponi/entry/ePwSjYSxJLGwSdAiAOOw"
+        },
+        {
+          "id": "canonical_self",
+          "ok": true,
+          "detail": "self"
+        },
+        {
+          "id": "not_noindex",
+          "ok": true,
+          "detail": "no robots meta"
+        },
+        {
+          "id": "jsonld_parses",
+          "ok": true,
+          "detail": "1/1 blocks parse"
+        },
+        {
+          "id": "jsonld_type",
+          "ok": true,
+          "detail": "DefinedTerm, DefinedTermSet"
+        },
+        {
+          "id": "og_image_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "twitter_image",
+          "ok": true,
+          "detail": "present"
+        },
+        {
+          "id": "in_sitemap",
+          "ok": true,
+          "detail": "listed"
+        },
+        {
+          "id": "robots_allows",
+          "ok": true,
+          "detail": "/tutelo-saponi/entry/ePwSjYSxJLGwSdAiAOOw"
+        },
+        {
+          "id": "answer_first",
+          "ok": true,
+          "detail": "headword ✓, gloss \"hand, finger\" ✓ in crawlable text"
+        },
+        {
+          "id": "ssr_content",
+          "ok": true,
+          "detail": "67 chars of page-own text (min 60)"
+        },
+        {
+          "id": "ai_crawlers_allowed",
+          "ok": true,
+          "detail": "GPTBot, PerplexityBot, ClaudeBot, Googlebot, Bingbot"
+        }
+      ],
+      "head": {
+        "title": "-há:ki | Tutelo-Saponi Monacan Living Dictionary",
+        "description": "English: hand, finger",
+        "canonical": "https://livingdictionaries.app/tutelo-saponi/entry/ePwSjYSxJLGwSdAiAOOw",
+        "json_ld_types": [
+          "DefinedTerm",
+          "DefinedTermSet"
+        ]
+      },
+      "crawler_results": {
+        "GPTBot": {
+          "status": 200,
+          "bytes": 39018
+        },
+        "PerplexityBot": {
+          "status": 200,
+          "bytes": 39018
+        },
+        "ClaudeBot": {
+          "status": 200,
+          "bytes": 39018
+        },
+        "Googlebot": {
+          "status": 200,
+          "bytes": 39018
+        },
+        "Bingbot": {
+          "status": 200,
+          "bytes": 39018
+        }
+      },
+      "text_length": 343
+    },
+    {
+      "url": "https://livingdictionaries.app/hazaragi",
+      "page_type": "dictionary",
+      "status": 200,
+      "checks": [
+        {
+          "id": "http_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "title_present",
+          "ok": true,
+          "detail": "Hazaragi Language Living Dictionary"
+        },
+        {
+          "id": "title_specific",
+          "ok": true,
+          "detail": "Hazaragi Language Living Dictionary"
+        },
+        {
+          "id": "description_present",
+          "ok": true,
+          "detail": "Hazaragi is a separate standalone language of the Hazara people spoken by Hazaras on five "
+        },
+        {
+          "id": "description_specific",
+          "ok": true,
+          "detail": "page-specific"
+        },
+        {
+          "id": "canonical_single",
+          "ok": true,
+          "detail": "1 canonical, robots=none"
+        },
+        {
+          "id": "canonical_clean",
+          "ok": true,
+          "detail": "https://livingdictionaries.app/hazaragi"
+        },
+        {
+          "id": "canonical_self",
+          "ok": true,
+          "detail": "self"
+        },
+        {
+          "id": "not_noindex",
+          "ok": true,
+          "detail": "no robots meta"
+        },
+        {
+          "id": "jsonld_parses",
+          "ok": true,
+          "detail": "1/1 blocks parse"
+        },
+        {
+          "id": "jsonld_type",
+          "ok": true,
+          "detail": "DefinedTermSet, Language, Organization"
+        },
+        {
+          "id": "og_image_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "twitter_image",
+          "ok": true,
+          "detail": "present"
+        },
+        {
+          "id": "in_sitemap",
+          "ok": true,
+          "detail": "listed"
+        },
+        {
+          "id": "robots_allows",
+          "ok": true,
+          "detail": "/hazaragi"
+        },
+        {
+          "id": "answer_first",
+          "ok": true,
+          "detail": "Hazaragi Language Living Dictionary"
+        },
+        {
+          "id": "ssr_content",
+          "ok": true,
+          "detail": "5265 chars of page-own text (min 300)"
+        },
+        {
+          "id": "ai_crawlers_allowed",
+          "ok": true,
+          "detail": "GPTBot, PerplexityBot, ClaudeBot, Googlebot, Bingbot"
+        }
+      ],
+      "head": {
+        "title": "Hazaragi Language Living Dictionary",
+        "description": "Hazaragi is a separate standalone language of the Hazara people spoken by Hazaras on five continents: Afghanistan, Pakistan, Iran, Australia, Europe, the USA and many other countries. Hazaragi is spoken by 12-16 Million (according to…",
+        "canonical": "https://livingdictionaries.app/hazaragi",
+        "json_ld_types": [
+          "DefinedTermSet",
+          "Language",
+          "Organization"
+        ]
+      },
+      "crawler_results": {
+        "GPTBot": {
+          "status": 200,
+          "bytes": 82638
+        },
+        "PerplexityBot": {
+          "status": 200,
+          "bytes": 82638
+        },
+        "ClaudeBot": {
+          "status": 200,
+          "bytes": 82638
+        },
+        "Googlebot": {
+          "status": 200,
+          "bytes": 82638
+        },
+        "Bingbot": {
+          "status": 200,
+          "bytes": 82638
+        }
+      },
+      "text_length": 5529
+    },
+    {
+      "url": "https://livingdictionaries.app/hazaragi/about",
+      "page_type": "about",
+      "status": 200,
+      "checks": [
+        {
+          "id": "http_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "title_present",
+          "ok": true,
+          "detail": "About | Hazaragi Language Living Dictionary"
+        },
+        {
+          "id": "title_specific",
+          "ok": true,
+          "detail": "About | Hazaragi Language Living Dictionary"
+        },
+        {
+          "id": "description_present",
+          "ok": true,
+          "detail": "Learn about the background and creation of this Living Dictionary."
+        },
+        {
+          "id": "description_specific",
+          "ok": true,
+          "detail": "page-specific"
+        },
+        {
+          "id": "canonical_single",
+          "ok": true,
+          "detail": "1 canonical, robots=none"
+        },
+        {
+          "id": "canonical_clean",
+          "ok": true,
+          "detail": "https://livingdictionaries.app/hazaragi/about"
+        },
+        {
+          "id": "canonical_self",
+          "ok": true,
+          "detail": "self"
+        },
+        {
+          "id": "not_noindex",
+          "ok": true,
+          "detail": "no robots meta"
+        },
+        {
+          "id": "og_image_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "twitter_image",
+          "ok": true,
+          "detail": "present"
+        },
+        {
+          "id": "in_sitemap",
+          "ok": true,
+          "detail": "listed"
+        },
+        {
+          "id": "robots_allows",
+          "ok": true,
+          "detail": "/hazaragi/about"
+        },
+        {
+          "id": "ssr_content",
+          "ok": true,
+          "detail": "1518 chars of page-own text (min 300)"
+        },
+        {
+          "id": "ai_crawlers_allowed",
+          "ok": true,
+          "detail": "GPTBot, PerplexityBot, ClaudeBot, Googlebot, Bingbot"
+        }
+      ],
+      "head": {
+        "title": "About | Hazaragi Language Living Dictionary",
+        "description": "Learn about the background and creation of this Living Dictionary.",
+        "canonical": "https://livingdictionaries.app/hazaragi/about",
+        "json_ld_types": []
+      },
+      "crawler_results": {
+        "GPTBot": {
+          "status": 200,
+          "bytes": 32106
+        },
+        "PerplexityBot": {
+          "status": 200,
+          "bytes": 32106
+        },
+        "ClaudeBot": {
+          "status": 200,
+          "bytes": 32106
+        },
+        "Googlebot": {
+          "status": 200,
+          "bytes": 32106
+        },
+        "Bingbot": {
+          "status": 200,
+          "bytes": 32106
+        }
+      },
+      "text_length": 1782
+    },
+    {
+      "url": "https://livingdictionaries.app/hazaragi/entry/72c3f7dc-2e80-4d71-abdd-ab4fa02c3847",
+      "page_type": "entry",
+      "status": 200,
+      "checks": [
+        {
+          "id": "http_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "title_present",
+          "ok": true,
+          "detail": "jan-o-than | Hazaragi Language Living Dictionary"
+        },
+        {
+          "id": "title_specific",
+          "ok": true,
+          "detail": "jan-o-than | Hazaragi Language Living Dictionary"
+        },
+        {
+          "id": "description_present",
+          "ok": true,
+          "detail": "English: Lit: body and body to stress."
+        },
+        {
+          "id": "description_specific",
+          "ok": true,
+          "detail": "page-specific"
+        },
+        {
+          "id": "canonical_single",
+          "ok": true,
+          "detail": "1 canonical, robots=none"
+        },
+        {
+          "id": "canonical_clean",
+          "ok": true,
+          "detail": "https://livingdictionaries.app/hazaragi/entry/72c3f7dc-2e80-4d71-abdd-ab4fa02c3847"
+        },
+        {
+          "id": "canonical_self",
+          "ok": true,
+          "detail": "self"
+        },
+        {
+          "id": "not_noindex",
+          "ok": true,
+          "detail": "no robots meta"
+        },
+        {
+          "id": "jsonld_parses",
+          "ok": true,
+          "detail": "1/1 blocks parse"
+        },
+        {
+          "id": "jsonld_type",
+          "ok": true,
+          "detail": "DefinedTerm, DefinedTermSet"
+        },
+        {
+          "id": "og_image_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "twitter_image",
+          "ok": true,
+          "detail": "present"
+        },
+        {
+          "id": "in_sitemap",
+          "ok": true,
+          "detail": "listed"
+        },
+        {
+          "id": "robots_allows",
+          "ok": true,
+          "detail": "/hazaragi/entry/72c3f7dc-2e80-4d71-abdd-ab4fa02c3847"
+        },
+        {
+          "id": "answer_first",
+          "ok": true,
+          "detail": "headword ✓, gloss \"Lit: body and body to stress.\" ✓ in crawlable text"
+        },
+        {
+          "id": "ssr_content",
+          "ok": true,
+          "detail": "61 chars of page-own text (min 60)"
+        },
+        {
+          "id": "ai_crawlers_allowed",
+          "ok": true,
+          "detail": "GPTBot, PerplexityBot, ClaudeBot, Googlebot, Bingbot"
+        }
+      ],
+      "head": {
+        "title": "jan-o-than | Hazaragi Language Living Dictionary",
+        "description": "English: Lit: body and body to stress.",
+        "canonical": "https://livingdictionaries.app/hazaragi/entry/72c3f7dc-2e80-4d71-abdd-ab4fa02c3847",
+        "json_ld_types": [
+          "DefinedTerm",
+          "DefinedTermSet"
+        ]
+      },
+      "crawler_results": {
+        "GPTBot": {
+          "status": 200,
+          "bytes": 37121
+        },
+        "PerplexityBot": {
+          "status": 200,
+          "bytes": 37121
+        },
+        "ClaudeBot": {
+          "status": 200,
+          "bytes": 37121
+        },
+        "Googlebot": {
+          "status": 200,
+          "bytes": 37121
+        },
+        "Bingbot": {
+          "status": 200,
+          "bytes": 37121
+        }
+      },
+      "text_length": 325
+    },
+    {
+      "url": "https://livingdictionaries.app/hazaragi/entry/b6281767-f6f3-4402-a31e-f7a01dc3f132",
+      "page_type": "entry",
+      "status": 200,
+      "checks": [
+        {
+          "id": "http_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "title_present",
+          "ok": true,
+          "detail": "da kodam thabqa thu/shumo morin? means “Which floor are you going to?” in English | Hazaragi Language Living Dictionary"
+        },
+        {
+          "id": "title_specific",
+          "ok": true,
+          "detail": "da kodam thabqa thu/shumo morin? means “Which floor are you going to?” in English | Hazaragi Language Living Dictionary"
+        },
+        {
+          "id": "description_present",
+          "ok": true,
+          "detail": "دہ کدام تبقہ موری تو/شمو مورین, English: Which floor are you going to?"
+        },
+        {
+          "id": "description_specific",
+          "ok": true,
+          "detail": "page-specific"
+        },
+        {
+          "id": "canonical_single",
+          "ok": true,
+          "detail": "1 canonical, robots=none"
+        },
+        {
+          "id": "canonical_clean",
+          "ok": true,
+          "detail": "https://livingdictionaries.app/hazaragi/entry/b6281767-f6f3-4402-a31e-f7a01dc3f132"
+        },
+        {
+          "id": "canonical_self",
+          "ok": true,
+          "detail": "self"
+        },
+        {
+          "id": "not_noindex",
+          "ok": true,
+          "detail": "no robots meta"
+        },
+        {
+          "id": "jsonld_parses",
+          "ok": true,
+          "detail": "1/1 blocks parse"
+        },
+        {
+          "id": "jsonld_type",
+          "ok": true,
+          "detail": "DefinedTerm, DefinedTermSet"
+        },
+        {
+          "id": "og_image_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "twitter_image",
+          "ok": true,
+          "detail": "present"
+        },
+        {
+          "id": "in_sitemap",
+          "ok": true,
+          "detail": "listed"
+        },
+        {
+          "id": "robots_allows",
+          "ok": true,
+          "detail": "/hazaragi/entry/b6281767-f6f3-4402-a31e-f7a01dc3f132"
+        },
+        {
+          "id": "answer_first",
+          "ok": true,
+          "detail": "headword ✓, gloss \"Which floor are you going to?\" ✓ in crawlable text"
+        },
+        {
+          "id": "ssr_content",
+          "ok": true,
+          "detail": "136 chars of page-own text (min 60)"
+        },
+        {
+          "id": "ai_crawlers_allowed",
+          "ok": true,
+          "detail": "GPTBot, PerplexityBot, ClaudeBot, Googlebot, Bingbot"
+        }
+      ],
+      "head": {
+        "title": "da kodam thabqa thu/shumo morin? means “Which floor are you going to?” in English | Hazaragi Language Living Dictionary",
+        "description": "دہ کدام تبقہ موری تو/شمو مورین, English: Which floor are you going to?",
+        "canonical": "https://livingdictionaries.app/hazaragi/entry/b6281767-f6f3-4402-a31e-f7a01dc3f132",
+        "json_ld_types": [
+          "DefinedTerm",
+          "DefinedTermSet"
+        ]
+      },
+      "crawler_results": {
+        "GPTBot": {
+          "status": 200,
+          "bytes": 38336
+        },
+        "PerplexityBot": {
+          "status": 200,
+          "bytes": 38336
+        },
+        "ClaudeBot": {
+          "status": 200,
+          "bytes": 38336
+        },
+        "Googlebot": {
+          "status": 200,
+          "bytes": 38336
+        },
+        "Bingbot": {
+          "status": 200,
+          "bytes": 38336
+        }
+      },
+      "text_length": 400
+    },
+    {
+      "url": "https://livingdictionaries.app/louisiana-creole",
+      "page_type": "dictionary",
+      "status": 200,
+      "checks": [
+        {
+          "id": "http_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "title_present",
+          "ok": true,
+          "detail": "Louisiana Creole (Kouri-Vini) Living Dictionary"
+        },
+        {
+          "id": "title_specific",
+          "ok": true,
+          "detail": "Louisiana Creole (Kouri-Vini) Living Dictionary"
+        },
+        {
+          "id": "description_present",
+          "ok": true,
+          "detail": "Kouri-Vini, konné konm kréyol Lalwizyàn itou, çé langaj kréyol gravmen en danjé ki natif a"
+        },
+        {
+          "id": "description_specific",
+          "ok": true,
+          "detail": "page-specific"
+        },
+        {
+          "id": "canonical_single",
+          "ok": true,
+          "detail": "1 canonical, robots=none"
+        },
+        {
+          "id": "canonical_clean",
+          "ok": true,
+          "detail": "https://livingdictionaries.app/louisiana-creole"
+        },
+        {
+          "id": "canonical_self",
+          "ok": true,
+          "detail": "self"
+        },
+        {
+          "id": "not_noindex",
+          "ok": true,
+          "detail": "no robots meta"
+        },
+        {
+          "id": "jsonld_parses",
+          "ok": true,
+          "detail": "1/1 blocks parse"
+        },
+        {
+          "id": "jsonld_type",
+          "ok": true,
+          "detail": "DefinedTermSet, Language, Organization"
+        },
+        {
+          "id": "og_image_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "twitter_image",
+          "ok": true,
+          "detail": "present"
+        },
+        {
+          "id": "in_sitemap",
+          "ok": true,
+          "detail": "listed"
+        },
+        {
+          "id": "robots_allows",
+          "ok": true,
+          "detail": "/louisiana-creole"
+        },
+        {
+          "id": "answer_first",
+          "ok": true,
+          "detail": "Louisiana Creole (Kouri-Vini) Living Dictionary"
+        },
+        {
+          "id": "ssr_content",
+          "ok": true,
+          "detail": "2631 chars of page-own text (min 300)"
+        },
+        {
+          "id": "ai_crawlers_allowed",
+          "ok": true,
+          "detail": "GPTBot, PerplexityBot, ClaudeBot, Googlebot, Bingbot"
+        }
+      ],
+      "head": {
+        "title": "Louisiana Creole (Kouri-Vini) Living Dictionary",
+        "description": "Kouri-Vini, konné konm kréyol Lalwizyàn itou, çé langaj kréyol gravmen en danjé ki natif a Lalwizyàn. Li formé parmi kominoté lésklav-yé pendan tem a koloni Françé-la bonnœr dan 18èm syèk-la. Li té vini langaj kommin-la, parlé par lésklav…",
+        "canonical": "https://livingdictionaries.app/louisiana-creole",
+        "json_ld_types": [
+          "DefinedTermSet",
+          "Language",
+          "Organization"
+        ]
+      },
+      "crawler_results": {
+        "GPTBot": {
+          "status": 200,
+          "bytes": 47305
+        },
+        "PerplexityBot": {
+          "status": 200,
+          "bytes": 47305
+        },
+        "ClaudeBot": {
+          "status": 200,
+          "bytes": 47305
+        },
+        "Googlebot": {
+          "status": 200,
+          "bytes": 47305
+        },
+        "Bingbot": {
+          "status": 200,
+          "bytes": 47305
+        }
+      },
+      "text_length": 2931
+    },
+    {
+      "url": "https://livingdictionaries.app/louisiana-creole/about",
+      "page_type": "about",
+      "status": 200,
+      "checks": [
+        {
+          "id": "http_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "title_present",
+          "ok": true,
+          "detail": "About | Louisiana Creole (Kouri-Vini) Living Dictionary"
+        },
+        {
+          "id": "title_specific",
+          "ok": true,
+          "detail": "About | Louisiana Creole (Kouri-Vini) Living Dictionary"
+        },
+        {
+          "id": "description_present",
+          "ok": true,
+          "detail": "Learn about the background and creation of this Living Dictionary."
+        },
+        {
+          "id": "description_specific",
+          "ok": true,
+          "detail": "page-specific"
+        },
+        {
+          "id": "canonical_single",
+          "ok": true,
+          "detail": "1 canonical, robots=none"
+        },
+        {
+          "id": "canonical_clean",
+          "ok": true,
+          "detail": "https://livingdictionaries.app/louisiana-creole/about"
+        },
+        {
+          "id": "canonical_self",
+          "ok": true,
+          "detail": "self"
+        },
+        {
+          "id": "not_noindex",
+          "ok": true,
+          "detail": "no robots meta"
+        },
+        {
+          "id": "og_image_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "twitter_image",
+          "ok": true,
+          "detail": "present"
+        },
+        {
+          "id": "in_sitemap",
+          "ok": true,
+          "detail": "listed"
+        },
+        {
+          "id": "robots_allows",
+          "ok": true,
+          "detail": "/louisiana-creole/about"
+        },
+        {
+          "id": "ssr_content",
+          "ok": true,
+          "detail": "2448 chars of page-own text (min 300)"
+        },
+        {
+          "id": "ai_crawlers_allowed",
+          "ok": true,
+          "detail": "GPTBot, PerplexityBot, ClaudeBot, Googlebot, Bingbot"
+        }
+      ],
+      "head": {
+        "title": "About | Louisiana Creole (Kouri-Vini) Living Dictionary",
+        "description": "Learn about the background and creation of this Living Dictionary.",
+        "canonical": "https://livingdictionaries.app/louisiana-creole/about",
+        "json_ld_types": []
+      },
+      "crawler_results": {
+        "GPTBot": {
+          "status": 200,
+          "bytes": 34210
+        },
+        "PerplexityBot": {
+          "status": 200,
+          "bytes": 34210
+        },
+        "ClaudeBot": {
+          "status": 200,
+          "bytes": 34210
+        },
+        "Googlebot": {
+          "status": 200,
+          "bytes": 34210
+        },
+        "Bingbot": {
+          "status": 200,
+          "bytes": 34210
+        }
+      },
+      "text_length": 2748
+    },
+    {
+      "url": "https://livingdictionaries.app/louisiana-creole/entry/LGBU1dETWZn0yX3MzO8J",
+      "page_type": "entry",
+      "status": 200,
+      "checks": [
+        {
+          "id": "http_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "title_present",
+          "ok": true,
+          "detail": "lafamiy, famiy means “family” in English | Louisiana Creole (Kouri-Vini) Living Dictionary"
+        },
+        {
+          "id": "title_specific",
+          "ok": true,
+          "detail": "lafamiy, famiy means “family” in English | Louisiana Creole (Kouri-Vini) Living Dictionary"
+        },
+        {
+          "id": "description_present",
+          "ok": true,
+          "detail": "n., English: family"
+        },
+        {
+          "id": "description_specific",
+          "ok": true,
+          "detail": "page-specific"
+        },
+        {
+          "id": "canonical_single",
+          "ok": true,
+          "detail": "1 canonical, robots=none"
+        },
+        {
+          "id": "canonical_clean",
+          "ok": true,
+          "detail": "https://livingdictionaries.app/louisiana-creole/entry/LGBU1dETWZn0yX3MzO8J"
+        },
+        {
+          "id": "canonical_self",
+          "ok": true,
+          "detail": "self"
+        },
+        {
+          "id": "not_noindex",
+          "ok": true,
+          "detail": "no robots meta"
+        },
+        {
+          "id": "jsonld_parses",
+          "ok": true,
+          "detail": "1/1 blocks parse"
+        },
+        {
+          "id": "jsonld_type",
+          "ok": true,
+          "detail": "DefinedTerm, DefinedTermSet"
+        },
+        {
+          "id": "og_image_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "twitter_image",
+          "ok": true,
+          "detail": "present"
+        },
+        {
+          "id": "in_sitemap",
+          "ok": true,
+          "detail": "listed"
+        },
+        {
+          "id": "robots_allows",
+          "ok": true,
+          "detail": "/louisiana-creole/entry/LGBU1dETWZn0yX3MzO8J"
+        },
+        {
+          "id": "answer_first",
+          "ok": true,
+          "detail": "headword ✓, gloss \"family\" ✓ in crawlable text"
+        },
+        {
+          "id": "ssr_content",
+          "ok": true,
+          "detail": "62 chars of page-own text (min 60)"
+        },
+        {
+          "id": "ai_crawlers_allowed",
+          "ok": true,
+          "detail": "GPTBot, PerplexityBot, ClaudeBot, Googlebot, Bingbot"
+        }
+      ],
+      "head": {
+        "title": "lafamiy, famiy means “family” in English | Louisiana Creole (Kouri-Vini) Living Dictionary",
+        "description": "n., English: family",
+        "canonical": "https://livingdictionaries.app/louisiana-creole/entry/LGBU1dETWZn0yX3MzO8J",
+        "json_ld_types": [
+          "DefinedTerm",
+          "DefinedTermSet"
+        ]
+      },
+      "crawler_results": {
+        "GPTBot": {
+          "status": 200,
+          "bytes": 38670
+        },
+        "PerplexityBot": {
+          "status": 200,
+          "bytes": 38670
+        },
+        "ClaudeBot": {
+          "status": 200,
+          "bytes": 38670
+        },
+        "Googlebot": {
+          "status": 200,
+          "bytes": 38670
+        },
+        "Bingbot": {
+          "status": 200,
+          "bytes": 38670
+        }
+      },
+      "text_length": 362
+    },
+    {
+      "url": "https://livingdictionaries.app/louisiana-creole/entry/gVCIqzTO5bBUDo6wvAHg",
+      "page_type": "entry",
+      "status": 200,
+      "checks": [
+        {
+          "id": "http_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "title_present",
+          "ok": true,
+          "detail": "médsinn means “medicine” in English | Louisiana Creole (Kouri-Vini) Living Dictionary"
+        },
+        {
+          "id": "title_specific",
+          "ok": true,
+          "detail": "médsinn means “medicine” in English | Louisiana Creole (Kouri-Vini) Living Dictionary"
+        },
+        {
+          "id": "description_present",
+          "ok": true,
+          "detail": "n., English: medicine"
+        },
+        {
+          "id": "description_specific",
+          "ok": true,
+          "detail": "page-specific"
+        },
+        {
+          "id": "canonical_single",
+          "ok": true,
+          "detail": "1 canonical, robots=none"
+        },
+        {
+          "id": "canonical_clean",
+          "ok": true,
+          "detail": "https://livingdictionaries.app/louisiana-creole/entry/gVCIqzTO5bBUDo6wvAHg"
+        },
+        {
+          "id": "canonical_self",
+          "ok": true,
+          "detail": "self"
+        },
+        {
+          "id": "not_noindex",
+          "ok": true,
+          "detail": "no robots meta"
+        },
+        {
+          "id": "jsonld_parses",
+          "ok": true,
+          "detail": "1/1 blocks parse"
+        },
+        {
+          "id": "jsonld_type",
+          "ok": true,
+          "detail": "DefinedTerm, DefinedTermSet"
+        },
+        {
+          "id": "og_image_200",
+          "ok": true,
+          "detail": "200"
+        },
+        {
+          "id": "twitter_image",
+          "ok": true,
+          "detail": "present"
+        },
+        {
+          "id": "in_sitemap",
+          "ok": true,
+          "detail": "listed"
+        },
+        {
+          "id": "robots_allows",
+          "ok": true,
+          "detail": "/louisiana-creole/entry/gVCIqzTO5bBUDo6wvAHg"
+        },
+        {
+          "id": "answer_first",
+          "ok": true,
+          "detail": "headword ✓, gloss \"medicine\" ✓ in crawlable text"
+        },
+        {
+          "id": "ssr_content",
+          "ok": false,
+          "detail": "57 chars of page-own text (min 60)"
+        },
+        {
+          "id": "ai_crawlers_allowed",
+          "ok": true,
+          "detail": "GPTBot, PerplexityBot, ClaudeBot, Googlebot, Bingbot"
+        }
+      ],
+      "head": {
+        "title": "médsinn means “medicine” in English | Louisiana Creole (Kouri-Vini) Living Dictionary",
+        "description": "n., English: medicine",
+        "canonical": "https://livingdictionaries.app/louisiana-creole/entry/gVCIqzTO5bBUDo6wvAHg",
+        "json_ld_types": [
+          "DefinedTerm",
+          "DefinedTermSet"
+        ]
+      },
+      "crawler_results": {
+        "GPTBot": {
+          "status": 200,
+          "bytes": 38634
+        },
+        "PerplexityBot": {
+          "status": 200,
+          "bytes": 38634
+        },
+        "ClaudeBot": {
+          "status": 200,
+          "bytes": 38634
+        },
+        "Googlebot": {
+          "status": 200,
+          "bytes": 38634
+        },
+        "Bingbot": {
+          "status": 200,
+          "bytes": 38634
+        }
+      },
+      "text_length": 357
+    }
+  ],
+  "benchmark": [
+    {
+      "query": "living dictionaries",
+      "intent": "brand",
+      "page_type": "home",
+      "brave": {
+        "available": true,
+        "rank": 1,
+        "hit": "https://livingdictionaries.app/",
+        "total": 17
+      },
+      "google": {
+        "impressions": 185,
+        "clicks": 76,
+        "position": 1,
+        "top_page": "https://livingdictionaries.app/"
+      }
+    },
+    {
+      "query": "dictionary maker",
+      "intent": "head",
+      "page_type": "create-dictionary",
+      "brave": {
+        "available": true,
+        "rank": 1,
+        "hit": "https://livingdictionaries.app/create-dictionary",
+        "total": 20
+      },
+      "google": {
+        "impressions": 131,
+        "clicks": 32,
+        "position": 2.213740458015267,
+        "top_page": "https://livingdictionaries.app/create-dictionary"
+      }
+    },
+    {
+      "query": "make your own dictionary",
+      "intent": "head",
+      "page_type": "create-dictionary",
+      "brave": {
+        "available": true,
+        "rank": 12,
+        "hit": "https://livingdictionaries.app/create-dictionary",
+        "total": 20
+      },
+      "google": {
+        "impressions": 54,
+        "clicks": 8,
+        "position": 5.777777777777778,
+        "top_page": "https://livingdictionaries.app/create-dictionary"
+      }
+    },
+    {
+      "query": "endangered language dictionary online",
+      "intent": "head",
+      "page_type": "home",
+      "brave": {
+        "available": true,
+        "rank": 3,
+        "hit": "https://livingdictionaries.app/about",
+        "total": 19
+      },
+      "google": null
+    },
+    {
+      "query": "tutelo saponi dictionary",
+      "intent": "dictionary",
+      "page_type": "dictionary",
+      "brave": {
+        "available": true,
+        "rank": 3,
+        "hit": "https://livingdictionaries.app/tutelo-saponi/about",
+        "total": 20
+      },
+      "google": {
+        "impressions": 14,
+        "clicks": 11,
+        "position": 1.2857142857142858,
+        "top_page": "https://livingdictionaries.app/tutelo-saponi"
+      }
+    },
+    {
+      "query": "hazaragi language",
+      "intent": "dictionary",
+      "page_type": "dictionary",
+      "brave": {
+        "available": true,
+        "rank": 2,
+        "hit": "https://livingdictionaries.app/hazaragi",
+        "total": 20
+      },
+      "google": {
+        "impressions": 591,
+        "clicks": 6,
+        "position": 6.9661590524534684,
+        "top_page": "https://livingdictionaries.app/hazaragi"
+      }
+    },
+    {
+      "query": "louisiana creole dictionary",
+      "intent": "dictionary",
+      "page_type": "dictionary",
+      "brave": {
+        "available": true,
+        "rank": 10,
+        "hit": "https://livingdictionaries.app/louisiana-creole",
+        "total": 20
+      },
+      "google": {
+        "impressions": 98,
+        "clicks": 16,
+        "position": 5.295918367346939,
+        "top_page": "https://livingdictionaries.app/louisiana-creole"
+      }
+    },
+    {
+      "query": "kaqchikel dictionary",
+      "intent": "dictionary",
+      "page_type": "dictionary",
+      "brave": {
+        "available": true,
+        "rank": 2,
+        "hit": "https://livingdictionaries.app/kaqchikel",
+        "total": 20
+      },
+      "google": {
+        "impressions": 24,
+        "clicks": 12,
+        "position": 2.7916666666666665,
+        "top_page": "https://livingdictionaries.app/kaqchikel"
+      }
+    },
+    {
+      "query": "manchu dictionary",
+      "intent": "dictionary",
+      "page_type": "dictionary",
+      "brave": {
+        "available": true,
+        "rank": 15,
+        "hit": "https://livingdictionaries.app/sibe",
+        "total": 20
+      },
+      "google": {
+        "impressions": 72,
+        "clicks": 27,
+        "position": 1.6944444444444444,
+        "top_page": "https://livingdictionaries.app/sibe"
+      }
+    },
+    {
+      "query": "kouri vini dictionary",
+      "intent": "dictionary",
+      "page_type": "dictionary",
+      "brave": {
+        "available": true,
+        "rank": 1,
+        "hit": "https://livingdictionaries.app/louisiana-creole",
+        "total": 20
+      },
+      "google": {
+        "impressions": 64,
+        "clicks": 18,
+        "position": 11.09375,
+        "top_page": "https://livingdictionaries.app/louisiana-creole"
+      }
+    },
+    {
+      "query": "how do you say water in tutelo",
+      "intent": "answer",
+      "page_type": "entry",
+      "brave": {
+        "available": true,
+        "rank": null,
+        "hit": null,
+        "total": 20
+      },
+      "google": null
+    },
+    {
+      "query": "how to say thank you in hazaragi",
+      "intent": "answer",
+      "page_type": "entry",
+      "brave": {
+        "available": true,
+        "rank": 9,
+        "hit": "https://livingdictionaries.app/hazaragi",
+        "total": 20
+      },
+      "google": null
+    },
+    {
+      "query": "kaqchikel word for water",
+      "intent": "answer",
+      "page_type": "entry",
+      "brave": {
+        "available": true,
+        "rank": 9,
+        "hit": "https://livingdictionaries.app/kaqchikel",
+        "total": 20
+      },
+      "google": null
+    }
+  ]
+}

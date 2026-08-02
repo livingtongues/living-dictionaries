@@ -1,8 +1,8 @@
 import type { CronDef } from './cron-scheduler'
 import { spawn_analytics_snapshot_job } from './analytics-snapshot'
 import { run_chat_reping_sweep } from './chat-reping-cron'
+import { run_cron_heartbeat_sweep } from './cron-heartbeat-cron'
 import { prime_host_stats_baseline, sample_host_stats_once } from './host-stats-cron'
-import { run_log_retention_sweep } from './log-retention-cron'
 import { run_monthly_metrics_announcement } from './monthly-metrics-announce'
 import { media_sweep_disabled_reason, run_media_sweep } from './media-sweep-cron'
 import { run_notification_digest_sweep } from './notification-digest-cron'
@@ -45,21 +45,23 @@ export const CRONS: CronDef[] = [
   },
   {
     name: 'log-retention',
-    description: 'Roll client_logs into daily metrics, archive past the hot window, prune the archive, then compute the analytics checkpoint',
+    description: 'Fork the niced daily maintenance child: retention sweep (rollups, archive, prune, VACUUM) then the analytics checkpoint',
     // THE daily maintenance moment, pinned to the quietest hour rather than
-    // drifting to wherever a reboot left it. It ends by forking the niced
-    // analytics child, so the heaviest read of the day (a 30-day scan of a 2 GB
-    // logs.db, once per audience) happens at 03:30 Pacific, at nice 19, in a
-    // process that isn't serving anyone.
+    // drifting to wherever a reboot left it. ALL of its heavy work happens in
+    // ONE niced child process at 03:30 Pacific: first the retention sweep
+    // (rollups → archive → prune → conditional VACUUM), then the 30-day analytics
+    // scan of a 2 GB logs.db per audience. Neither runs in the serving process —
+    // the sweep alone held its event loop for 115 s on 2026-08-01 and cost two
+    // signed-in editors a 502 (`.issues/retention-sweep-blocks-request-thread.md`).
     every_ms: days(1),
     at: { hour: 3, minute: 30, tz: 'America/Los_Angeles' },
-    // The monthly summary posts AFTER the child exits: the child freezes the
-    // month's `monthly_metrics` row, but pings need SES/ntfy, which only exist
-    // in this runtime. A no-op on every day except the first of a month.
-    run: () => run_log_retention_sweep({ after_sweep: async () => {
-      await spawn_analytics_snapshot_job({ reason: 'cron' })
+    // The monthly summary posts from THIS process: the child freezes the month's
+    // `monthly_metrics` row, but pings need SES/ntfy, which only exist in this
+    // runtime. A no-op on every day except the first of a month.
+    run: async () => {
+      await spawn_analytics_snapshot_job({ reason: 'cron', sweep_retention: true })
       await run_monthly_metrics_announcement()
-    } }),
+    },
   },
   {
     name: 'r2-snapshot-builder',
@@ -90,5 +92,14 @@ export const CRONS: CronDef[] = [
     every_ms: days(1),
     at: { hour: 8, minute: 5, tz: 'America/Los_Angeles' },
     run: run_chat_reping_sweep,
+  },
+  {
+    name: 'cron-heartbeat',
+    description: 'One coalesced daily liveness row per cron, so a dead cron and a quiet night stop looking identical',
+    // 03:00 PT — half an hour ahead of log-retention, so the night's heartbeats
+    // are already in the raw window that same sweep rolls up.
+    every_ms: days(1),
+    at: { hour: 3, minute: 0, tz: 'America/Los_Angeles' },
+    run: run_cron_heartbeat_sweep,
   },
 ]
