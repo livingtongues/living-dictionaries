@@ -155,7 +155,10 @@
 
 <style>
   .page {
-    min-height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     background: var(--background);
     color: var(--color);
   }
@@ -262,11 +265,13 @@
     gap: 0.75rem;
   }
   .page-main {
-    padding-left: 1rem;
-    padding-right: 1rem;
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    padding: 0.75rem 1rem 1.5rem;
     width: 100%;
-    padding-top: 0.75rem;
-    padding-bottom: 1.5rem;
   }
   .signed-out {
     min-height: 100vh;

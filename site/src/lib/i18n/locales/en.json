@@ -448,7 +448,17 @@
   "error": {
     "run_into_error": "We're sorry, we've run into an error.",
     "error_recorded": "The error has been recorded and we will be looking into it.",
-    "please_explain": "Can you please send us a short note to explain what happened?"
+    "please_explain": "Can you please send us a short note to explain what happened?",
+    "page_not_found": "This page doesn't exist",
+    "entry_not_found": "This entry doesn't exist",
+    "not_found_explain": "It may have been deleted, or the link may be incomplete.",
+    "page_moved_explain": "The link may be incomplete, or this page may have moved.",
+    "dictionary_unaffected": "The rest of {dictionary} is unaffected.",
+    "browse_entries": "Browse entries",
+    "dictionary_home": "Dictionary home",
+    "go_home": "Go to the homepage",
+    "browse_dictionaries": "Browse dictionaries",
+    "think_mistake": "Think this is a mistake?"
   },
   "map": {
     "webgl_unavailable": "The interactive map can't load because your browser or device doesn't support WebGL."
