@@ -471,6 +471,7 @@
   },
   "home": {
     "list_of_dictionaries": "List of Dictionaries",
+    "search_dictionaries": "Search by language name, code, or location",
     "find_dictionary": "Find a Dictionary",
     "no_results": "No Results",
     "open_dictionary": "Open Dictionary",
@@ -565,7 +566,12 @@
     "theme_dark": "Dark",
     "app_update_needed": "A new version of the app is needed to keep syncing this dictionary. Please reload the page.",
     "local_data_expired": "This dictionary's offline data is too old to sync and must be refreshed.",
-    "sync_paused_repeated_failure": "Your changes are not saving to the server. The same error keeps happening, so syncing is paused. Your work is safe on this device — reload the page to try again, and contact us if this message returns."
+    "sync_paused_repeated_failure": "Your changes are not saving to the server. The same error keeps happening, so syncing is paused. Your work is safe on this device — reload the page to try again, and contact us if this message returns.",
+    "dict_open_failed": "This dictionary could not be opened on this device.",
+    "dict_open_failed_explanation": "Your browser refused to open the offline copy of this dictionary. Downloading a fresh copy usually fixes it.",
+    "dict_open_failed_editor_warning": "You can edit this dictionary. If this device is holding changes that never reached the server, re-downloading will discard them — we cannot check without opening the file. Contact us first if you may have unsaved work.",
+    "dict_reset_and_redownload": "Reset and re-download",
+    "dict_reset_confirm": "Discard the copy on this device and download a fresh one?"
   },
   "settings": {
     "community_permission": "Does the speech community allow this language to be online?",

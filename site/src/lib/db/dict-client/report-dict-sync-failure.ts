@@ -262,8 +262,13 @@ export function report_dict_self_healed({ dict_id, reason, flushed_push }: {
  * in the wild. A row here followed by a healthy `dict_boot` = a real recovery;
  * a row here followed by `dict_boot_recovery_exhausted` = the environment (not
  * just the file) is broken. `warn` — a recovered degradation, not an error.
+ *
+ * `reason` distinguishes the branches of `poisoned_file_recovery_decision`:
+ * `viewer_replace` (a persisted file that stopped opening) vs `viewer_replace_fresh`
+ * (a snapshot we had JUST written, added 2026-08-03) — so "did widening it to
+ * fresh files cure anyone?" is one query, not an argument.
  */
-export function report_dict_file_replaced({ dict_id, boot_message }: { dict_id: string, boot_message: string }): void {
+export function report_dict_file_replaced({ dict_id, boot_message, reason }: { dict_id: string, boot_message: string, reason?: string }): void {
   try {
     void api_log({
       entries: [{
@@ -273,7 +278,7 @@ export function report_dict_file_replaced({ dict_id, boot_message }: { dict_id: 
         user_agent: safe_user_agent(),
         platform: 'web',
         app_version: version ?? null,
-        context: { worker: true, engine: 'dict', dict_id, boot_message, session_id: worker_session_id ?? undefined },
+        context: { worker: true, engine: 'dict', dict_id, boot_message, reason: reason ?? null, session_id: worker_session_id ?? undefined },
       }],
     })
   } catch {

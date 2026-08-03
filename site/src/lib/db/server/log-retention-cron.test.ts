@@ -7,7 +7,7 @@ import type { RequestGeo } from '$lib/server/geo-from-request'
 import { insert_client_log } from '$lib/server/insert-client-log'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { open_log_archive_db } from './log-archive-db'
-import { archive_old_logs, get_rollup_watermark, MONTHLY_FINALIZED_KEY, normalize_route, prev_month, reroll_archived_days_once, rollup_day, rollup_month, rollup_recent_months, run_log_retention_once, SITE_SCOPE, vacuum_if_worthwhile } from './log-retention-cron'
+import { archive_old_logs, get_rollup_watermark, MONTHLY_FINALIZED_KEY, normalize_route, prev_month, reroll_archived_days_once, rollup_day, rollup_month, rollup_recent_months, ROLLUP_WRITE_CHUNK_ROWS, run_log_retention_once, SITE_SCOPE, vacuum_if_worthwhile } from './log-retention-cron'
 import { CLIENT_LOG_COLUMNS, open_logs_db } from './logs-db'
 import { open_test_shared_db } from './shared-db'
 
@@ -179,6 +179,22 @@ describe(rollup_day, () => {
     rollup_day({ day: '2026-06-01', shared_db, logs_db })
     expect(metric('2026-06-01', 'logs')).toBe(1)
     expect((shared_db.prepare(`SELECT COUNT(*) n FROM log_daily_sessions WHERE day = '2026-06-01'`).get() as { n: number }).n).toBe(1)
+  })
+
+  test('writes a day WIDER than one chunk completely — the chunked write must not drop the tail', () => {
+    // 2026-08-03: the whole-day write became ~500-row transactions so the child stops
+    // holding shared.db's write lock for seconds at a time (§1.1 measured 15.4 s of
+    // hold and an 8.3 s event-loop stall in the serving process). Correctness first:
+    // a day spanning several chunks must still land in full.
+    const session_count = ROLLUP_WRITE_CHUNK_ROWS + 37
+    for (let i = 0; i < session_count; i++)
+      add_log({ message: 'session_start', context: { session_id: `s${i}` } })
+    rollup_day({ day: '2026-06-01', shared_db, logs_db })
+    expect((shared_db.prepare(`SELECT COUNT(*) n FROM log_daily_sessions WHERE day = '2026-06-01'`).get() as { n: number }).n).toBe(session_count)
+    expect(metric('2026-06-01', 'sessions')).toBe(session_count)
+    // And re-rolling still REPLACES rather than doubling, across chunk boundaries.
+    rollup_day({ day: '2026-06-01', shared_db, logs_db })
+    expect((shared_db.prepare(`SELECT COUNT(*) n FROM log_daily_sessions WHERE day = '2026-06-01'`).get() as { n: number }).n).toBe(session_count)
   })
 
   test('full-day REPLACE purges a metric that no longer occurs (ghost-metric fix)', () => {

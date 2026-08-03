@@ -37,6 +37,28 @@ const HOT_WINDOW_DAYS = 14
 const ARCHIVE_WINDOW_DAYS = 60
 const DAY_MS = 24 * 60 * 60 * 1000
 
+/**
+ * Rows per write transaction in `rollup_day`. Bounds how long the child owns
+ * shared.db's single write lock — the serving process waits on it synchronously
+ * (see the long note at the write site). 500 keeps each hold in the low
+ * milliseconds while still amortizing the transaction overhead.
+ */
+export const ROLLUP_WRITE_CHUNK_ROWS = 500
+
+/** Apply `write` to every item, committing a transaction every `ROLLUP_WRITE_CHUNK_ROWS` rows. */
+function write_in_chunks<T>({ db, items, write }: {
+  db: Database.Database
+  items: T[]
+  write: (item: T) => void
+}): void {
+  const write_chunk = db.transaction((chunk: T[]) => {
+    for (const item of chunk)
+      write(item)
+  })
+  for (let i = 0; i < items.length; i += ROLLUP_WRITE_CHUNK_ROWS)
+    write_chunk(items.slice(i, i + ROLLUP_WRITE_CHUNK_ROWS))
+}
+
 const ERROR_LEVELS = new Set(['error', 'unhandled_rejection', 'crash'])
 const TOP_LEVEL_ROUTES = new Set(['dictionaries', 'about', 'tutorials', 'account', 'create-dictionary', 'admin', 'terms'])
 
@@ -66,7 +88,9 @@ interface AccumRow { source: string, level: string, message: string, user_id: st
  * `log_daily_metrics` + `log_daily_sessions`. Idempotent full-day REPLACE: the
  * day's existing rows are DELETEd first, so re-running (e.g. for "today", still
  * accumulating) is safe AND a metric that stopped occurring can't linger as a
- * ghost (see the gotcha note on write_all).
+ * ghost. The writes are CHUNKED (`ROLLUP_WRITE_CHUNK_ROWS`) — see the long note at
+ * the write site for why holding one whole-day transaction stalled the serving
+ * process, and what the chunking costs.
  */
 export function rollup_day({ day, shared_db = get_shared_db(), logs_db = get_logs_db() }: { day: string, shared_db?: Database.Database, logs_db?: Database.Database }): { metrics_written: number } {
   const rows = logs_db.prepare(`
@@ -308,39 +332,49 @@ export function rollup_day({ day, shared_db = get_shared_db(), logs_db = get_log
     INSERT INTO dictionary_daily_views (day, dictionary_id, sessions, anon_sessions, visitors, anon_visitors)
     VALUES (?, ?, ?, ?, ?, ?)
   `)
-  const write_all = shared_db.transaction((items: typeof metrics) => {
-    // Full-day REPLACE, not merge: without the delete, a metric that no longer
-    // exists for the day (e.g. a UA reclassified as a bot) would keep its stale
-    // value forever — upsert only overwrites keys that still occur. This "ghost
-    // metric" bug lived in prod (house post-mortem) until the reader started
-    // trusting rollups; the archived-days re-roll heals history.
-    shared_db.prepare('DELETE FROM log_daily_metrics WHERE day = ?').run(day)
-    for (const item of items)
-      upsert.run(day, item.metric, item.source, item.value)
-    shared_db.prepare('DELETE FROM log_daily_sessions WHERE day = ?').run(day)
-    for (const session of session_activity.values()) {
-      insert_session.run(
-        day,
-        session.session_id,
-        session.user_agent,
-        session.heartbeats,
-        session.has_user_id ? 1 : 0,
-        webdriver_sessions.has(session.session_id) ? 1 : null,
-        session.db_tier,
-        session.country,
-        session.region,
-        session.user_id,
-        session.visitor_id,
-        session.browser_locale,
-        session.ui_locale,
-      )
-    }
-    // Full-day REPLACE (same idempotency contract as the metrics/sessions above).
-    shared_db.prepare('DELETE FROM dictionary_daily_views WHERE day = ?').run(day)
-    for (const [dict_id, views] of dict_views)
-      insert_dict_view.run(day, dict_id, views.sessions.size, views.anon.size, views.visitors.size, views.anon_visitors.size)
-  })
-  write_all(metrics)
+  // Full-day REPLACE, not merge: without the delete, a metric that no longer
+  // exists for the day (e.g. a UA reclassified as a bot) would keep its stale
+  // value forever — upsert only overwrites keys that still occur. This "ghost
+  // metric" bug lived in prod (house post-mortem) until the reader started
+  // trusting rollups; the archived-days re-roll heals history.
+  //
+  // CHUNKED, not one whole-day transaction (2026-08-03). This runs in the niced
+  // child, but the SERVING process still waits on the locks it takes: better-sqlite3
+  // is synchronous, so a request that writes shared.db during the rollup parks the
+  // event loop until its `busy_timeout = 5000` expires and then fails. On 2026-08-02
+  // this single transaction ran 15.4 s across two days and the meter caught an 8.3 s
+  // event-loop stall with one signed-in user's HTTP 502 seven seconds before the
+  // sweep ended. The cure is to stop HOLDING the write lock for seconds — not to
+  // shorten shared.db's serving busy timeout (that converts waits into user-visible
+  // errors on a database carrying real request-path writes).
+  //
+  // Tradeoff, stated: a crash mid-rollup can now leave a PARTIALLY written day
+  // instead of rolling the whole day back. Both are healed the same way — drop the
+  // `ROLLUP_WATERMARK_KEY` row and re-run (`reroll_archived_days_once` does it for
+  // archived days) — and every write here is idempotent on re-roll.
+  const delete_day = (table: string): void => {
+    shared_db.prepare(`DELETE FROM "${table}" WHERE day = ?`).run(day)
+  }
+  delete_day('log_daily_metrics')
+  write_in_chunks({ db: shared_db, items: metrics, write: item => upsert.run(day, item.metric, item.source, item.value) })
+  delete_day('log_daily_sessions')
+  write_in_chunks({ db: shared_db, items: [...session_activity.values()], write: session => insert_session.run(
+    day,
+    session.session_id,
+    session.user_agent,
+    session.heartbeats,
+    session.has_user_id ? 1 : 0,
+    webdriver_sessions.has(session.session_id) ? 1 : null,
+    session.db_tier,
+    session.country,
+    session.region,
+    session.user_id,
+    session.visitor_id,
+    session.browser_locale,
+    session.ui_locale,
+  ) })
+  delete_day('dictionary_daily_views')
+  write_in_chunks({ db: shared_db, items: [...dict_views], write: ([dict_id, views]) => insert_dict_view.run(day, dict_id, views.sessions.size, views.anon.size, views.visitors.size, views.anon_visitors.size) })
   return { metrics_written: metrics.length }
 }
 

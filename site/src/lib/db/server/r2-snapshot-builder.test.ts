@@ -7,7 +7,7 @@ import { join } from 'node:path'
 import { gunzipSync } from 'node:zlib'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { open_test_shared_db } from './shared-db'
-import { sweep_dirty_dictionaries } from './r2-snapshot-builder'
+import { run_r2_snapshot_sweep, sweep_dirty_dictionaries } from './r2-snapshot-builder'
 
 let shared: ReturnType<typeof open_test_shared_db>
 const dict_dbs = new Map<string, Database.Database>()
@@ -31,6 +31,11 @@ vi.mock('./dictionary-db', () => ({
 
 vi.mock('$lib/r2/snapshot-client', () => ({
   get_r2_snapshot_client: () => ({ client: { send: put_spy }, bucket: 'test-snapshots' }),
+}))
+
+const log_spy = vi.fn()
+vi.mock('$lib/server/log-server-event', () => ({
+  log_server_event: (...args: unknown[]) => log_spy(...args),
 }))
 
 function make_dict_db(): Database.Database {
@@ -71,7 +76,7 @@ describe(sweep_dirty_dictionaries, () => {
 
     const result = await sweep_dirty_dictionaries()
 
-    expect(result).toEqual({ uploaded: 2, deleted: 0 })
+    expect(result).toMatchObject({ uploaded: 2, deleted: 0, failed: 0 })
     expect(put_spy).toHaveBeenCalledTimes(2)
     const uploaded_keys = put_spy.mock.calls.map(([command]) => command.input.Key).sort()
     expect(uploaded_keys).toEqual(['dictionaries/never-built.db.gz', 'dictionaries/stale.db.gz'])
@@ -91,7 +96,7 @@ describe(sweep_dirty_dictionaries, () => {
 
     const result = await sweep_dirty_dictionaries()
 
-    expect(result).toEqual({ uploaded: 0, deleted: 0 })
+    expect(result).toMatchObject({ uploaded: 0, deleted: 0, bytes_uploaded: 0, slowest_dict: null })
     expect(put_spy).not.toHaveBeenCalled()
   })
 
@@ -101,7 +106,7 @@ describe(sweep_dirty_dictionaries, () => {
 
     const result = await sweep_dirty_dictionaries()
 
-    expect(result).toEqual({ uploaded: 1, deleted: 0 })
+    expect(result).toMatchObject({ uploaded: 1, deleted: 0, failed: 0 })
     expect(put_spy.mock.calls.map(([command]) => command.input.Key)).toEqual(['dictionaries/open.db.gz'])
   })
 
@@ -110,7 +115,7 @@ describe(sweep_dirty_dictionaries, () => {
 
     const result = await sweep_dirty_dictionaries()
 
-    expect(result).toEqual({ uploaded: 0, deleted: 1 })
+    expect(result).toMatchObject({ uploaded: 0, deleted: 1 })
     expect(put_spy).toHaveBeenCalledTimes(1)
     const [[command]] = put_spy.mock.calls
     expect(command).toBeInstanceOf(DeleteObjectCommand)
@@ -185,5 +190,43 @@ describe(sweep_dirty_dictionaries, () => {
       snapshot_db.close()
       rmSync(temp_path, { force: true })
     }
+  })
+})
+
+/**
+ * §1.2 of the 2026-08-02 log review: the event-loop meter caught this job freezing
+ * the serving process for 6.4 s at 03:03 UTC, and it could only be INFERRED from an
+ * `:03`/`:33` timestamp because the builder emitted zero telemetry — `grep` found
+ * no `log_server_event` call in the whole module. These lock in the account it now
+ * gives of itself.
+ */
+describe(run_r2_snapshot_sweep, () => {
+  test('reports what the sweep cost — dictionaries, bytes, duration, per-step timings, slowest dict', async () => {
+    insert_dict({ id: 'alpha', updated_at: '2026-03-01T00:00:00.000Z', snapshot_uploaded_at: null })
+    insert_dict({ id: 'beta', updated_at: '2026-03-01T00:00:00.000Z', snapshot_uploaded_at: null })
+
+    await run_r2_snapshot_sweep()
+
+    expect(log_spy).toHaveBeenCalledTimes(1)
+    const [[{ level, message, context }]] = log_spy.mock.calls
+    expect(message).toBe('snapshot_sweep_completed')
+    expect(level).toBe('info')
+    expect(context).toMatchObject({ dictionaries: 2, deleted: 0, failed: 0 })
+    // Two real gzipped snapshots were uploaded, so the byte tally must be the sum
+    // of what the R2 client actually received.
+    const uploaded_bytes = put_spy.mock.calls.reduce((total, [command]) => total + (put_input(command).Body as Uint8Array).byteLength, 0)
+    expect(context.bytes_uploaded).toBe(uploaded_bytes)
+    expect(typeof context.duration_ms).toBe('number')
+    expect(typeof context.blocking_ms).toBe('number')
+    // The step that is SYNCHRONOUS SQLite work on the event loop — the freeze candidate.
+    expect(Object.keys(context.step_ms as Record<string, number>)).toEqual(
+      expect.arrayContaining(['list_dirty', 'prune_deletes', 'backup', 'strip_and_bake', 'read_file', 'gzip', 'upload']),
+    )
+    expect(['alpha', 'beta']).toContain((context.slowest_dict as { id: string }).id)
+  })
+
+  test('an idle sweep stays silent — this fires every 30 minutes and logs.db is 2 GB', async () => {
+    await run_r2_snapshot_sweep()
+    expect(log_spy).not.toHaveBeenCalled()
   })
 })

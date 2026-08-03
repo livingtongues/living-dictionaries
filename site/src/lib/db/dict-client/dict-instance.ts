@@ -54,7 +54,7 @@ import { DICT_DB_OPFS_PREFIX } from '$lib/constants'
 export const BOOT_STRATEGY = 'blocking_snapshot_boot_with_idle_watchdog'
 
 export type PoisonedFileRecoveryReason
-  = 'not_existing' | 'editor_preserve' | 'already_attempted' | 'viewer_replace'
+  = 'editor_preserve' | 'already_attempted' | 'viewer_replace' | 'viewer_replace_fresh'
 
 /**
  * Decide whether an EXISTING per-dict OPFS file that failed to open (or migrate)
@@ -73,22 +73,28 @@ export type PoisonedFileRecoveryReason
  * right now) can't refetch-loop — a second failure falls through to the normal
  * exhaustion path.
  *
- * Fresh-file failures (`file_existed=false`) are never eligible: the snapshot
- * was just written, so a failure there is an environment problem, not a
- * poisoned persisted file, and re-fetching it would only loop.
+ * FRESH-FILE failures (`file_existed=false`) USED TO BE EXCLUDED on the reasoning
+ * that a just-written snapshot cannot be "poisoned", so a re-fetch would only
+ * loop. 2026-08-03 dropped that exclusion for viewers, because the reasoning has
+ * a hole: `drop_in_snapshot` SWALLOWS a failed write (it falls through to an empty
+ * DB), so a quota blip or a truncated write leaves exactly the kind of half-file
+ * that `sqlite3_open_v2` refuses — and every boot failure of 2026-08-02 died at
+ * `opfs_open` (§1.3). Re-fetching is lossless for a viewer and the once-per-page-
+ * session bound (carried across worker re-elections by `poison_recovery_attempted`)
+ * is what stops a loop, not the file_existed test. The two cases stay separately
+ * named in telemetry so "did the fresh-file branch ever cure anything?" stays
+ * answerable.
  */
 export function poisoned_file_recovery_decision({ file_existed, has_editor_role, already_attempted }: {
   file_existed: boolean
   has_editor_role: boolean
   already_attempted: boolean
 }): { replace: boolean, reason: PoisonedFileRecoveryReason } {
-  if (!file_existed)
-    return { replace: false, reason: 'not_existing' }
   if (has_editor_role)
     return { replace: false, reason: 'editor_preserve' }
   if (already_attempted)
     return { replace: false, reason: 'already_attempted' }
-  return { replace: true, reason: 'viewer_replace' }
+  return { replace: true, reason: file_existed ? 'viewer_replace' : 'viewer_replace_fresh' }
 }
 
 export function create_dict_instance(options: InstanceOptions): InstanceFactory {
@@ -224,7 +230,7 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
       try {
         return await open_and_migrate_at_path()
       } catch (err) {
-        const { replace } = poisoned_file_recovery_decision({
+        const { replace, reason } = poisoned_file_recovery_decision({
           file_existed,
           has_editor_role,
           already_attempted: poison_recovery_attempted,
@@ -233,8 +239,8 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
           throw err
         poison_recovery_attempted = true
         context.emit_event({ type: 'poison_recovery_claimed' })
-        console.warn(`[dict-instance] ${dict_id} viewer's existing OPFS file failed to open/migrate — replacing with a fresh snapshot:`, err)
-        report_dict_file_replaced({ dict_id, boot_message: err instanceof Error ? err.message : String(err) })
+        console.warn(`[dict-instance] ${dict_id} viewer's OPFS file failed to open/migrate (${reason}) — replacing with a fresh snapshot:`, err)
+        report_dict_file_replaced({ dict_id, boot_message: err instanceof Error ? err.message : String(err), reason })
         await delete_opfs_db_file({ path })
         await drop_in_snapshot()
         return await open_and_migrate_at_path()

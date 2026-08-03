@@ -21,6 +21,8 @@ import { start_leader_election } from './leader-election'
 import type { LeaderElection } from './leader-election'
 import type { BootFault } from './boot-recovery'
 import { boot_retry_decision, read_boot_fault, reelect_delay } from './boot-recovery'
+// LD-only policy (this file is 🔴 divergent in `PARITY.md`, so an app import is safe here).
+import { boot_reelect_decision } from '../boot-give-up'
 import { ensure_persistent_storage } from './persistent-storage'
 import { create_transport_client } from './transport'
 import type { TransportClient } from './transport'
@@ -179,17 +181,35 @@ export function create_db_client({ instance_options, on_boot_failed, on_boot_pro
         return
       }
       const { will_retry, delay_ms } = boot_retry_decision({ attempt: boot_attempt })
+      // THE CROSS-ELECTION BOUND (2026-08-03). `boot_retry_decision` bounds the
+      // attempts INSIDE one worker; a re-election spawns a NEW worker whose ladder
+      // starts at zero, so the pair was bounded × unbounded = unbounded — which is
+      // how one iPhone visitor reached 17 boot-failure rows over 9.5 minutes with
+      // nothing on screen but an indeterminate bar (§1.3, 2026-08-02). Once the
+      // re-election budget is spent this tab stops and the app owns the visible
+      // failure state. NOTE FOR house: its copy of this file has the same
+      // unbounded shape and wants the same bound.
+      const will_reelect = will_retry || boot_reelect_decision({ reelect_attempt }).will_reelect
       on_boot_failed?.({
         message,
         last_stage,
         attempt: boot_attempt,
         will_retry,
+        will_reelect,
+        reelect_attempt,
         terminal_reason: null,
       })
       if (will_retry) {
         console.warn(`[db-client] leader worker boot failed (attempt ${boot_attempt + 1}) — retrying in ${delay_ms}ms:`, message)
         boot_attempt++
         boot_retry_timer = setTimeout(() => { boot_retry_timer = null; spawn_leader_worker() }, delay_ms)
+      } else if (!will_reelect) {
+        // Give up: resign so a healthier tab can lead, but never re-acquire. The
+        // person is now looking at the failure panel with a reset action instead of
+        // a bar that never ends.
+        console.warn(`[db-client] leader worker boot failed — re-election budget spent after ${reelect_attempt} cycles, giving up:`, message)
+        boot_attempt = 0
+        election.resign()
       } else {
         // Fast in-tab retries spent — resign so ANY other waiter can try, then
         // re-enter the election on a slow backoff. A lone tab (no other waiter)

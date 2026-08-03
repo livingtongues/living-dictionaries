@@ -1,6 +1,6 @@
 import type Database from 'better-sqlite3'
 import type { Audience, LogAnalytics } from './log-analytics'
-import { fork } from 'node:child_process'
+import { fork, spawnSync } from 'node:child_process'
 import { mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { setPriority } from 'node:os'
 import { setTimeout } from 'node:timers'
@@ -383,6 +383,26 @@ const CHILD_TIMEOUT_MS = 20 * 60_000
 const CHILD_NICE = 19
 
 /**
+ * I/O priority idle-class (`ionice -c 3`), set by the child ON ITSELF alongside
+ * the nice above. `nice` governs CPU only, and the two longest steps of the
+ * retention sweep this child now runs are pure DISK on a two-core box
+ * (2026-08-02: `archive_old_logs` 20.6 s, `vacuum_logs_db` 40.0 s — a whole
+ * minute of rewriting multi-GB files while the site serves).
+ *
+ * Idle class needs no privileges (Linux ≥ 2.6.25) and busybox's `ionice` applet
+ * is present in the node:24-alpine runner (verified in the running prod
+ * container). Entirely best-effort: a missing binary or a kernel that refuses is
+ * a warn, never a failure — the sweep is still correct at normal I/O priority.
+ */
+const CHILD_IONICE_CLASS = 3
+
+function self_ionice_idle(): void {
+  const result = spawnSync('ionice', ['-c', String(CHILD_IONICE_CLASS), '-p', String(process.pid)], { stdio: 'ignore' })
+  if (result.error || result.status !== 0)
+    console.warn('[analytics-snapshot] could not self-ionice:', result.error?.message ?? `exit ${result.status}`)
+}
+
+/**
  * Heap ceiling for the child. MEASURED (2026-07-30, living's 2.1 GB logs.db copied
  * to mustang): one 30-day payload peaks around 1.0 GB RSS, so this leaves real
  * headroom while still being bounded — an unexpected blow-up ends as a dead child
@@ -534,7 +554,7 @@ export async function spawn_analytics_snapshot_job({ reason, sweep_retention = f
         context: { reason, code, signal, written: summary?.written ?? [], failed: summary?.failed ?? [] },
       })
     })
-    console.info(`[analytics-snapshot] spawned child ${child.pid} (${reason}) at nice ${CHILD_NICE}.`)
+    console.info(`[analytics-snapshot] spawned child ${child.pid} (${reason}) at nice ${CHILD_NICE}, ionice class ${CHILD_IONICE_CLASS}.`)
     return 'spawned'
   } catch (error) {
     set_running(null)
@@ -588,6 +608,7 @@ if (process.env.ANALYTICS_SNAPSHOT_CHILD === '1' && !building) {
     } catch (error) {
       console.warn('[analytics-snapshot] could not self-nice:', (error as Error).message)
     }
+    self_ionice_idle()
     try {
       const summary = await run_analytics_snapshot_job({
         reason: process.env.ANALYTICS_SNAPSHOT_REASON || 'cron',

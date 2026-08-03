@@ -11,6 +11,17 @@ Filed by the nightly log review, 2026-08-01. **Measured, not inferred.**
 > process's `logs.db` busy timeout had to drop 5 s → 250 ms or a `VACUUM` would have parked the
 > request thread anyway. **house and tutor run the ported copy of this cron — broadcast when Jacob
 > commits.** Delete this file once that's done.
+>
+> ✅ **RESIDUAL ALSO FIXED (uncommitted) 2026-08-03** — `.issues/nightly-fixes-2026-08-03.md` item 5.
+> The residual after the child-process move was CROSS-PROCESS WRITE-LOCK CONTENTION, not the work
+> itself: `rollup_day`'s single whole-day transaction held shared.db's write lock for a measured
+> 15.4 s and the serving process (busy_timeout 5000) parked on it — one 8.3 s event-loop stall and
+> one signed-in user's 502 on 2026-08-02. Now CHUNKED at 500 rows (`ROLLUP_WRITE_CHUNK_ROWS`), each
+> day-DELETE its own statement, so the longest hold is milliseconds. shared.db's serving busy
+> timeout was deliberately NOT dropped — on a DB carrying request-path writes that converts waits
+> into user-visible errors. The child also self-`ionice -c 3` now (verified unprivileged inside the
+> running prod container): `nice` is CPU-only and the two longest steps are pure disk (archive
+> 20.6 s, VACUUM 40.0 s). When broadcasting to house/tutor, carry BOTH halves.
 
 ## What happens
 

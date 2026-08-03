@@ -110,6 +110,42 @@ proposals against this lens.
 
 ## Open proposals
 
+- **★★★ NEW — A "Responsiveness" line on `/admin/health`'s Host resources panel: worst event-loop
+  stall today, when, and what was running** *(filed 2026-08-02 · LOW-MEDIUM cost, HIGH value ·
+  verified absent: ZERO occurrences of `loop_lag` in `log-analytics.ts` or `admin/health/+page.svelte`;
+  `HostHourlyPoint` at `log-analytics.ts:1053` carries only cpu/mem/disk).* The 5-minute `host_stats`
+  sample gained `loop_lag_max_ms` + `loop_lag_p99_ms` on 2026-08-02 and nothing reads them. On its
+  first production night the instrument explained two separate faults, and it did so **because the two
+  statistics disagreed by three orders of magnitude**: p99 never exceeded 13 ms all day (the box is
+  responsive) while max hit **8,321 ms** once (a signed-in user's sync was dropped with a 502 in that
+  same minute). CPU average said 2.9% — "idle" — throughout. Reads as a verdict sentence per the
+  standing directive:
+
+  > **Responsiveness: worst freeze today 8.3 s at 10:34 UTC — during daily maintenance. 1 user
+  > affected. Every other sample under 15 ms.**
+
+  **Build it together with the ★★★ availability-attribution item below** — that one buckets each 5xx as
+  deploy / maintenance / unexplained but cannot say *what blocked*; this one answers that in the same
+  join. Both of their missing inputs landed on 2026-08-02: `log_retention_swept` (with `duration_ms` +
+  per-step `step_ms`) and `server_started` (exact deploy boundaries, both containers). Cause windows:
+  deploy = `server_started` / `deploy-metrics.jsonl`; maintenance = `log_retention_swept` start+duration;
+  everything else = unexplained, which is the only bucket that needs a human. Aggregate health, no
+  error list.
+
+- **★★ NEW — Share-card (Open Graph) family row on `/admin/storage`** *(ported from house 2026-08-01,
+  accepted 2026-08-02 · LOW-MEDIUM cost · verified absent: `src/routes/admin/storage/` contains no
+  `og`/card reference — the page reads the `media_objects` ledger + `media_storage_daily` rollups,
+  i.e. R2 media only).* `/data/og-cache` reached **557 MB / 2,792 entries on 2026-08-02**, the
+  second-largest thing on the data volume after the two log databases, growing ~120 MB/day with
+  `removed: 0` at every sample — it hits its **1 GB byte cap (not its 5,000-entry cap) in about three
+  days**. LD is better placed than house to build this: `og_store_state` already coalesces
+  `kept` / `bytes` / `removed` / `max_entries` / `max_bytes` / `remote_gets` / `remote_puts` /
+  `remote_faults` / `breaker_open` into one periodic row, so the panel needs no new telemetry. Show:
+  disk tier entries + bytes **against their caps**, evictions since the last checkpoint, R2 tier object
+  count/bytes in `livingdictionaries-og-cache`, and one honest tier-share line (disk / R2 / render as
+  shares of `og_card_served`). Storage page rather than health page: this is bytes and cost, not
+  stability — the share-card *health* line stays queued separately below.
+
 - **★★★ NEW — Attribute the user-observed 5xx line to a CAUSE window: deploy · scheduled maintenance ·
   unexplained** *(filed 2026-08-01 · MEDIUM cost, HIGH value · verified: `build_uptime` in
   `log-analytics.ts:1364-1416` already collects `user_observed` failures/users/sessions/worst-hour
@@ -670,3 +706,23 @@ house's **/admin/revenue** dashboard (no payments).
   deploy-settling band ported from tutor + retention-staleness styling ported from house)
 - Phase D cross-repo read 2026-06-27 (house `error_audience`/`errors_by_version`/expected-bucket;
   tutor `error_clusters`/`KNOWN_NOISE`).
+
+### Cross-pollination update — 2026-08-02 (read house + tutor 08-01 reviews/backlogs)
+
+- **Inbound, ACCEPTED from house:** the share-card family row on `/admin/storage` (filed as an open
+  proposal above, tagged `ported from house`). House filed it the night its own card store doubled;
+  LD is one step further along — the byte cap binds in ~3 days.
+- **Inbound, DECLINED from tutor:** the `js_thread_stall` panel. Tutor blocked its own proposal after
+  proving the metric was measuring backgrounded phones. LD has no equivalent client-side stall metric
+  and should not build one.
+- **Inbound, ACCEPTED as a METHOD (not a panel) from tutor:** *an instrument that has never been
+  validated against a second source is not evidence.* Applied immediately — the 2026-08-02 review
+  attributes three event-loop stalls to the R2 snapshot builder on **timestamp correlation alone**,
+  so the action item is to instrument the builder before changing it, not to "fix" it.
+- **Outbound to house + tutor:** (1) the event-loop stall meter pays off on night one, but only if a
+  panel reads BOTH `max` and `p99` — a p99-only view reads healthy while a user is being dropped;
+  (2) moving a job off the request thread ≠ stopping it from blocking the request thread — both
+  siblings run the ported retention cron with the same single-transaction day rollup and the same 5 s
+  serving-side `shared.db` busy timeout, so the lock still crosses the process boundary.
+- **Already shipped in LD, so no longer inbound-portable:** `server_started` and the per-cron
+  heartbeat row (both house's/tutor's 08-01 borrows FROM LD; LD shipped them 2026-08-02).

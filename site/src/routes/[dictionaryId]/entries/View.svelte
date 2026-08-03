@@ -12,14 +12,25 @@
   import { page } from '$app/state'
   import { browser } from '$app/environment'
   import { log_warning } from '$lib/debug/remote-log'
+  import { dedupe_entries_list } from '$lib/utils/dedupe-entries-list'
 
   interface Props {
     entries: EntryData[]
     page_data: EntriesPageData
   }
 
-  const { entries, page_data }: Props = $props()
+  const { entries: raw_entries, page_data }: Props = $props()
   const { dictionary, can_edit, preferred_table_columns, writes, search_params } = $derived(page_data)
+
+  // One de-dupe before all three keyed views consume the array — a single duplicated
+  // id otherwise throws `each_key_duplicate` and the boundary below catches it, which
+  // renders an EMPTY results area. `dedupe_entries_list` also names the duplicated id.
+  const entries = $derived(dedupe_entries_list({
+    entries: raw_entries ?? [],
+    dict_id: dictionary?.id,
+    view: search_params.value.view ?? 'list',
+    query: search_params.value.query,
+  }))
 
   // Defensive boundary around the results render. A client-local corruption of the
   // local dict.db (or a would-be render recursion) must not white-screen the whole

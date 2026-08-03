@@ -11,6 +11,8 @@ export interface SsrDictionaryRow {
   location: string | null
   coordinates: DictionaryCoordinates | null
   metadata: DictionaryCatalogMetadata | null
+  /** Searched but never displayed — the name someone knows a language by is often not the catalog name. */
+  alternate_names: string[] | null
 }
 
 function parse_json<T>(value: string | null): T | null {
@@ -29,7 +31,7 @@ function parse_json<T>(value: string | null): T | null {
  */
 export function load(_event: PageServerLoadEvent) {
   const rows = get_shared_db()
-    .prepare('SELECT id, url, name, entry_count, iso_639_3, glottocode, location, coordinates, metadata FROM dictionaries WHERE public = 1 ORDER BY name COLLATE NOCASE')
+    .prepare('SELECT id, url, name, entry_count, iso_639_3, glottocode, location, coordinates, metadata, alternate_names FROM dictionaries WHERE public = 1 ORDER BY name COLLATE NOCASE')
     .all() as (Record<string, string | null> & { entry_count: number })[]
 
   const ssr_dictionaries: SsrDictionaryRow[] = rows.map(row => ({
@@ -41,6 +43,7 @@ export function load(_event: PageServerLoadEvent) {
     location: row.location,
     coordinates: parse_json<DictionaryCoordinates>(row.coordinates),
     metadata: parse_json<DictionaryCatalogMetadata>(row.metadata),
+    alternate_names: parse_json<string[]>(row.alternate_names),
   }))
 
   return { ssr_dictionaries }

@@ -79,6 +79,53 @@ terminal_reason })`. Non-obvious pieces, in order of how easily they'd be undone
   "did the rule rescue people?" is answerable. `_gave_up` means the reload did NOT pick up newer code
   (stale SW/CDN) and a real person is stuck behind a toast.
 
+## The ladder also has a FLOOR: bounded × unbounded = unbounded (2026-08-03)
+
+The reload-once rule above handles the class where retrying is *provably* useless. A second class had
+nothing at all: a boot that keeps failing for a reason nobody can classify from the message — every
+one of 2026-08-02's four failures was `sqlite3_open_v2` at stage `opfs_open`, i.e. the OPFS file
+simply refuses to open.
+
+The arithmetic that made it unbounded is the non-obvious part, and it is invisible reading either
+file alone: `boot_retry_decision` bounds attempts **inside one worker** (0→1→2), then the tab resigns
+and `reelect_delay` re-enters the election — and the NEW worker starts the ladder at zero. Bounded
+retries × unbounded re-elections = unbounded. One anonymous iPhone on `tutelo-saponi` wrote **17
+failure rows over nine and a half minutes**, opened a second session and hit the same wall — with
+nothing on screen but an indeterminate progress bar, because `dict-boot-progress.svelte.ts` had
+stages and no failed state.
+
+Four pieces, all in `$lib/db/dict-client/`:
+
+- **`boot-give-up.ts`** — `MAX_BOOT_REELECTIONS` (3) caps the OUTER loop, so the ladder ends in ~15 s
+  instead of never. It also bounds the TELEMETRY (`decide_boot_failure_log`): a repeating failure
+  says nothing new after a few rows, and the rows cost bandwidth on a device already in trouble (one
+  tab once shipped **421** `dict_boot_recovery_exhausted` rows over five hours). Measured after: 12
+  boot attempts → **6 rows** (3 warn + 2 terminal + 1 `dict_boot_gave_up`).
+- **A real failure state** in `dict-boot-progress.svelte.ts` + `routes/DictBootProgress.svelte`,
+  shown even when the progress bar never activated — a warm re-open never emits `snapshot_fetch`,
+  which is the shape every one of these failures had.
+- **`reset-dict-storage.ts`** — destroy the client FIRST (it holds the OPFS sync-access-handle, and a
+  held handle makes `removeEntry` fail), delete the file, reload.
+- **`boot-failure-context.ts`** — `navigator.storage.estimate()` + `persisted()` + visibility on
+  every shipped failure row. "Is this device simply full?" had no answer before; now it is one query.
+
+**The viewer/editor asymmetry is the load-bearing judgement** and it did not change, only widen:
+`poisoned_file_recovery_decision` may silently drop and re-fetch a VIEWER's file (snapshot + server
+pulls, losslessly re-downloadable) but never an EDITOR's, because an unopenable file cannot be probed
+for un-pushed writes — that check lives inside the file. Editors get the same panel plus a warning
+and a `confirm()`; the reset is theirs to authorize, never ours to take.
+
+What DID widen: fresh-file failures (`file_existed === false`) used to be excluded on the reasoning
+that a just-written snapshot cannot be poisoned. That reasoning has a hole — `drop_in_snapshot`
+SWALLOWS a failed write and falls through to an empty DB, so a quota blip or truncated write leaves
+exactly the half-file `sqlite3_open_v2` refuses. Viewers may now replace it too
+(`viewer_replace_fresh`, named separately in telemetry so the branch's usefulness is measurable). The
+once-per-page-session permit — carried across re-elections by `poison_recovery_attempted` — is what
+prevents a refetch loop, NOT the `file_existed` test.
+
+**house's `db-client.ts` still has the unbounded shape** (it is 🔴 divergent in `PARITY.md`, so LD
+taking this first breaks no parity test). Port `boot_reelect_decision` when its boot triage comes up.
+
 ## Main-thread boot is non-blocking (2026-07-07)
 
 The WORKER still awaits the download in the factory (above) — but the **main thread no longer

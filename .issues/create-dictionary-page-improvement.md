@@ -1,12 +1,12 @@
-# /create-dictionary page improvement — DONE, awaiting Jacob's review
+# /create-dictionary page improvement — DONE and live
 
 Driven by the 2026-08-01 SEO/GEO audit: the page is the site's best-converting page (6.80% CTR,
 position 2.2 for "dictionary maker") yet its SSR HTML had 58 chars of own text, no h1, no JSON-LD,
 and was in no sitemap. Goal was primarily to make the page genuinely useful, with the mission
 stated warmly and the conlang handling kept but de-fanged.
 
-**Everything is uncommitted on `main`.** Files touched (only these — the maps refactor,
-monthly-metrics etc. in the working tree are other sessions' work, untouched):
+Files touched (only these — the maps refactor, monthly-metrics etc. were other sessions' work,
+untouched by me):
 
 - `site/src/routes/create-dictionary/+page.svelte` — content + JSON-LD + styles; form logic unchanged
 - `site/src/routes/create-dictionary/_page.stories.ts` — NEW svelte-look stories (Visitor,

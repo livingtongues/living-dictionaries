@@ -1,5 +1,11 @@
 # A duplicate entry id blanks the whole entries results list
 
+> ✅ **FIXED (uncommitted) 2026-08-03** — tracked in `.issues/nightly-fixes-2026-08-03.md` item 3.
+> `$lib/utils/dedupe-entries-list.ts` runs once in `View.svelte` before all three views consume
+> `entries`, and emits `entries_list_duplicate_key { dict_id, dup_id, view, entry_count, query }`.
+> The boundary stays as the backstop. Recurred a second time on 2026-08-02 (`birhor`, list view,
+> 20 entries) before this landed. Delete this file once Jacob commits.
+
 Filed by the nightly log review, 2026-08-01. One anonymous visitor, one dictionary, reproducible
 shape.
 

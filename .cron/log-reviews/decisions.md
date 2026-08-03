@@ -4,6 +4,18 @@ Durable Jacob decisions this lane must honor. **Read this FIRST, before the date
 Maintenance: dated one-liners; add on a durable debrief decision (declines, kill-list items,
 standing baselines); DELETE once shipped or obsolete. Keep it small — standing law, not a log.
 
+- **2026-08-03 — `crossorigin="anonymous"` is a PER-ORIGIN decision, never a blanket one.** The
+  attribute only de-opaques `Script error.` on an origin that actually returns a permissive
+  `Access-Control-Allow-Origin`; on an origin that does not, it turns the load into a CORS request
+  the origin refuses and **the script never loads at all**. Live proof: it was on
+  `accounts.google.com/gsi/client`, which returns NO ACAO — so the Sign In dialog rendered an orphan
+  "OR" divider with no Google button, and every Google user lost that path. REMOVED 2026-08-03
+  (`$lib/auth/load-script-once.ts`, now `{ cors }` opt-in, default off). The standing "de-opaque the
+  external scripts" item (§1.5) survives but is now **one origin at a time, each verified against
+  that origin's real response headers first** (`curl -sI -H 'Origin: https://livingdictionaries.app'
+  <url>`) — "add it everywhere" is the wrong reading and breaks more than it fixes. Checked so far:
+  `accounts.google.com/gsi/client` → no ACAO, must stay off; `kit.fontawesome.com` →
+  `access-control-allow-origin: *`, safe (already on, admin-only `/admin/icon-review`).
 - **2026-07-31 — THE RELOAD-ONCE RULE, approved portfolio-wide and SHIPPED in LD.** *When the missing
   thing is a build artifact the server has DELETED, retrying is provably useless — reload ONCE onto
   the current build instead of retrying N times.* `/_app/immutable/*` is content-hashed, so a 404
@@ -454,3 +466,46 @@ standing baselines); DELETE once shipped or obsolete. Keep it small — standing
   `EntriesTable` + `EntriesGallery` all key on `entry.id`), unlike the entry page's child lists.
   One duplicate id renders the whole results area as NOTHING via the caught boundary.
   `.issues/entries-list-duplicate-key-blank-results.md`.
+- **2026-08-02 — MOVING A JOB OFF THE REQUEST THREAD IS NOT THE SAME AS STOPPING IT FROM BLOCKING THE
+  REQUEST THREAD (standing law, fleet-wide).** The forked retention sweep worked — 115 s of blocking
+  → one 8.3 s stall, 6 proxy resets → 0, 2 user 502s → 1 — but the residual is CROSS-PROCESS: the
+  child's `rollup_day` writes a whole day of `log_daily_metrics` + `log_daily_sessions` in ONE
+  transaction (`log-retention-cron.ts:311` `write_all`, 15.4 s measured) while the serving process
+  opens `shared.db` with `busy_timeout = 5000` (`shared-db.ts:24`) and waits SYNCHRONOUSLY behind it.
+  One signed-in user (`ayook`) got a Cloudflare 502 at 10:31:30 inside that window. **Fix is chunked
+  transactions in the child, NOT a smaller busy timeout on `shared.db`** — unlike logs.db (250 ms,
+  telemetry is droppable), shared.db carries real request-path writes, so a short timeout converts
+  waits into user-visible errors. Add `ionice -c 3` too: `nice` is CPU-only and the two longest steps
+  (`archive_old_logs` 20.6 s, `vacuum_logs_db` 40.0 s) are pure disk. house + tutor run the ported
+  cron with the same single-transaction rollup — broadcast when fixed.
+- **2026-08-02 — the event-loop stall meter paid off on NIGHT ONE, and BOTH statistics are required.**
+  `loop_lag_p99_ms` never exceeded 13 ms all day while `loop_lag_max_ms` hit 8,321 ms once — a p99-only
+  panel would have read "perfectly healthy" during the exact minute a user was dropped. It also exposed
+  a SECOND stall source: three sub-samples containing an `:03`/`:33` tick (6.4 s at 03:04, 0.7 s at
+  07:34, 1.0 s at 14:04) = the half-hourly **R2 snapshot builder**, which emits ZERO telemetry (verified:
+  no `log_server_event` in `r2-snapshot-builder.ts`). ⚠️ That attribution is TIMESTAMP CORRELATION ONLY —
+  per tutor's 2026-08-01 validation lesson, instrument the builder BEFORE changing it. Nothing on either
+  LD dashboard reads `loop_lag_*` yet (verified: zero occurrences in `log-analytics.ts` + `admin/health`).
+- **2026-08-02 — the 2026-08-01 prediction about `Internal Error` HELD on its first full night.** All 3
+  crash rows carry `origin:"client"` with a `Failed to fetch dynamically imported module` cause. LD does
+  not have an SSR-crash problem; it has a stale-tab-navigation problem. Stop re-triaging these; the only
+  open piece remains COPY on `+error.svelte`.
+- **2026-08-02 — iOS/iPadOS OPFS boot failure is now LD's top USER-FACING fault, with a measured human
+  cost.** An anonymous iPhone (iOS 18.6) on `tutelo-saponi` wrote 17 boot-failure rows + 14
+  `live_query_timeout` over **9.5 minutes** across two sessions, all `sqlite3_open_v2` @ `opfs_open`;
+  `qanjobal` (iOS 15.5, `Failed to parse String to BigInt`), `birhor` (iPadOS) and `werikyana`
+  (leader never elected) hit the same class the same day. TWO distinct gaps, both in
+  `.issues/dict-boot-persistent-opfs-recovery.md`: (a) nothing consumes `dict_boot_recovery_exhausted`,
+  so `dict-boot-progress.svelte.ts` has no failed state and the bar spins forever; (b) the give-up
+  ladder is bounded WITHIN a worker but a re-election restarts it at zero. The reload-once rule
+  correctly declines these — they are storage faults, not deleted build artifacts — so a human-readable
+  failure state is the ONLY remaining lever. Don't re-triage individual devices; fix the two gaps.
+- **2026-08-02 — a guard-log without its de-dupe is half a fix.** `entries_view_render_failed` shipped
+  and fired again on `birhor` (16:24, 20 entries, a DIFFERENT visitor and query from the 08-01
+  occurrence) — a caught `<svelte:boundary>` renders NOTHING, so a second person's search results were
+  blank. The one-line `dedupe_by_id` over `entries` in `View.svelte` never landed.
+  `.issues/entries-list-duplicate-key-blank-results.md` stays open.
+- **2026-08-02 — the share-card disk tier hits its BYTE cap first, in ~3 days.** 2,792 entries of 5,000
+  but 575 MB of 1 GB, +~120 MB/day, `removed: 0` at every sample. R2 is live and answering (212 gets /
+  199 puts / 0 faults), so the first eviction should be invisible — verify `og_card_served source:'r2'`
+  goes non-zero and `og_render_shed` stays near zero rather than treating either as a regression.

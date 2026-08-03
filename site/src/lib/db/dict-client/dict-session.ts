@@ -10,7 +10,9 @@ import { recover_from_stale_bundle } from './stale-bundle-recovery'
 import { create_db_client } from './worker/db-client'
 import { ensure_persistent_storage } from './worker/persistent-storage'
 import { create_dict_worker_connection } from './worker-connection'
-import { end_dict_boot_progress, report_dict_boot_progress } from './dict-boot-progress.svelte'
+import { end_dict_boot_progress, report_dict_boot_failed, report_dict_boot_progress } from './dict-boot-progress.svelte'
+import { decide_boot_failure_log } from './boot-give-up'
+import { collect_boot_failure_context } from './boot-failure-context'
 import { create_dict_live_db } from './dict-live-db.svelte'
 import { DictSyncStatus } from './dict-sync-status.svelte'
 import { mark_snapshot_expired } from './snapshot-expired-tracker'
@@ -100,6 +102,11 @@ export async function open_dict(options: OpenDictOptions): Promise<DictConnectio
   let cached = globals.__ld_dict_clients[dict_id]
   if (!cached) {
     let recovery_exhausted = false
+    // PAGE-SESSION telemetry bound (`./boot-give-up.ts`). One tab once shipped 421
+    // `dict_boot_recovery_exhausted` rows over five hours; a repeating failure says
+    // nothing new after the first few, and the rows cost the bandwidth of a device
+    // that is already in trouble.
+    const boot_log_counts = { warns: 0, terminals: 0 }
     const client = create_db_client({
       instance_options: { dict_id, has_editor_role: options.has_editor_role, auth: options.auth, session_id: get_session_id() || null },
       // Worker-internal boot failures never reach the main-thread console.error
@@ -113,7 +120,7 @@ export async function open_dict(options: OpenDictOptions): Promise<DictConnectio
         message,
         online: typeof navigator === 'undefined' || navigator.onLine !== false,
       }),
-      on_boot_failed: ({ message, last_stage, attempt, will_retry, terminal_reason }) => {
+      on_boot_failed: async ({ message, last_stage, attempt, will_retry, will_reelect = true, reelect_attempt = 0, terminal_reason }) => {
         if (terminal_reason) {
           // `recover_from_stale_bundle` emits the single terminal row for this
           // outcome (reloaded / deferred / gave_up); a `dict_boot_recovery_exhausted`
@@ -123,10 +130,27 @@ export async function open_dict(options: OpenDictOptions): Promise<DictConnectio
         }
         if (!will_retry)
           recovery_exhausted = true
+        const gave_up = !will_retry && !will_reelect
+        if (gave_up) {
+          // The ladder is spent. STOP watching a bar that will never finish — say so,
+          // and offer the one action that can help (`routes/DictBootProgress.svelte`).
+          report_dict_boot_failed({ dict_id, boot_message: message, last_stage: last_stage ?? null, has_editor_role: options.has_editor_role })
+        }
+        const { emit, message: event_message } = decide_boot_failure_log({ will_retry, gave_up, counts: boot_log_counts })
+        if (!emit)
+          return
+        if (will_retry)
+          boot_log_counts.warns++
+        else
+          boot_log_counts.terminals++
+        // Storage + visibility are collected ONLY on the rows we actually ship, so
+        // the bound above also bounds this work. `estimate()` answers the question
+        // last night's four failures could not: is this device simply full?
+        const failure_context = await collect_boot_failure_context()
         log_event({
           level: will_retry ? 'warn' : 'error',
-          message: will_retry ? 'leader_boot_failed' : 'dict_boot_recovery_exhausted',
-          context: { dict_id, boot_message: message, last_stage, attempt, will_retry },
+          message: event_message,
+          context: { dict_id, boot_message: message, last_stage, attempt, will_retry, will_reelect, reelect_attempt, ...failure_context },
         })
       },
       // Feed the boot download progress bar (root-layout `DictBootProgress`). Only
@@ -161,6 +185,21 @@ export async function open_dict(options: OpenDictOptions): Promise<DictConnectio
   // boot bar + editor set_role are handled by the `on_ready` callback above (and
   // for an already-cached client the `set_role` above / below covers it).
   return create_dict_worker_connection({ client: cached.client, dict_id })
+}
+
+/**
+ * Tear down this tab's DB client for one dictionary: terminates the leader worker
+ * (releasing the OPFS sync-access-handle) and resigns the election. Used by
+ * `reset-dict-storage.ts` — a held handle makes the file undeletable — and always
+ * followed by a reload, so the session registry is left for the fresh page.
+ */
+export function destroy_dict_client(dict_id: string): void {
+  const globals = globalThis as DictClientGlobals
+  const cached = globals.__ld_dict_clients?.[dict_id]
+  if (!cached)
+    return
+  cached.client.destroy()
+  delete globals.__ld_dict_clients[dict_id]
 }
 
 export interface DictSession {
