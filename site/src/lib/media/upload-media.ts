@@ -3,6 +3,7 @@ import type { Readable } from 'svelte/store'
 import type { PhotoUploadResponseBody } from '../../routes/api/photo-upload/+server'
 import type { PhotoExif } from './photo-coords'
 import { api_upload } from '$api/upload/_call'
+import { api_audio_generate_derivative } from '$api/audio/generate-derivative/_call'
 import { log_event } from '$lib/debug/remote-log'
 import { prepare_image_upload } from './prepare-image-upload'
 import { probe_media_duration_ms } from './probe-duration'
@@ -39,12 +40,13 @@ export interface MediaUploadHandle {
  * (the server stores the original, responds fast, and generates WebP variants
  * after the response). Rendering derives URLs from `storage_path`.
  */
-export function upload_media({ file, dictionary_id, kind, media_id }: {
+export function upload_media({ file, dictionary_id, kind, media_id, trim_audio = false }: {
   file: File | Blob
   dictionary_id: string
   kind: MediaKind
   /** the pre-minted media row uuid — the R2 object key is built from it */
   media_id: string
+  trim_audio?: boolean
 }): MediaUploadHandle {
   const preview_url = kind === 'image' ? URL.createObjectURL(file) : undefined
   const { set, subscribe } = writable<MediaUploadProgress>({ progress: 0, preview_url })
@@ -97,6 +99,8 @@ export function upload_media({ file, dictionary_id, kind, media_id }: {
     stage = 'upload'
     xhr = new XMLHttpRequest()
     await send_xhr({ xhr, method: 'PUT', url: presigned_upload_url, body: file, content_type: file.type, on_progress })
+    if (kind === 'audio')
+      void api_audio_generate_derivative({ dictionary_id, storage_path: object_key, trim: trim_audio })
     set({ progress: 100, preview_url })
     return { storage_path: object_key }
   }

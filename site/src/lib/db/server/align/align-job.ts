@@ -13,6 +13,7 @@ import { PRIMARY_ORTHOGRAPHY_CODE } from '$lib/db/schemas/shared.types'
 import { encode_token_spans, unpack_timing_string } from '$lib/media/media-timings'
 import { dev_media_dir } from '$lib/server/dev-media-dir'
 import { log_server_event } from '$lib/server/log-server-event'
+import { store_audio_derivative_in_background } from '$lib/server/audio-derivative'
 import { is_r2_media_path } from '$lib/utils/media-path'
 import { get_dictionary_db } from '../dictionary-db'
 import { get_dictionary_history_db } from '../dictionary-history-db'
@@ -288,6 +289,7 @@ async function execute_align_job({ job, derived, storage_path, user_id }: {
     if (!result.found)
       throw new Error('audio no longer linked to target')
     mirror_dictionary_cursor({ dict_id: job.dictionary_id, cursor: result.new_synced_up_to })
+    store_audio_derivative_in_background({ original_key: storage_path, trim: false })
 
     shared.prepare(`UPDATE align_jobs SET status = 'done', finished_at = ? WHERE id = ?`).run(new Date().toISOString(), job.id)
     log_server_event({ level: 'info', message: 'align_job_done', user_id, context: { dictionary_id: job.dictionary_id, job_id: job.id, target_kind: job.target_kind, target_id: job.target_id, tokens_total: job.tokens_total, tokens_aligned: job.tokens_aligned } })

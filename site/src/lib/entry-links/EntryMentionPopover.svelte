@@ -3,7 +3,7 @@
   import { page } from '$app/state'
   import Popover from '$lib/components/ui/Popover.svelte'
   import { get_headword } from '$lib/orthography/orthographies'
-  import { url_from_storage_path } from '$lib/utils/media-url'
+  import { audio_element_from_storage_path } from '$lib/utils/media-url'
   import { play_audio_element } from '$lib/media/play-audio-element'
   import IconMdiArrowRight from '~icons/mdi/arrow-right'
   import IconMdiVolumeHigh from '~icons/mdi/volume-high'
@@ -61,7 +61,7 @@
 
   function play(entry_id: string, storage_path: string) {
     audio_element?.pause()
-    audio_element = new Audio(url_from_storage_path(storage_path))
+    audio_element = audio_element_from_storage_path(storage_path)
     const finish = () => { if (playing_id === entry_id) playing_id = null }
     audio_element.onended = finish
     audio_element.onerror = finish

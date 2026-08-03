@@ -9,12 +9,34 @@
 
 import { R2_MEDIA_DOMAIN } from '$lib/constants'
 import type { PhotoVariant } from './media-path'
-import { is_r2_media_path, photo_variant_key } from './media-path'
+import { audio_playback_key, is_r2_media_path, photo_variant_key } from './media-path'
 
 export function url_from_storage_path(path: string): string {
   if (import.meta.env.DEV)
     return `/api/dev-media/${path}`
   return `${R2_MEDIA_DOMAIN}/${path}`
+}
+
+export interface AudioSource { src: string, type?: string }
+
+export function audio_sources(storage_path: string): AudioSource[] {
+  if (!is_r2_media_path(storage_path))
+    return [{ src: url_from_storage_path(storage_path) }]
+  return [
+    { src: url_from_storage_path(audio_playback_key({ original_key: storage_path })), type: 'audio/mpeg' },
+    { src: url_from_storage_path(storage_path) },
+  ]
+}
+
+export function audio_element_from_storage_path(storage_path: string): HTMLAudioElement {
+  const audio = new Audio()
+  for (const source of audio_sources(storage_path)) {
+    const element = document.createElement('source')
+    element.src = source.src
+    if (source.type) element.type = source.type
+    audio.append(element)
+  }
+  return audio
 }
 
 /** The one photo `src` builder every surface should use. */
@@ -67,6 +89,14 @@ if (import.meta.vitest) {
   test('url_from_storage_path: dev routes through the local dev-media store', () => {
     // vitest runs with import.meta.env.DEV === true
     expect(url_from_storage_path('gta/audio/e1/1.mp3')).toBe('/api/dev-media/gta/audio/e1/1.mp3')
+  })
+
+  test(audio_sources, () => {
+    const original = `gta/audio/${uuid}.wav`
+    expect(audio_sources(original)).toEqual([
+      { src: `/api/dev-media/gta/audio/${uuid}_p1.mp3`, type: 'audio/mpeg' },
+      { src: `/api/dev-media/${original}` },
+    ])
   })
 
   const uuid = '48af49b0-b410-4db1-babf-38ac53269e62'

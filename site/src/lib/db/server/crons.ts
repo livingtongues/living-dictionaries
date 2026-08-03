@@ -8,6 +8,7 @@ import { media_sweep_disabled_reason, run_media_sweep } from './media-sweep-cron
 import { run_notification_digest_sweep } from './notification-digest-cron'
 import { r2_snapshot_disabled_reason, run_r2_snapshot_sweep } from './r2-snapshot-builder'
 import { run_wal_checkpoint_sweep } from './wal-checkpoint-cron'
+import { run_audio_derivative_sweep } from './audio-derivative-sweep'
 
 /**
  * THE cron roster — the single source of truth for every background job this
@@ -27,6 +28,12 @@ export function hours(n: number): number { return n * 3_600_000 }
 export function days(n: number): number { return n * 86_400_000 }
 
 export const CRONS: CronDef[] = [
+  {
+    name: 'audio-derivative',
+    description: 'Generate missing audio playback derivatives and repair timing-sensitive clips untrimmed',
+    every_ms: minutes(5),
+    run: run_audio_derivative_sweep,
+  },
   {
     name: 'wal-checkpoint',
     description: 'TRUNCATE-checkpoint shared/logs/archive WALs so they never ratchet up under multi-connection load',

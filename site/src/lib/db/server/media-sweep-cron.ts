@@ -4,7 +4,7 @@ import { get_r2_media, r2_media_is_configured } from '$lib/server/r2-media'
 import { generate_and_store_photo_variants } from '$lib/server/photo-variants'
 import { generate_and_store_video_thumbnail } from '$lib/server/video-thumbnails'
 import { log_server_event } from '$lib/server/log-server-event'
-import { photo_variant_key, PHOTO_VARIANTS } from '$lib/utils/media-path'
+import { audio_playback_key, photo_variant_key, PHOTO_VARIANTS } from '$lib/utils/media-path'
 import { dictionary_db_path } from './dictionary-db'
 import { parse_media_key } from './media-ledger'
 import { run_media_metadata_probe_once } from './media-metadata-probe'
@@ -102,6 +102,8 @@ export function live_keys_for_dict(dict_id: string): LiveKeysResult {
     if (media_type === 'photo') {
       for (const variant of PHOTO_VARIANTS)
         keys.add(photo_variant_key({ original_key: path, variant }))
+    } else if (media_type === 'audio') {
+      keys.add(audio_playback_key({ original_key: path }))
     } else if (media_type === 'video') {
       // Videos derive only a single `_thumb.webp` sibling (no w900/w1600) — keep it
       // in the live set so the orphan sweep never deletes a generated thumbnail.

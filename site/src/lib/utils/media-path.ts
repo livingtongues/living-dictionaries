@@ -46,6 +46,10 @@ export function photo_variant_key({ original_key, variant }: { original_key: str
   return `${original_key.replace(/\.[\w-]{1,10}$/, '')}_${variant}.webp`
 }
 
+export function audio_playback_key({ original_key }: { original_key: string }): string {
+  return `${original_key.replace(/\.[\w-]{1,10}$/, '')}_p1.mp3`
+}
+
 if (import.meta.vitest) {
   const uuid = '48af49b0-b410-4db1-babf-38ac53269e62'
 
@@ -82,6 +86,10 @@ if (import.meta.vitest) {
       .toBe(`gta/photo/${uuid}_thumb.webp`)
     expect(photo_variant_key({ original_key: `gta/photo/${uuid}.x-m4a`, variant: 'w900' }))
       .toBe(`gta/photo/${uuid}_w900.webp`)
+  })
+
+  test(audio_playback_key, () => {
+    expect(audio_playback_key({ original_key: `gta/audio/${uuid}.x-m4a` })).toBe(`gta/audio/${uuid}_p1.mp3`)
   })
 
   test('variant keys never match is_r2_media_path (rows hold originals only)', () => {

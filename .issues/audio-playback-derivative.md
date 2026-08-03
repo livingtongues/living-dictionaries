@@ -1,10 +1,13 @@
 # Audio playback derivative — compressed copy for playback, original preserved for research
 
-**Status:** PLANNING (measurement done, no code written, nothing shipped).
+**Status:** PLAN AGREED — all six decisions locked with Jacob 2026-08-03. **No code written, nothing
+shipped.** Ready to implement; §10 is the build order.
 **Origin:** product-journey lane 2026-08-02 → overnight brief item/agenda 10.
-**Listening dashboard:** `/home/jacob/ld-audio/audio-dashboard.html` (11.7 MB, self-contained;
-originals stream from the live CDN, all candidates embedded). Regenerate with
-`/tmp/build_dash.py` + `/tmp/dash_template.html` (scripts described at the bottom).
+**Listening dashboards** (self-contained; originals stream from the live CDN, candidates embedded):
+- round 1, all codecs — `/home/jacob/ld-audio/audio-dashboard.html` (11.7 MB)
+- **round 2, MP3 candidates + the sample-peak ceiling — `/home/jacob/ld-audio/audio-dashboard-mp3.html`** (13.2 MB)
+
+Regenerate with `/tmp/build_dash.py` / `/tmp/build_dash2.py` + `/tmp/dash_template.html`.
 
 Photos get three WebP derivatives. Audio gets none — we serve the raw upload. This issue is the
 measured case for a playback derivative, the processing recipe, and the linguistics guardrails.
@@ -97,51 +100,66 @@ Processing ladder at fixed Opus 32k mono:
 | + 70 Hz high-pass | 716 KB | −17.5 | 8.7 dB | 2.67 s |
 | full gain + true-peak limiter | 727 KB | −16.4 | **4.3 dB** | 2.79 s |
 
-**The mission number:** a Babanki word goes **860 KB → 15 KB**; one screen of 20 words goes
-**17.2 MB → 0.30 MB**. Whole corpus **29.06 GB → 1.12 GB**.
+**The mission number (with the agreed MP3 V6 recipe):** a Babanki word goes **860 KB → 23 KB**;
+one screen of 20 words goes **17.2 MB → 0.45 MB (38×)**; the average word across the platform goes
+**208 KB → 12 KB**. Whole corpus **29.06 GB → 1.70 GB**.
 
-## 4. Recipe as measured (the exact ffmpeg the backfill would run)
+## 4. THE AGREED RECIPE (final — this is what gets built)
 
-Two passes. Pass 1 measures; pass 2 encodes. Pass 1 is ~0.1 s per clip.
+Two ffmpeg passes. Pass 1 measures (~0.1 s per clip); pass 2 encodes.
 
+```bash
+# ── pass 1 — measure, on the mono signal ───────────────────────────────────────
+ffmpeg -i IN -af "aformat=channel_layouts=mono,ebur128=peak=true,\
+astats=measure_perchannel=none:measure_overall=Peak_level+Noise_floor" -f null -
+#   → I  = integrated LUFS
+#   → SP = sample Peak level dBFS      (NOT the ebur128 true peak — see §8a)
+#   → NF = Noise floor dB
+
+gain_db  = min(-16 - I, -1.0 - SP)                      # one constant multiplier, never dynamics
+trim_thr = clamp(min(NF + 6, I - 20), -70, -30)         # adaptive, never a fixed dB
+
+# ── pass 2 — encode ───────────────────────────────────────────────────────────
+ffmpeg -i IN -af "aformat=channel_layouts=mono,volume={gain_db}dB,\
+silenceremove=start_periods=1:start_duration=0:start_threshold={trim_thr}dB:start_silence=0.08:detection=rms,\
+areverse,\
+silenceremove=start_periods=1:start_duration=0:start_threshold={trim_thr}dB:start_silence=0.12:detection=rms,\
+areverse" \
+  -c:a libmp3lame -q:a 6 -ar 32000 OUT.mp3
 ```
-# pass 1 — measure on the mono signal
-ffmpeg -i IN -af "aformat=channel_layouts=mono,ebur128=peak=true,astats=measure_perchannel=none:measure_overall=Noise_floor" -f null -
-   → I (integrated LUFS), Peak (true peak dBTP), Noise floor dB
 
-gain_db   = min(-16 - I, -1.0 - true_peak)          # linear, never exceeds the peak ceiling
-trim_thr  = clamp(min(noise_floor + 6, I - 20), -70, -30)
-
-# pass 2 — encode
-ffmpeg -i IN -af "aformat=channel_layouts=mono,volume={gain}dB,\
-silenceremove=start_periods=1:start_duration=0:start_threshold={thr}dB:start_silence=0.08:detection=rms,\
-areverse,silenceremove=…:start_silence=0.12:detection=rms,areverse" \
-  -c:a libopus -b:a 32k -vbr on -application audio -ar 48000 OUT.opus
-```
+**Skip the two `silenceremove` stages entirely when the `audio` row has `timings`, or is
+`sentence_id`/`text_id` audio** — trimming would desync karaoke (§6). Everything else still applies
+to those clips.
 
 Why each knob:
-- `min(…)` on the gain means a **single constant multiplier**, never dynamics. Cost: hot/clipped
-  sources land at −17…−23 LUFS instead of −16, which is why the residual spread is 8.5 dB not 0.
-- `detection=rms` + noise-floor-relative threshold, never a fixed dB, or kayan-baram trims nothing
-  and a whisper-quiet birhor clip loses its onset.
-- 80 ms lead pad is deliberately generous: it protects the onset of quiet consonants (implosives,
-  prenasalised stops, breathy/creaky onsets) and the pitch trajectory at word start.
-- `-application audio`, **not** `voip`: VoIP mode applies speech-specific processing that is exactly
-  what you do not want on tone, creak, breath and ideophones. Same file size either way (measured
-  736 KB vs 716 KB over 60 files) — so there is no reason to take the risk.
+- **`-q:a 6` (VBR ~45 kbps) at 32 kHz mono** — 30 % smaller than CBR 64 kbps because bits follow the
+  speech instead of being spent evenly on silence. 32 kHz keeps a 16 kHz Nyquist, far above the
+  4–12 kHz band where /s/ vs /ʃ/ contrast lives; 22.05 kHz would start to dull sibilants and is
+  rejected. libmp3lame writes a Xing header by default, so VBR duration and seeking are correct.
+- **`min(…)` on the gain** = a single constant multiplier, never dynamics. Constrained on **sample
+  peak**, not true peak — the correction in §8a, worth 0.8 dB of median level for free.
+- **`detection=rms` with a noise-floor-relative threshold**, never a fixed dB: a fixed −50 dB trims
+  0 % on kayan-baram (room tone sits above it) and would eat the onset of a quiet birhor clip.
+- **80 ms lead pad** is deliberately generous — it protects the onset of quiet consonants
+  (implosives, prenasalised stops, breathy/creaky onsets) and the pitch trajectory at word start.
+- **No high-pass, no limiter, no noise reduction.** Decided in §8.
+
+Measured result over the 60-file sample: **1.11 MB total (29× smaller), median −16.0 LUFS,
+loudness spread 39.3 dB → 6.1 dB, median length 3.16 s → 2.74 s.**
 
 ## 5. Linguistics risk — what is safe and what is not
 
 | step | verdict | reasoning |
 |---|---|---|
 | **Mono downmix** | ✅ safe | channels are bit-identical in the corpus; where they are not, the difference is at/below the noise floor. Never a linguistic signal. |
-| **48 kHz resample** | ✅ safe for playback | 24 kHz Nyquist keeps every phonetic band including fricative energy. (96 kHz sources lose ultrasonic content that no phonetic analysis of these recordings uses — and the **original is untouched**.) |
+| **32 kHz resample** | ✅ safe for playback | 16 kHz Nyquist keeps every phonetic band that carries contrast, including sibilant energy (4–12 kHz). 44.1/48/96 kHz sources lose only content above 16 kHz, which no analysis of these recordings uses — and the **original is untouched**. |
 | **Constant (linear) gain** | ✅ safe | multiplies every sample by one number. **All within-clip relative amplitude, stress, prosody, declination and intensity contours survive exactly.** Only the arbitrary recording-gain offset changes. |
 | **Adaptive silence trim with pad** | ⚠️ mostly safe, flagged | removes room tone, not speech, at noise floor + 6 dB with 80/120 ms pads. Risk is real but small: a very quiet aspirated release or a breathy offset could sit within 6 dB of the floor. **This is the one step I'd want you to spot-check by ear** — the dashboard's "sort by most silence trimmed" view is built for exactly that. |
 | **70 Hz high-pass** | ⚠️ arguable | removes handling rumble/HVAC. 70 Hz is below male modal F0 (typically 85–180 Hz) so tone survives, but it does touch the very bottom of the spectrum and would alter any analysis of subglottal/creak energy. Optional, and it bought **0 bytes** in the measurement. |
-| **True-peak limiter to hit −16 exactly** | ❌ scholarly-lossy | this is dynamic range compression. It changes relative amplitude *within* the clip — the exact thing prosody and stress live in. It halves the residual loudness spread (8.5 → 4.3 dB), which is a real listening win, so it is your call, but it is the one step I would not do silently. |
+| **Limiter to hit −16 exactly** | ❌ REJECTED | dynamic range compression. Measured (delay-aligned against pure gain): `alimiter` moves **8 % of samples by >0.5 dB and 3 % by >3 dB** — syllable-scale gain movement on real speech, which is exactly where prosody and stress live. It would buy 2.3 dB of extra loudness consistency. Not worth it; the sample-peak ceiling (§8a) recovers most of that for free. |
 | **Noise reduction (afftdn/arnndn)** | ❌ not recommended | spectral subtraction eats breathiness, creaky voice and low-amplitude fricatives — the phonation-quality cues that are often the *point* of the recording. Not proposed. |
-| **Lossy codec at all** | ⚠️ inherent | Opus at 32 kbps is a perceptual codec: it discards what a human ear will not notice, which is not the same as what a spectrogram will not notice. **Nobody should ever measure F0, formants or VOT from the derivative.** That is why the original stays canonical and reachable. |
+| **Lossy codec at all** | ⚠️ inherent | MP3 at ~45 kbps is a perceptual codec: it discards what a human ear will not notice, which is not the same as what a spectrogram will not notice. **Nobody should ever measure F0, formants or VOT from the derivative.** That is why the original stays canonical and reachable. |
 
 **The invariant:** the original is never modified, never replaced, never deleted, and stays the
 thing the download link, the CSV export, `/api/v1`, the waveform editor, and forced alignment use.
@@ -154,28 +172,27 @@ Edge 4.1 %, Chrome-iOS 3.8 %, Firefox 2.9 %, Opera 2.1 %, Samsung 1.1 %. By plat
 Android 10 22 %, iOS 18 15 %, macOS 11 %, Linux 10 %, iOS 26 6 %, Android 6 5 %, iOS 17/11 1.2 %.
 Countries: US 47 %, IN 6.1 %, MX 4.7 %, CN 4.5 %, MY 3.5 %, then GB/FR/IT/BR/CO.
 
-**Ogg Opus is only supported in Safari 18.4+.** ~22 % of real sessions are Apple, and a slice of
-those predate 18.4. So a single Opus derivative would silence some iPhones.
-
-Proposed: **two derivatives + native `<source>` fallback**, no JS capability sniffing, no schema
-column:
+**Ogg Opus is only supported in Safari 18.4+**, and ~22 % of real sessions are Apple — one reason
+Opus was rejected. MP3 plays in every browser in that table, at every version, with no capability
+check. **One derivative, universal.**
 
 ```html
 <audio>
-  <source src="…/{uuid}_p1.opus" type="audio/ogg; codecs=opus">
-  <source src="…/{uuid}_p1.mp3"  type="audio/mpeg">
-  <source src="…/{uuid}.wav">            <!-- original: also the "not generated yet" fallback -->
+  <source src="…/{uuid}_p1.mp3" type="audio/mpeg">
+  <source src="…/{uuid}.wav">            <!-- original: the "not generated yet" fallback -->
 </audio>
 ```
-The `<source>` list falls through on **both** an unsupported type and a 404, so it doubles as the
-"derivative doesn't exist yet" path — legacy clips work from day one with zero backfill, and no
-client needs to know whether generation has run.
+The `<source>` list falls through on both an unsupported type and a **404**, so it doubles as the
+"derivative doesn't exist yet" path — legacy clips work from day one with zero backfill dependency,
+and no client needs to know whether generation has run. `AudioPlayer.svelte` currently sets a single
+`src`, and four call sites use bare `new Audio(url)`; both need a small
+`audio_sources(storage_path)` helper that builds the ordered list.
 
 `_p1` is a **recipe version** in the key (photos have no equivalent and would need a bucket-wide
 purge if their recipe changed). Bumping to `_p2` invalidates nothing cached and lets the sweep
 delete `_p1` orphans on its normal schedule.
 
-Combined storage: Opus 1.12 GB + MP3 2.33 GB = **3.45 GB on top of 29.06 GB (+12 %)**.
+Storage: **+1.70 GB on top of 29.06 GB (+5.9 %)**.
 
 Call sites that must move to the derivative: `AudioPlayer.svelte`, `WordCards.svelte`,
 `FeaturedEntryFullscreen.svelte`, `EntryMentionPopover.svelte`, `admin/featured-words`.
@@ -195,38 +212,119 @@ sends bytes straight to R2 (photos are the opposite — they POST bytes to `/api
 is why photo variants are trivially in-process). So the derivative cannot be made "at upload" the
 way photos are.
 
-Three places it can happen, and I think we want all three:
+Worse: there is **no server callback after the PUT at all** today. `upload_media()` resolves with
+the object key and the client writes the `audio` row into its own wa-sqlite DB, which reaches the
+server later through `/changes`. "Automatic after upload" has to be built. All four pieces:
 
-1. **Post-upload trigger** — after the client's PUT succeeds it already calls back to record the
-   row; that call fires a background job that GETs the object from R2, transcodes, PUTs both
-   derivatives, and records them in `media_objects`. Same fire-and-forget shape as
-   `store_photo_variants_in_background`. ffmpeg 8.1.2 **is already in the production container**
-   (video thumbnails use it).
-2. **Weekly media reconcile** — the existing sweep already "repairs missing derivatives" for
-   photos; audio joins the same live-key set so a crashed job or a failed transcode self-heals, and
-   `_p1` orphans get swept when the recipe version bumps.
-3. **One-off backfill** for the existing 146,619 files.
+1. **Fast path — an explicit ping.** After the PUT resolves in `upload_media()`, POST the object key
+   to a small endpoint that fires the transcode fire-and-forget — the exact shape of
+   `store_photo_variants_in_background`. Derivative exists a second or two after upload. ffmpeg
+   8.1.2 **is already in the production container** (video thumbnails use it).
+2. **Backstop — a cheap short-interval sweep, NOT the weekly reconcile.** `media_objects` is already
+   seeded with the audio key at presign time, so "audio objects older than 60 s with no `_p1.mp3`
+   sibling row" is a plain indexed SQL query — no R2 listing, no I/O. Run it every few minutes. It
+   covers a closed tab, a failed ping, and a transcode that threw.
+3. **Weekly media reconcile** keeps owning orphan cleanup and `_p1` → `_p2` recipe-version sweeping;
+   audio derivatives join its live-key set so the orphan pass never deletes them.
+4. **One-off backfill** for the existing 146,619 files.
 
 **Backfill cost, measured:** the two-pass recipe runs ~0.12 s wall per clip with 2-way parallelism
-on a 2-core box (measured: 20 files × 13 ffmpeg invocations = 15.2 s). For both derivatives that is
-roughly **5–7 hours of one 2-core box**, plus 29 GB of R2 GET (egress to our own compute is free)
-and ~3.5 GB of PUT. The `living` VPS is 2 cores / 8 GB and is also serving the site — this should
-run **on mustang**, streaming each object, never staging the corpus on disk (mustang has 26 GB
-free). Order it worst-first (sengwer, babanki, werikyana, sibe, biyo, kihehe, kayan-baram,
+on a 2-core box (measured: 20 files × 13 ffmpeg invocations = 15.2 s). For the single MP3 derivative
+that is roughly **4–6 hours of one 2-core box**, plus 29 GB of R2 GET (egress to our own compute is
+free) and 1.7 GB of PUT. The `living` VPS is 2 cores / 8 GB and is also serving the site — this
+should run **on mustang**, streaming each object, never staging the corpus on disk (mustang has
+26 GB free). Order it worst-first (sengwer, babanki, werikyana, sibe, biyo, kihehe, kayan-baram,
 tla-wilano) so the biggest wins land in the first hour.
 
-Prod-safety: backfill writes only NEW keys (`_p1.*`) and NEW `media_objects` rows. It never touches
-an original, never writes a dict DB, and is fully re-runnable.
+Prod-safety: backfill writes only NEW keys (`_p1.mp3`) and NEW `media_objects` rows. It never
+touches an original, never writes a dict DB, and is fully re-runnable.
 
-## 8. Open decisions (asked in chat, one at a time)
+## 8. Decisions — round 1 (Jacob, 2026-08-03)
 
-1. Codec + bitrate for the derivative → recommend **Opus 32 kbps mono, `-application audio`**, with
-   an MP3 64 kbps mono companion for Safari < 18.4.
-2. Loudness target and method → recommend **−16 LUFS via peak-capped linear gain** (no limiter).
-3. Silence trim → recommend **yes, adaptive threshold, 80/120 ms pads, entry audio only**.
-4. High-pass → recommend **no** (zero byte saving, non-zero scholarly cost).
-5. Fallback strategy → recommend **dual derivative + `<source>` chain**.
-6. Pipeline → recommend **post-upload background job + reconcile repair + one-off mustang backfill**.
+| # | decision | outcome |
+|---|---|---|
+| 1 | codec | **MP3 mono only.** Opus rejected: fewer moving parts, one file, works everywhere. |
+| 2 | fallback | **`<source>` chain: MP3 derivative → original.** No second codec. |
+| 3 | loudness | **−16 LUFS, linear gain, no limiter** — but see the ceiling correction below. |
+| 4 | trim | **Yes** — adaptive threshold, 80/120 ms pads, entry-word audio only. |
+| 5 | high-pass | **No.** |
+| 6 | pipeline | **Post-upload trigger + sweep backstop + one-off mustang backfill.** |
+
+### 8a. Ceiling correction — true peak → SAMPLE peak (the real answer to "is the limiter better?")
+
+Round 1's gain cap used **true peak** at −1.0 dBTP. Measured consequence: **43 of 60 files never
+reached −16** (median 2.4 dB short, worst 6.9 dB). Investigating why:
+
+- The cap is set by **isolated sub-millisecond spikes**. Across all 43 capped files, only
+  **0.0715 % of samples** exceed −1 dBFS at full gain, and the **longest continuous overshoot is
+  0.8 ms** (median 0.2 ms). Prosody lives at 50–500 ms. That is not prosody, it is waveform peaks.
+- **6 of 60 originals already peak at ≥ −0.2 dBFS** — clipped at source. True-peak measurement
+  inflates on an already-clipped file (inter-sample reconstruction overshoots the pinned samples),
+  so a true-peak ceiling forces several dB of pointless attenuation to protect audio that was
+  already damaged before we saw it.
+- Meanwhile ffmpeg's `alimiter` is a **smoothing** limiter, not a peak shaver. Measured against the
+  pure-gain signal (delay-aligned): `attack=1 release=10` moves **8.0 % of samples by >0.5 dB and
+  3.1 % by >3 dB**; `attack=5 release=50` moves 10.6 % / 3.6 %. That IS syllable-scale gain
+  movement — real dynamics processing on real speech.
+
+**Therefore: keep linear gain, but constrain on SAMPLE peak at −1.0 dBFS, not true peak.**
+
+| ceiling rule | files capped | median shortfall | worst |
+|---|---:|---:|---:|
+| true peak, −1.0 dBTP (round 1) | 43 / 60 | −2.4 dB | −6.9 dB |
+| true peak, −0.5 dBTP | 38 / 60 | −2.3 dB | −6.4 dB |
+| **sample peak, −1.0 dBFS** | **19 / 60** | **−1.6 dB** | −4.9 dB |
+| sample peak, −0.3 dBFS | 14 / 60 | −1.2 dB | −4.2 dB |
+
+Result on the corpus sample: median lands at **−16.4 LUFS, spread 6.1 dB** (was 8.5 dB), with zero
+dynamics processing. The limiter would give 3.8 dB — the remaining 2.3 dB is what dynamics
+processing buys, and it is not worth it.
+
+Final gain rule: `gain_db = min(-16 - I, -1.0 - sample_peak_dBFS)`.
+
+### 8b. MP3 encoder ladder — measured, same recipe, only the encoder differs
+
+| MP3 option | total | shrink | avg/word | whole corpus | median LUFS |
+|---|---:|---:|---:|---:|---:|
+| VBR **V7** / 32 kHz | 965 KB | 33× | 16 KB | 1.55 GB | −16.0 |
+| **VBR V6 / 32 kHz** ★ | **1.06 MB** | **29×** | **18 KB** | **1.74 GB** | −16.0 |
+| CBR 48k / 32 kHz | 1.14 MB | 27× | 20 KB | 1.88 GB | −16.4 |
+| CBR 56k / 32 kHz | 1.40 MB | 23× | 25 KB | 2.19 GB | −16.4 |
+| CBR 64k / 44.1 kHz | 1.51 MB | 20× | 26 KB | 2.49 GB | −16.4 |
+| VBR V5 / 44.1 kHz | 1.52 MB | 21× | 27 KB | 2.38 GB | −16.0 |
+| CBR 80k / 44.1 kHz | 1.89 MB | 16× | 32 KB | 3.11 GB | −16.5 |
+
+**VBR V6 at 32 kHz is 30 % smaller than CBR 64k** and spends its bits where the speech is. 32 kHz
+keeps a 16 kHz Nyquist — well above the 4–12 kHz where sibilant contrast lives; 22.05 kHz would
+start to dull /s/ vs /ʃ/ and is not proposed. libmp3lame writes a Xing header by default so VBR
+seeking and duration reporting are correct.
+
+### 8c. Pipeline trigger — answering "cron, or automatic after upload?"
+
+Today there is **no server callback after the presigned PUT**: `upload_media()` resolves with the
+object key and the client writes the `audio` row into its own wa-sqlite DB, which reaches the server
+later through `/changes`. So "automatic after upload" has to be built. Proposed, both halves:
+
+1. **Fast path — an explicit ping.** After the PUT resolves in `upload_media()`, POST the object key
+   to a small endpoint that fires the transcode fire-and-forget (the exact shape of
+   `store_photo_variants_in_background`). Derivative exists within a second or two of the upload.
+2. **Backstop — a cheap short-interval sweep, not the weekly reconcile.** `media_objects` is already
+   seeded with the audio key at presign time, so "audio objects older than 60 s with no `_p1.mp3`
+   sibling row" is a plain indexed SQL query — no R2 listing, no I/O. Run it every few minutes. This
+   covers a closed tab, a failed ping, and a transcode that threw.
+
+The weekly reconcile still owns orphan cleanup and recipe-version (`_p1` → `_p2`) sweeping.
+
+Until a derivative exists the `<source>` chain silently serves the original, so nothing is ever
+broken by a missing or late derivative.
+
+### 8d. Round 2 (Jacob, 2026-08-03) — encoder setting
+
+**VBR V6 at 32 kHz mono** (`-c:a libmp3lame -q:a 6 -ar 32000`). 30 % smaller than the CBR 64 kbps
+first picked, same perceived quality, bits follow the speech. Recipe in §4 is now final.
+
+Nothing is open. Remaining risk to retire by ear, not by decision: spot-check the most heavily
+trimmed clips (biyo −70 %, orich −60 %) in the round-2 dashboard before the backfill runs.
 
 ## 9. Reproducing the measurements
 
@@ -234,7 +332,150 @@ an original, never writes a dict DB, and is fully re-runnable.
 - `/tmp/encode2.sh` — measure + encode all candidates for one file.
 - `/tmp/enc3.sh` — the `-application audio` variants.
 - `/tmp/lm.sh` — per-output size / integrated loudness / duration.
-- `/tmp/build_dash.py` + `/tmp/dash_template.html` → `/home/jacob/ld-audio/audio-dashboard.html`.
+- `/tmp/build_dash.py` / `/tmp/build_dash2.py` + `/tmp/dash_template.html` → the two dashboards.
+- `/tmp/mp3lad.sh` + `/tmp/mp3extra.sh` — the MP3 ladder with the final sample-peak gain rule.
+- `/tmp/limtest2.py` — the delay-aligned limiter deviation measurement behind §8a.
 - Prod queries ran through `ssh living 'docker exec -i sveltekit_blue node' < script.js`.
 
-**Nothing in this issue has been implemented. No repo files were changed.**
+
+## 9b. Pre-execution audit (2026-08-03, second lane) — constraints the implementation MUST honor
+
+1. **Owner-type is unknowable server-side at trigger time.** `/api/upload` presigns knowing only
+   `{dict, kind, media_id}`; the `audio` row (entry vs `sentence_id`/`text_id`, `timings`) reaches
+   the server LATER via `/changes`. So the post-upload ping must carry a client-supplied
+   `trim: boolean` (the `add_audio` caller knows its owner kind). Trust it — it only shapes a
+   derivative. The backstop sweep, which runs after the row has synced, verifies: if a derivative
+   was trimmed but the row turns out to be text/sentence audio or has `timings`, regenerate
+   untrimmed (same `_p1` key, overwrite).
+2. **Replicate `/tmp/mp3lad.sh` LITERALLY, including its filter order.** The measured/auditioned
+   chain applies `volume` BEFORE `silenceremove`, while `trim_thr` was computed from the PRE-gain
+   noise floor — so on positive-gain (quiet) files the effective trim is conservative by the gain
+   amount. That frame mismatch is what Jacob approved by ear; do NOT "correct" it by offsetting the
+   threshold or reordering filters. Port the script's exact maths (including its NaN/inf fallbacks
+   `I=-20, SP=-1, NF=-70`) into the unit-tested pure functions.
+3. **Concurrency cap.** Fire-and-forget ffmpeg per upload on a 2-core box serving the site needs a
+   small in-process queue (concurrency 1–2, `nice`d). A bulk upload burst must not fork unbounded
+   transcodes; overflow is fine — the backstop sweep catches anything dropped.
+4. **Dev path.** Dev has no R2 — uploads land in the local `/api/dev-media` store. The derivative
+   pipeline must work there too (write `_p1.mp3` into the same dev store) so the §10 e2e can run
+   against the dev server. Skip cleanly (log, don't throw) if ffmpeg is missing locally.
+5. **Future-timings guard.** Today only text audio has `timings`, and text audio is never trimmed.
+   But if alignment ever writes `timings` to a row whose derivative WAS trimmed (future entry-word
+   alignment), karaoke silently desyncs against the derivative. Where `align/*` writes `timings`,
+   add a regenerate-untrimmed hook (or at minimum a guard that flags the mismatch).
+6. **Ledger hygiene.** Derivative `media_objects` rows set `is_variant=1` (+ bytes, duration_ms) so
+   `/admin/storage` stays honest, and the weekly reconcile's live-key set includes `_p1.mp3` keys.
+7. **Rescue the /tmp artifacts.** The measurement/dashboard scripts (§9) live in `/tmp` and will
+   evaporate. Copy what the repo needs (recipe reference, dashboard generator for the §10
+   verification re-run, the 60-key sample TSV) into `scripts/audio-derivative/` before building.
+8. **Scope of execution.** Implement §10 steps 1–8 fully with tests; write the backfill script and
+   smoke-test it against a small slice (~20 files, one worst dictionary — prod-safe: new keys only,
+   re-runnable). Do NOT run the full 146k-file backfill and do NOT commit — Jacob reviews first.
+
+## 10. Build order
+
+1. ✅ `$lib/server/audio-derivative.ts` — the §4 recipe: measure pass, gain/threshold maths, encode
+   pass, `store_media_bytes` + `record_media_object_by_key`, plus
+   `store_audio_derivative_in_background()`. Unit-test the maths (gain cap, adaptive threshold,
+   the timings/text skip) against fixtures; they are pure functions.
+2. ✅ `audio_playback_key({ original_key })` in `$lib/utils/media-path.ts` next to `photo_variant_key`,
+   → `{dict}/audio/{uuid}_p1.mp3`. Pure, unit-tested.
+3. ✅ `audio_sources(storage_path)` in `$lib/utils/media-url.ts` → ordered `[{src,type}]`.
+   Then `AudioPlayer.svelte` renders `<source>` children instead of `src=`, and the four
+   `new Audio(url)` call sites (`WordCards`, `FeaturedEntryFullscreen`, `EntryMentionPopover`,
+   `admin/featured-words`) build the element with sources. **Do not touch** `EditAudio`,
+   `AttachAudioModal`, `TimingsEditor`, `align/*`, `entry-csv.ts`, or the v1 media redirect.
+4. ✅ Post-upload ping endpoint + the `upload_media()` call after the PUT resolves.
+5. ✅ The few-minute backstop sweep (indexed SQL over `media_objects`, no R2 listing).
+6. ✅ Weekly reconcile: add audio derivatives to the live-key set + repair pass.
+7. ✅ `scripts/` backfill, worst-dictionary-first, resumable, run on mustang.
+8. ✅ **Update AGENTS.md** — its media paragraph says photos get variants and audio does not; that
+   stops being true at step 3.
+
+Verification: unit tests on the pure maths; a dev-server e2e that plays a word and asserts the
+served bytes are the `_p1.mp3`; and a re-run of the round-2 dashboard generator against a handful
+of freshly backfilled production keys to confirm the shipped pipeline reproduces the numbers in
+§8b.
+
+**Execution completed below; all work remains uncommitted for review.**
+
+## Execution report
+
+Implemented 2026-08-03 on mustang, uncommitted.
+
+### Built
+
+- Added the literal measured MP3 V6 / 32 kHz / mono recipe in
+  `site/src/lib/server/audio-derivative.ts`, including the approved pre-gain
+  threshold/filter-order quirk, NaN/inf fallbacks, timings/owner trim guard,
+  `nice -n 19`, a two-worker/40-pending in-process queue, dev-media support,
+  `_p1.mp3` storage, and `is_variant=1` ledger rows with bytes + duration.
+- Added the authenticated post-PUT ping and the client owner-type trim hint.
+- Added the five-minute SQL-ledger backstop. Missing derivatives are selected
+  with an indexed key join and recent derivatives are rechecked against the
+  synced audio row so a mistakenly trimmed text/sentence/timed clip is
+  overwritten untrimmed. Alignment also directly queues untrimmed regeneration
+  whenever it writes timings.
+- Added `audio_playback_key`, ordered `audio_sources`, `<source>` fallback in
+  `AudioPlayer`, and derivative-aware construction at the four approved bare
+  `Audio` playback sites. Original-only editing/alignment/export/v1 surfaces
+  were not changed.
+- Weekly reconcile now parses `_p1` as a variant and derives it into every live
+  audio key set, preventing false orphaning.
+- Rescued the `/tmp` recipe/sample/dashboard artifacts into
+  `scripts/audio-derivative/`, added a dry-run-by-default/resumable backfill and
+  a separately reviewable ledger apply helper, and updated `AGENTS.md`.
+
+### Verification
+
+- Pure/unit tests: 25 passed across audio maths, media paths/URLs, and media
+  reconcile helpers.
+- `tsc --noEmit`: passed.
+- `pnpm lint`: passed.
+- `pnpm -F site check`: 0 errors (48 pre-existing warnings in 23 files).
+- Dev-server Chromium E2E: authenticated as the dev fixture manager, uploaded
+  a generated WAV, queued the derivative, fetched 4,149 bytes beginning `ID3`,
+  played it, and asserted `HTMLAudioElement.currentSrc` ended in the exact
+  generated `_p1.mp3` key. No page errors.
+- Production smoke only (no full backfill): wrote exactly 20 new Sengwer
+  `_p1.mp3` objects, 1,074,960 bytes / 189,971 ms total, and recorded 20
+  `is_variant=1` ledger rows. Five sampled CDN objects independently probe as
+  MP3, 32,000 Hz, mono with sizes matching the ledger.
+- Re-ran the preserved round-2 dashboard generator (`rows 60`). Discovery: it
+  is hard-coded to its original `/tmp/ld-audio` candidate ladder and therefore
+  cannot ingest CDN `_p1` outputs without rebuilding every local ladder variant;
+  shipped-output reproduction was instead checked directly against five fresh
+  CDN smoke objects with `ffprobe` as recorded above.
+
+### Files / review focus
+
+Code touched: `AGENTS.md`; audio media path/URL/player and four playback
+components; upload/add-media; alignment hook; media ledger/reconcile/cron;
+new derivative generator, backstop, endpoint + `_call`; and
+`scripts/audio-derivative/*`.
+
+Reviewer should scrutinize the ffmpeg stderr parsers, the queue overflow cap,
+the backstop's fixed UUID-key SQL expression, and whether the standalone
+backfill's deliberately separate ledger-apply step is the desired operational
+interface before authorizing the full corpus run. The original objects and
+dictionary DBs were never modified, replaced, or deleted.
+
+### Review corrections
+
+Post-execution review found that the first LUFS parser expected the number at
+the end of the ebur128 summary line, but real ffmpeg appends `LUFS`. That made
+the initial dev E2E and 20-object smoke use the `I=-20` fallback. Corrected both
+the site generator and standalone backfill to parse the first metric token
+after the label (with or without astats' colon), and added a captured-real-stderr
+regression covering `I: -21.8 LUFS`, sample peak, and noise floor. The same 20
+deterministic Sengwer keys were overwritten with corrected encodes and their
+ledger bytes/durations refreshed. A cache-busted CDN probe of the first clip
+measured original `I=-19.5 LUFS`, sample peak `-1.39 dBFS`, and derivative
+`I=-19.1 LUFS`: the expected ~+0.39 dB sample-peak-capped gain.
+
+The review also caught two `<source>` behavior details: the last source now
+owns the terminal error handler, and an `audio_url` change waits for the source
+DOM update then calls `audio.load()` so in-place prop changes rerun resource
+selection. Final rerun: 25 unit tests passed; TypeScript and lint passed;
+Svelte check remained at 0 errors / 48 pre-existing warnings; `git diff --check`
+passed. No commit or push was made.
