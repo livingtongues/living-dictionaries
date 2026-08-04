@@ -7,6 +7,7 @@ import { run_monthly_metrics_announcement } from './monthly-metrics-announce'
 import { media_sweep_disabled_reason, run_media_sweep } from './media-sweep-cron'
 import { run_notification_digest_sweep } from './notification-digest-cron'
 import { r2_snapshot_disabled_reason, run_r2_snapshot_sweep } from './r2-snapshot-builder'
+import { run_sign_in_alarm_sweep } from './sign-in-alarm-cron'
 import { run_wal_checkpoint_sweep } from './wal-checkpoint-cron'
 import { run_audio_derivative_sweep } from './audio-derivative-sweep'
 
@@ -30,9 +31,17 @@ export function days(n: number): number { return n * 86_400_000 }
 export const CRONS: CronDef[] = [
   {
     name: 'audio-derivative',
-    description: 'Generate missing audio playback derivatives and repair timing-sensitive clips untrimmed',
-    every_ms: minutes(5),
-    run: run_audio_derivative_sweep,
+    description: 'Fork the niced daily audio backfill child: convert any playback derivative the upload path missed',
+    // A BACKFILL, not the path. Audio is converted on upload
+    // (`/api/audio/generate-derivative`); this only catches what that missed.
+    // It shipped as a 5-minute IN-PROCESS cron on 2026-08-03 and took the
+    // typical worst 5-minute event-loop stall from 65 ms to 623 ms for a whole
+    // day — a full ledger scan plus up to 160 synchronous DB-file opens per run,
+    // on the thread that answers requests. Now: once a day, in a nice-19 child.
+    // 04:10 PT sits after the 03:30 maintenance child so the two never overlap.
+    every_ms: days(1),
+    at: { hour: 4, minute: 10, tz: 'America/Los_Angeles' },
+    run: async () => { await run_audio_derivative_sweep() },
   },
   {
     name: 'wal-checkpoint',
@@ -99,6 +108,17 @@ export const CRONS: CronDef[] = [
     every_ms: days(1),
     at: { hour: 8, minute: 5, tz: 'America/Los_Angeles' },
     run: run_chat_reping_sweep,
+  },
+  {
+    name: 'sign-in-alarm',
+    description: 'Alarm when a sign-in METHOD produces zero logins for a full day after a live week',
+    // 04:30 PT — after the 03:30 maintenance child has written the day's
+    // analytics checkpoint, which is this cron's only input (a readFileSync; it
+    // runs no queries). Google sign-in was dead for 30 DAYS and nothing noticed:
+    // a broken integration produces FEWER log rows, not more.
+    every_ms: days(1),
+    at: { hour: 4, minute: 30, tz: 'America/Los_Angeles' },
+    run: run_sign_in_alarm_sweep,
   },
   {
     name: 'cron-heartbeat',

@@ -155,23 +155,23 @@
 
   // use via https://svelte.dev/tutorial/component-this
   export function fit_bounds(bbox: LngLatBoundsLike, data = {}) {
-    queue.send('fitBounds', [bbox, data])
+    queue.send({ command: 'fitBounds', params: [bbox, data] })
   }
 
   export function fly_to(destination, data = {}) {
-    queue.send('flyTo', [destination, data])
+    queue.send({ command: 'flyTo', params: [destination, data] })
   }
 
   export function resize() {
-    queue.send('resize')
+    queue.send({ command: 'resize' })
   }
 
   export function set_center(coords, data = {}) {
-    queue.send('setCenter', [coords, data])
+    queue.send({ command: 'setCenter', params: [coords, data] })
   }
 
   export function set_zoom(value, data = {}) {
-    queue.send('setZoom', [value, data])
+    queue.send({ command: 'setZoom', params: [value, data] })
   }
 
   export function get_map() {

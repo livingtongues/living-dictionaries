@@ -162,7 +162,18 @@
     "agree_for_non-commercial": "Je conviens que ce travail est non commercial.",
     "source_question": "D’où proviennent les données de ce dictionnaire ? Veuillez préciser si vous avez collecté les données vous-même. Si vous avez utilisé des sources de référence publiées, veuillez les indiquer ici.",
     "use_question": "Qui utilisera ce dictionnaire ? Sera-t-il utilisé dans des projets éducatifs ou médiatiques ?",
-    "conlang_warning": "Si ce dictionnaire concerne une langue construite (ou artificielle) et que vous ne le précisez pas, nous nous réservons le droit de le supprimer."
+    "conlang_warning": "Si ce dictionnaire concerne une langue construite (ou artificielle) et que vous ne le précisez pas, nous nous réservons le droit de le supprimer.",
+    "page_title": "Créez un dictionnaire pour votre langue",
+    "lede_1": "Un dictionnaire vivant est un dictionnaire multimédia gratuit et collaboratif, créé par vous et votre communauté, pour les générations à venir. Nous soutenons les langues menacées, sous-représentées et minoritaires du monde entier.",
+    "lede_2": "Nommez votre langue pour commencer.",
+    "faq_what_q": "Qu'est-ce qu'un dictionnaire vivant ?",
+    "faq_what_a": "Un dictionnaire vivant est un dictionnaire en ligne créé par et pour une communauté linguistique. Chaque entrée peut contenir des enregistrements audio de locuteurs nommés, des photos, des vidéos, des transcriptions phonétiques, des exemples de phrases et des traductions dans plusieurs langues. Vous pouvez importer des listes de mots existantes, exporter vos données à tout moment et travailler avec des contributeurs partout dans le monde.",
+    "faq_who_q": "À qui s'adressent les dictionnaires vivants ?",
+    "faq_who_a": "Notre mission est de soutenir les langues menacées, sous-représentées, peu documentées et minoritaires — des langues vivantes parlées ou signées par de véritables communautés. Les dictionnaires vivants sont menés par des militants communautaires et des linguistes du monde entier : des locuteurs natifs et des aînés qui enregistrent leur voix, des apprenants qui se réapproprient une langue d'héritage, et des chercheurs qui travaillent aux côtés des communautés. Si cela vous ressemble, cet outil a été conçu pour vous.",
+    "faq_need_q": "De quoi avez-vous besoin avant de commencer ?",
+    "faq_need_a": "Simplement le nom de votre langue et un lien avec les personnes qui la parlent. Parce qu'un dictionnaire porte la voix d'une communauté, le formulaire demande si la communauté linguistique a donné son autorisation et comment vous connaissez la langue — pour de nombreuses langues menacées, le consentement et la propriété comptent profondément. Si vous cherchez encore cette autorisation, vous pouvez l'indiquer ; votre dictionnaire démarre en mode privé, et c'est vous qui décidez quand il est prêt à être partagé.",
+    "faq_after_q": "Que se passe-t-il après la création de votre dictionnaire ?",
+    "faq_after_a": "Votre dictionnaire est prêt immédiatement : vous arrivez sur sa page d'entrées et pouvez commencer à ajouter des mots tout de suite, depuis un téléphone ou un ordinateur. En tant que gérant, vous pouvez inviter d'autres gérants et contributeurs, ajouter les locuteurs dont les voix donnent vie aux entrées, configurer des langues de glose et des claviers personnalisés, et décider quand le rendre public. Les dictionnaires publics rejoignent des centaines d'autres sur notre carte du monde, où chacun peut les rechercher."
   },
   "dictionary": {
     "latitude": "Latitude",
@@ -258,7 +269,17 @@
   "error": {
     "run_into_error": "Nous sommes désolés, il y a une erreur.",
     "error_recorded": "L'erreur a été enregistrée et nous allons mener une enquête.",
-    "please_explain": "Veuillez nous envoyer un court message expliquant ce qui s'est passé."
+    "please_explain": "Veuillez nous envoyer un court message expliquant ce qui s'est passé.",
+    "page_not_found": "Cette page n'existe pas",
+    "entry_not_found": "Cette entrée n'existe pas",
+    "not_found_explain": "Elle a peut-être été supprimée, ou le lien est peut-être incomplet.",
+    "page_moved_explain": "Le lien est peut-être incomplet, ou cette page a peut-être été déplacée.",
+    "dictionary_unaffected": "Le reste de {dictionary} n'est pas affecté.",
+    "browse_entries": "Parcourir les entrées",
+    "dictionary_home": "Accueil du dictionnaire",
+    "go_home": "Aller à la page d'accueil",
+    "browse_dictionaries": "Parcourir les dictionnaires",
+    "think_mistake": "Vous pensez qu'il s'agit d'une erreur ?"
   },
   "map": {
     "webgl_unavailable": "La carte interactive ne peut pas se charger car votre navigateur ou votre appareil ne prend pas en charge WebGL."
@@ -285,7 +306,8 @@
     "no_results": "Aucun résultat",
     "open_dictionary": "Ouvrir le dictionnaire",
     "my_dictionaries": "Mes dictionnaires",
-    "read_more": "Lire la suite"
+    "read_more": "Lire la suite",
+    "search_dictionaries": "Rechercher par nom de langue, code ou lieu"
   },
   "misc": {
     "settings": "Configuration",
@@ -332,7 +354,12 @@
     "pause": "Pause",
     "clear": "Effacer",
     "sync_paused_repeated_failure": "Vos modifications ne s'enregistrent pas sur le serveur. La même erreur se répète, la synchronisation est donc en pause. Votre travail est en sécurité sur cet appareil — rechargez la page pour réessayer, et contactez-nous si ce message réapparaît.",
-    "done": "Terminé"
+    "done": "Terminé",
+    "dict_open_failed": "Ce dictionnaire n'a pas pu être ouvert sur cet appareil.",
+    "dict_open_failed_explanation": "Votre navigateur a refusé d'ouvrir la copie hors ligne de ce dictionnaire. Télécharger une nouvelle copie résout généralement le problème.",
+    "dict_open_failed_editor_warning": "Vous pouvez modifier ce dictionnaire. Si cet appareil conserve des modifications qui ne sont jamais parvenues au serveur, un nouveau téléchargement les supprimera — nous ne pouvons pas le vérifier sans ouvrir le fichier. Contactez-nous d'abord si vous pensez avoir du travail non enregistré.",
+    "dict_reset_and_redownload": "Réinitialiser et retélécharger",
+    "dict_reset_confirm": "Supprimer la copie présente sur cet appareil et en télécharger une nouvelle ?"
   },
   "settings": {
     "community_permission": "La communauté linguistique permet-elle à cette langue d'être en ligne ?",
@@ -764,7 +791,8 @@
     "open_sentence": "Ouvrir la phrase",
     "contents": "Sommaire",
     "multiple_entries": "Plusieurs entrées",
-    "back_to_top": "Retour en haut"
+    "back_to_top": "Retour en haut",
+    "standard_abbreviations": "Abréviations standard utilisées ici"
   },
   "discourse": {
     "role": "Rôle discursif",

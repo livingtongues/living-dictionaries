@@ -65,3 +65,7 @@ the stuff you can't learn by reading one file. The data model itself lives in `A
   smart-LD-server split, why romanization + the bespoke per-dict converter registry live server-side
   and admin-only, the two-runtime (Modal prod / local-CPU dev) aligner, the per-token align_form
   cascade, the `auto_align` graduation switch, job/rate-limit mechanics, and deploy/dev gotchas.
+- [heic-photo-uploads.md](./heic-photo-uploads.md) — which decoders can actually read an iPhone HEIC
+  (measured: Safari yes, Chrome no, the server never), the exact transferred size of the wasm decoder
+  chunk and the cheaper option not taken, the four rules that keep it off every non-HEIC upload, and
+  why a correct 415 still cost a contributor eighty minutes.

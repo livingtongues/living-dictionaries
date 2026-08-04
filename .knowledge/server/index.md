@@ -31,3 +31,14 @@ this category is about the runtime.
   naive verification script report a clean loop straight through an 800 ms freeze, and the three
   synchronous stalls measured and moved off the request thread on 2026-08-02.
 - [satori-fonts.md](./satori-fonts.md) — satori's script codes are version-specific AND `|`-joined, its FontLoader is cached by `options.fonts` array identity (so a same-array retry is a no-op and dynamic fonts accumulate), Noto Arabic is unparseable by its bundled opentype fork, colour emoji is not subsettable, and every font failure mode returns 200 with a valid-but-glyphless font. Also: what the 0.0.44 → 0.29 upgrade did and did not change visually.
+- [build-version-stamp.md](./build-version-stamp.md) — why `kit.version.name` must never be a clock
+  (the blank-page-with-HTTP-200 outage), the MEASURED fact that LD's build loads `svelte.config.js`
+  four times across three realms that share a pid but not `globalThis` (SvelteKit's postbuild runs in
+  worker threads), why `NODE_ENV` is the "is this a real build" discriminator, why
+  `GIT_SHA || Date.now()` is a trap under `${GIT_SHA:-}`, and what changed downstream now that
+  `app_version` is a commit sha instead of a timestamp.
+- [forked-child-jobs.md](./forked-child-jobs.md) — the rules for moving a periodic job off the
+  request thread: the fork-your-own-bundled-chunk trick, the trap that your module can silently land
+  in the HOOKS chunk (and start a second cron scheduler in every child), what is different inside a
+  child (`$env/dynamic/private` is empty, never `get_shared_db()`, keep it read-only + report over
+  IPC), and why every such job must emit `blocking_ms` and not just `duration_ms`.

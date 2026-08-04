@@ -80,7 +80,19 @@ async function source_bytes(original_key: string): Promise<Uint8Array> {
   return new Uint8Array(await object.Body.transformToByteArray())
 }
 
-export async function generate_and_store_audio_derivative({ original_key, trim }: { original_key: string, trim: boolean }): Promise<string> {
+export interface StoredAudioDerivative { key: string, bytes: number, duration_ms: number | null }
+
+/**
+ * `record_in_ledger: false` is for the daily backfill CHILD process: it has no
+ * writable `shared.db` handle by design (it is read-only like the analytics
+ * child), so it reports each stored object back over IPC and the PARENT writes
+ * the `media_objects` row. Every in-process caller keeps the default.
+ */
+export async function generate_and_store_audio_derivative({ original_key, trim, record_in_ledger = true }: {
+  original_key: string
+  trim: boolean
+  record_in_ledger?: boolean
+}): Promise<StoredAudioDerivative> {
   const directory = await mkdtemp(join(tmpdir(), 'ld-audio-'))
   const input = join(directory, 'input')
   const output = join(directory, 'output.mp3')
@@ -102,8 +114,9 @@ export async function generate_and_store_audio_derivative({ original_key, trim }
     const duration_ms = await probe_duration_ms(output)
     const key = audio_playback_key({ original_key })
     await store_media_bytes({ file_type: 'audio/mpeg', bytes, r2_key: key })
-    record_media_object_by_key({ key, bytes: bytes.length, duration_ms })
-    return key
+    if (record_in_ledger)
+      record_media_object_by_key({ key, bytes: bytes.length, duration_ms })
+    return { key, bytes: bytes.length, duration_ms }
   } finally {
     await rm(directory, { recursive: true, force: true })
   }

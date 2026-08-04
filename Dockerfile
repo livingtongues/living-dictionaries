@@ -19,6 +19,22 @@ COPY site/package.json site/
 # `install` hook (prebuild-install || node-gyp rebuild) compiles the native binary.
 RUN pnpm install --frozen-lockfile
 
+# The commit being built. `svelte.config.js` uses it as `kit.version.name` and
+# REFUSES TO BUILD without it (there is no `.git` dir in this stage, so git
+# can't answer): a clock-derived version name gives the page shell and the
+# client bundle different `__sveltekit_<hash>` globals and serves a blank page
+# on every route — the 2026-08-03 poly.education outage. `deploy.sh` exports
+# GIT_SHA before `docker compose build` and compose passes it through as
+# `${GIT_SHA:-}`, which is why the empty default here must never be accepted as
+# a value (see the comment in svelte.config.js).
+#
+# DELIBERATELY BELOW `pnpm install`: GIT_SHA changes on every deploy and Docker
+# invalidates every layer after a changed ENV, so declaring it above the install
+# would re-run `pnpm install --frozen-lockfile` (with a from-source
+# better-sqlite3 compile) on every single deploy.
+ARG GIT_SHA=""
+ENV GIT_SHA=$GIT_SHA
+
 # Source: site (self-contained; imports its own `$lib/types`).
 COPY site/ site/
 

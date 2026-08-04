@@ -122,6 +122,10 @@ export function upload_media({ file, dictionary_id, kind, media_id, trim_audio =
         mimetype: file.type || null,
         online: typeof navigator === 'undefined' ? null : navigator.onLine,
         error_message: error.message,
+        // The server's OWN sentence, separate from ours. Until 2026-08-04 both
+        // were the client's generic string, so the logs could not tell a
+        // rejected-format upload from a dead network (2026-08-03 review §5.4).
+        server_message: error instanceof UploadError ? error.server_message : null,
       },
     })
   })
@@ -143,6 +147,36 @@ function derive_file_name({ file, kind }: { file: File | Blob, kind: MediaKind }
   return `${kind}.${extension}`
 }
 
+/** Carries the server's own words alongside the message shown to the person. */
+export class UploadError extends Error {
+  server_message: string | null = null
+}
+
+/** How much of a server error body we keep — enough for a sentence, never a stack or an HTML page. */
+const SERVER_MESSAGE_MAX = 300
+
+/**
+ * SvelteKit's `error(status, message)` answers JSON `{ message }`; R2 and the
+ * reverse proxy answer XML or HTML. Take the JSON message when there is one,
+ * fall back to a short plain-text body, and refuse anything markup-shaped —
+ * "<!DOCTYPE html>…" helps nobody.
+ */
+export function server_message(xhr: { responseText?: string | null }): string | null {
+  const body = (xhr.responseText ?? '').trim()
+  if (!body)
+    return null
+  try {
+    const parsed = JSON.parse(body) as { message?: unknown }
+    if (typeof parsed?.message === 'string' && parsed.message.trim())
+      return parsed.message.trim().slice(0, SERVER_MESSAGE_MAX)
+  } catch {
+    // not JSON — fall through to the plain-text check
+  }
+  if (body.startsWith('<') || body.length > SERVER_MESSAGE_MAX)
+    return null
+  return body
+}
+
 function send_xhr({ xhr, method, url, body, content_type, on_progress }: {
   xhr: XMLHttpRequest
   method: 'PUT' | 'POST'
@@ -159,10 +193,19 @@ function send_xhr({ xhr, method, url, body, content_type, on_progress }: {
     })
 
     xhr.addEventListener('load', () => {
-      if (xhr.status >= 200 && xhr.status < 300)
+      if (xhr.status >= 200 && xhr.status < 300) {
         resolve(xhr.responseText)
-      else
-        reject(new Error(`Failed to upload file (status ${xhr.status}).`))
+        return
+      }
+      // SURFACE WHAT THE SERVER ACTUALLY SAID. On 2026-08-03 a contributor spent
+      // eighty minutes on four HEIC photo uploads that each came back with a
+      // usable sentence ("This HEIC photo could not be converted. Please convert
+      // it to JPEG…") — and saw "Failed to upload file (status 415)." every
+      // time, because this handler threw the body away. The generic string stays
+      // as the fallback for a body-less failure (a presigned R2 PUT, a proxy).
+      const upload_error = new UploadError(server_message(xhr) ?? `Failed to upload file (status ${xhr.status}).`)
+      upload_error.server_message = server_message(xhr)
+      reject(upload_error)
     })
 
     xhr.addEventListener('error', () => reject(new Error('Failed to upload file.')))

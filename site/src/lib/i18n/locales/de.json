@@ -162,7 +162,18 @@
     "agree_for_non-commercial": "Ich stimme zu, dass dieses Werk nicht kommerziell ist.",
     "source_question": "Woher stammen die Daten in diesem Wörterbuch? Bitte beschreiben Sie, ob Sie die Daten selbst erhoben haben. Wenn Sie veröffentlichte Referenzquellen verwendet haben, führen Sie diese bitte hier auf.",
     "use_question": "Wer wird dieses Wörterbuch nutzen? Wird es in Bildungs- oder Medienprojekten eingesetzt?",
-    "conlang_warning": "Wenn dieses Wörterbuch für eine konstruierte (oder künstliche) Sprache ist und Sie dies nicht angeben, behalten wir uns das Recht vor, es zu entfernen."
+    "conlang_warning": "Wenn dieses Wörterbuch für eine konstruierte (oder künstliche) Sprache ist und Sie dies nicht angeben, behalten wir uns das Recht vor, es zu entfernen.",
+    "page_title": "Erstellen Sie ein Wörterbuch für Ihre Sprache",
+    "lede_1": "Ein Living Dictionary ist ein kostenloses, kollaboratives Multimedia-Wörterbuch — erstellt von Ihnen und Ihrer Gemeinschaft, für kommende Generationen. Wir unterstützen bedrohte, unterrepräsentierte und Minderheitensprachen auf der ganzen Welt.",
+    "lede_2": "Nennen Sie Ihre Sprache, um zu beginnen.",
+    "faq_what_q": "Was ist ein Living Dictionary?",
+    "faq_what_a": "Ein Living Dictionary ist ein Online-Wörterbuch, das von und für eine Sprachgemeinschaft erstellt wird. Jeder Eintrag kann Audioaufnahmen namentlich genannter Sprecherinnen und Sprecher, Fotos, Videos, Lautschrift, Beispielsätze und Übersetzungen in mehrere Sprachen enthalten. Sie können vorhandene Wortlisten einbinden, Ihre Daten jederzeit exportieren und mit Mitwirkenden aus aller Welt zusammenarbeiten.",
+    "faq_who_q": "Für wen sind Living Dictionaries gedacht?",
+    "faq_who_a": "Unsere Mission ist es, bedrohte, unterrepräsentierte, wenig dokumentierte und Minderheitensprachen zu unterstützen — lebendige Sprachen, die von echten Gemeinschaften gesprochen oder gebärdet werden. Living Dictionaries werden von Aktivistinnen und Aktivisten aus den Gemeinschaften und von Sprachwissenschaftlerinnen und Sprachwissenschaftlern weltweit geleitet: fließend Sprechende und Ältere, die ihre Stimmen aufnehmen, Lernende, die sich eine Herkunftssprache zurückholen, und Forschende, die Seite an Seite mit den Gemeinschaften arbeiten. Wenn das auf Sie zutrifft, wurde dieses Werkzeug für Sie gemacht.",
+    "faq_need_q": "Was brauchen Sie, bevor Sie anfangen?",
+    "faq_need_a": "Nur den Namen Ihrer Sprache und eine Verbindung zu den Menschen, die sie sprechen. Weil ein Wörterbuch die Stimme einer Gemeinschaft trägt, fragt das Formular, ob die Sprachgemeinschaft ihre Erlaubnis erteilt hat und woher Sie die Sprache kennen — bei vielen bedrohten Sprachen sind Einwilligung und Eigentum von großer Bedeutung. Wenn Sie diese Erlaubnis noch einholen, können Sie das angeben; Ihr Wörterbuch startet privat, und Sie entscheiden, wann es bereit ist, geteilt zu werden.",
+    "faq_after_q": "Was passiert, nachdem Sie Ihr Wörterbuch erstellt haben?",
+    "faq_after_a": "Ihr Wörterbuch ist sofort einsatzbereit: Sie landen auf seiner Eintragsseite und können gleich Wörter hinzufügen, vom Telefon oder vom Computer aus. Als verwaltende Person können Sie weitere Verwaltende und Mitwirkende einladen, die Sprecherinnen und Sprecher hinzufügen, deren Stimmen die Einträge lebendig machen, Glossierungssprachen und eigene Tastaturen einrichten und entscheiden, wann es öffentlich wird. Öffentliche Wörterbücher reihen sich in Hunderte andere auf unserer Weltkarte ein und sind für alle durchsuchbar."
   },
   "dictionary": {
     "latitude": "Breitengrad",
@@ -258,7 +269,17 @@
   "error": {
     "run_into_error": "Es tut uns leid, es ist ein Fehler aufgetreten.",
     "error_recorded": "Der Fehler wurde aufgezeichnet und wir werden uns darum kümmern.",
-    "please_explain": "Könnten Sie uns bitte eine kurze Nachricht senden und erklären, was passiert ist?"
+    "please_explain": "Könnten Sie uns bitte eine kurze Nachricht senden und erklären, was passiert ist?",
+    "page_not_found": "Diese Seite existiert nicht",
+    "entry_not_found": "Dieser Eintrag existiert nicht",
+    "not_found_explain": "Er wurde möglicherweise gelöscht, oder der Link ist unvollständig.",
+    "page_moved_explain": "Der Link ist möglicherweise unvollständig, oder diese Seite wurde verschoben.",
+    "dictionary_unaffected": "Der Rest von {dictionary} ist nicht betroffen.",
+    "browse_entries": "Einträge durchstöbern",
+    "dictionary_home": "Wörterbuch-Startseite",
+    "go_home": "Zur Startseite",
+    "browse_dictionaries": "Wörterbücher durchstöbern",
+    "think_mistake": "Glauben Sie, dass das ein Fehler ist?"
   },
   "map": {
     "webgl_unavailable": "Die interaktive Karte kann nicht geladen werden, weil Ihr Browser oder Gerät WebGL nicht unterstützt."
@@ -285,7 +306,8 @@
     "no_results": "Keine Ergebnisse",
     "open_dictionary": "Wörterbuch öffnen",
     "my_dictionaries": "Meine Wörterbücher",
-    "read_more": "Mehr lesen"
+    "read_more": "Mehr lesen",
+    "search_dictionaries": "Nach Sprachname, Code oder Ort suchen"
   },
   "misc": {
     "settings": "Einstellungen",
@@ -332,7 +354,12 @@
     "pause": "Pause",
     "clear": "Leeren",
     "sync_paused_repeated_failure": "Ihre Änderungen werden nicht auf dem Server gespeichert. Derselbe Fehler tritt immer wieder auf, daher wurde die Synchronisierung pausiert. Ihre Arbeit ist auf diesem Gerät sicher – laden Sie die Seite neu, um es erneut zu versuchen, und kontaktieren Sie uns, falls diese Meldung erneut erscheint.",
-    "done": "Fertig"
+    "done": "Fertig",
+    "dict_open_failed": "Dieses Wörterbuch konnte auf diesem Gerät nicht geöffnet werden.",
+    "dict_open_failed_explanation": "Ihr Browser hat sich geweigert, die Offline-Kopie dieses Wörterbuchs zu öffnen. Eine neue Kopie herunterzuladen behebt das meistens.",
+    "dict_open_failed_editor_warning": "Sie können dieses Wörterbuch bearbeiten. Falls dieses Gerät Änderungen enthält, die den Server nie erreicht haben, gehen sie beim erneuten Herunterladen verloren — wir können das nicht prüfen, ohne die Datei zu öffnen. Kontaktieren Sie uns zuerst, wenn Sie ungesicherte Arbeit haben könnten.",
+    "dict_reset_and_redownload": "Zurücksetzen und neu herunterladen",
+    "dict_reset_confirm": "Die Kopie auf diesem Gerät verwerfen und eine neue herunterladen?"
   },
   "settings": {
     "community_permission": "Erlaubt die Sprachgemeinschaft, dass diese Sprache online steht?",
@@ -764,7 +791,8 @@
     "open_sentence": "Satz öffnen",
     "contents": "Inhalt",
     "multiple_entries": "Mehrere Einträge",
-    "back_to_top": "Zurück nach oben"
+    "back_to_top": "Zurück nach oben",
+    "standard_abbreviations": "Hier verwendete Standardabkürzungen"
   },
   "discourse": {
     "role": "Diskursrolle",

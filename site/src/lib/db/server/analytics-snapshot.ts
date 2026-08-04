@@ -66,7 +66,7 @@ import { compute_monthly_metrics, missing_metric_months, save_monthly_metrics } 
  * panel field, a renamed key) — older files then read as "no snapshot" instead of
  * hydrating the dashboard with a payload the current UI can't render.
  */
-export const SNAPSHOT_FORMAT = 1
+export const SNAPSHOT_FORMAT = 2
 
 /**
  * Windows the dashboards can ask for. LD's two admin pages are both fixed at 30

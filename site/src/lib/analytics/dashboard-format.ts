@@ -74,10 +74,14 @@ export function format_bytes(bytes: number | null): string {
   return `${bytes} B`
 }
 
-/** Build ids are long timestamps; show a short trailing slice for readability. */
+/** Build ids are long; show a short slice for readability. */
 export function short_version(version: string | null): string {
   if (!version)
     return 'unknown'
+  // A commit sha (what `kit.version.name` carries since 2026-08-04) shortens the
+  // way git shortens it — leading 7 — so it pastes straight into `git show`.
+  if (/^[0-9a-f]{40}$/.test(version))
+    return version.slice(0, 7)
   return version.length > 10 ? `…${version.slice(-8)}` : version
 }
 

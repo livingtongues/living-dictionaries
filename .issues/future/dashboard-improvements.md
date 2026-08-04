@@ -108,6 +108,28 @@ proposals against this lens.
   five total 1–3 minute outages and 21 signed-in users logged HTTP 502. A 5-minute probe cadence
   cannot reliably see a 1-minute outage.
 
+## Shipped (2026-08-04, `.issues/nightly-2026-08-03-approved-items.md`) — UNCOMMITTED
+
+- ✅ **"Sign-in health" on `/admin/health`, with the zero-day alarm** *(filed 2026-08-03, built
+  2026-08-04).* `routes/admin/health/SignInPanel.svelte` (+ stories) renders logins/day by method,
+  new accounts, and a per-method flatline warning; `build_sign_in_health` in `log-analytics.ts`
+  computes it in the daily niced child from the existing `auth_login` `{ method, created }` events;
+  the `sign-in-alarm` cron (`$lib/db/server/sign-in-alarm-cron.ts`, 04:30 PT) reads the checkpoint
+  FILE — zero queries — and posts to the admin chat `notifications` room. Rationale and the
+  thirty-day story: `.knowledge/admin/measuring-what-stopped.md`.
+
+  **Two deliberate deviations from the 2026-08-03 proposal (`.cron/log-reviews/2026-08-03.md` §6),
+  so nobody "fixes" them back:**
+  (1) the rule is judged on the **last COMPLETE UTC day**, not "today" — the cron runs ≈11:30 UTC and
+  "zero logins so far today" is normal at that hour on an American-afternoon site; the cost is firing
+  ~2 days after a break instead of 1, which is nothing against 30 days of blindness. (2) it does NOT
+  fire "every morning after" — that is thirty notifications Jacob would learn to ignore. It fires
+  once, reminds weekly while still down, and posts one recovery notice; state lives in
+  `db_metadata.sign_in_alarm_state`.
+
+  **STILL OPEN — the outbound broadcast.** house + tutor run the same Google One Tap + email
+  one-time-code pattern and neither has this panel. Only LD's was built.
+
 ## Open proposals
 
 - **★★★ NEW — A "Responsiveness" line on `/admin/health`'s Host resources panel: worst event-loop
@@ -263,7 +285,12 @@ proposals against this lens.
   a deploy-boundary rule drawn onto the existing availability/error series, plus a "n of m errors
   occurred within 10 minutes of a deploy" verdict line. **Prerequisite:** emit `server_started`
   `{ app_version, commit, container, is_standby }` — verified absent from source and from every row
-  ever written.
+  ever written. **UPDATE 2026-08-04:** `app_version` IS the commit sha now (`kit.version.name`
+  is set from `GIT_SHA` / `git rev-parse HEAD` — see `.knowledge/server/build-version-stamp.md`),
+  so a separate `commit` field is redundant with it; and “reverse-inferring build boundaries from
+  client `app_version` first-seen” is no longer a hand exercise — `build_deploys()` already
+  materialises that first-seen per build, and `build_build_adoption()` now consumes it to date a
+  build whose name isn’t a parseable epoch.
 
 - **★ NEW — Record tab `visibility` / `was_hidden` on leader-fault rows** *(ported from house 2026-07-29
   · filed 2026-07-29 · LOW cost, MEDIUM value).* House proved it separates genuine foreground stalls

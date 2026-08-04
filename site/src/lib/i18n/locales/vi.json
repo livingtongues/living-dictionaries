@@ -162,7 +162,18 @@
     "agree_for_non-commercial": "Tôi đồng ý rằng tác phẩm này không mang tính thương mại.",
     "source_question": "Dữ liệu trong từ điển này đến từ đâu? Vui lòng mô tả nếu bạn tự thu thập dữ liệu. Nếu bạn sử dụng bất kỳ nguồn tham khảo nào đã được công bố, vui lòng liệt kê chúng ở đây.",
     "use_question": "Ai sẽ sử dụng từ điển này? Nó sẽ được sử dụng trong bất kỳ dự án giáo dục hoặc truyền thông nào không?",
-    "conlang_warning": "Nếu từ điển này dành cho một ngôn ngữ nhân tạo (hoặc được tạo ra) và bạn không ghi rõ điều đó, chúng tôi có quyền xóa bỏ nó."
+    "conlang_warning": "Nếu từ điển này dành cho một ngôn ngữ nhân tạo (hoặc được tạo ra) và bạn không ghi rõ điều đó, chúng tôi có quyền xóa bỏ nó.",
+    "page_title": "Tạo một từ điển cho ngôn ngữ của bạn",
+    "lede_1": "Từ Điển Sống là một từ điển đa phương tiện miễn phí và mang tính cộng tác — được xây dựng bởi bạn và cộng đồng của bạn, cho các thế hệ mai sau. Chúng tôi hỗ trợ các ngôn ngữ đang bị đe dọa, ít được đại diện và ngôn ngữ thiểu số trên khắp thế giới.",
+    "lede_2": "Hãy cho biết tên ngôn ngữ của bạn để bắt đầu.",
+    "faq_what_q": "Từ Điển Sống là gì?",
+    "faq_what_a": "Từ Điển Sống là một từ điển trực tuyến được xây dựng bởi và dành cho một cộng đồng ngôn ngữ. Mỗi mục từ có thể chứa bản ghi âm của những người nói được nêu tên, hình ảnh, video, phiên âm ngữ âm, câu ví dụ và bản dịch sang nhiều ngôn ngữ. Bạn có thể nhập các danh sách từ đã có, xuất dữ liệu của mình bất cứ lúc nào và cùng làm việc với những người đóng góp ở khắp nơi trên thế giới.",
+    "faq_who_q": "Từ Điển Sống dành cho ai?",
+    "faq_who_a": "Sứ mệnh của chúng tôi là hỗ trợ các ngôn ngữ đang bị đe dọa, ít được đại diện, ít được ghi chép và các ngôn ngữ thiểu số — những ngôn ngữ sống được nói hoặc ra dấu bởi các cộng đồng có thật. Từ Điển Sống được dẫn dắt bởi các nhà hoạt động cộng đồng và nhà ngôn ngữ học trên toàn cầu: những người nói thành thạo và các bậc cao niên ghi lại giọng nói của mình, những người học đang giành lại ngôn ngữ di sản, và những nhà nghiên cứu làm việc cùng cộng đồng. Nếu điều đó nghe giống bạn, công cụ này được tạo ra cho bạn.",
+    "faq_need_q": "Bạn cần những gì trước khi bắt đầu?",
+    "faq_need_a": "Chỉ cần tên ngôn ngữ của bạn và mối liên hệ với những người nói ngôn ngữ đó. Vì một từ điển mang tiếng nói của cả một cộng đồng, biểu mẫu sẽ hỏi cộng đồng ngôn ngữ đã cho phép hay chưa và bạn biết ngôn ngữ này như thế nào — với nhiều ngôn ngữ đang bị đe dọa, sự đồng thuận và quyền sở hữu là điều hết sức hệ trọng. Nếu bạn vẫn đang xin phép, bạn có thể ghi rõ như vậy; từ điển của bạn khởi đầu ở chế độ riêng tư, và bạn chọn thời điểm nó sẵn sàng để chia sẻ.",
+    "faq_after_q": "Điều gì xảy ra sau khi bạn tạo từ điển?",
+    "faq_after_a": "Từ điển của bạn sẵn sàng ngay lập tức: bạn sẽ đến trang mục từ và có thể bắt đầu thêm từ ngay, từ điện thoại hoặc máy tính. Với tư cách người quản lý, bạn có thể mời thêm người quản lý và người đóng góp, thêm những người nói có giọng nói làm sống dậy các mục từ, thiết lập ngôn ngữ dịch nghĩa và bàn phím tùy chỉnh, và quyết định khi nào công khai từ điển. Các từ điển công khai sẽ gia nhập hàng trăm từ điển khác trên bản đồ thế giới của chúng tôi, ai cũng có thể tìm kiếm."
   },
   "dictionary": {
     "latitude": "Vĩ độ",
@@ -258,7 +269,17 @@
   "error": {
     "run_into_error": "Lỗi đã xảy ra. Xin quý vị thông cảm.",
     "error_recorded": "Lỗi đã được ghi nhận và chúng tôi sẽ xem xét nó.",
-    "please_explain": "Bạn có thể vui lòng gửi cho chúng tôi một ghi chú ngắn để giải thích những gì đã xảy ra không?"
+    "please_explain": "Bạn có thể vui lòng gửi cho chúng tôi một ghi chú ngắn để giải thích những gì đã xảy ra không?",
+    "page_not_found": "Trang này không tồn tại",
+    "entry_not_found": "Mục từ này không tồn tại",
+    "not_found_explain": "Có thể nó đã bị xóa, hoặc đường liên kết chưa đầy đủ.",
+    "page_moved_explain": "Đường liên kết có thể chưa đầy đủ, hoặc trang này đã được chuyển đi.",
+    "dictionary_unaffected": "Phần còn lại của {dictionary} không bị ảnh hưởng.",
+    "browse_entries": "Duyệt các mục từ",
+    "dictionary_home": "Trang chính của từ điển",
+    "go_home": "Đi tới trang chủ",
+    "browse_dictionaries": "Duyệt các từ điển",
+    "think_mistake": "Bạn cho rằng đây là một nhầm lẫn?"
   },
   "map": {
     "webgl_unavailable": "Không thể tải bản đồ tương tác vì trình duyệt hoặc thiết bị của bạn không hỗ trợ WebGL."
@@ -285,7 +306,8 @@
     "no_results": "Không có kết quả",
     "open_dictionary": "Mở từ điển",
     "my_dictionaries": "Từ điển của tôi",
-    "read_more": "Đọc thêm"
+    "read_more": "Đọc thêm",
+    "search_dictionaries": "Tìm theo tên ngôn ngữ, mã hoặc địa điểm"
   },
   "misc": {
     "settings": "Cài đặt",
@@ -332,7 +354,12 @@
     "pause": "Tạm dừng",
     "clear": "Xóa",
     "sync_paused_repeated_failure": "Các thay đổi của bạn không được lưu lên máy chủ. Cùng một lỗi liên tục xảy ra nên việc đồng bộ đã tạm dừng. Công việc của bạn vẫn an toàn trên thiết bị này — hãy tải lại trang để thử lại, và liên hệ với chúng tôi nếu thông báo này xuất hiện lại.",
-    "done": "Xong"
+    "done": "Xong",
+    "dict_open_failed": "Không thể mở từ điển này trên thiết bị này.",
+    "dict_open_failed_explanation": "Trình duyệt của bạn đã từ chối mở bản sao ngoại tuyến của từ điển này. Tải về một bản mới thường sẽ khắc phục được.",
+    "dict_open_failed_editor_warning": "Bạn có quyền chỉnh sửa từ điển này. Nếu thiết bị này đang giữ những thay đổi chưa từng đến được máy chủ, việc tải lại bản mới sẽ loại bỏ chúng — chúng tôi không thể kiểm tra mà không mở được tệp. Hãy liên hệ với chúng tôi trước nếu bạn có thể còn công việc chưa lưu.",
+    "dict_reset_and_redownload": "Đặt lại và tải về lại",
+    "dict_reset_confirm": "Loại bỏ bản sao trên thiết bị này và tải về bản mới?"
   },
   "settings": {
     "community_permission": "Cộng đồng có cho phép ngôn ngữ của họ được đăng tải trực tuyến hay không?",
@@ -764,7 +791,8 @@
     "open_sentence": "Mở câu",
     "contents": "Mục lục",
     "multiple_entries": "Nhiều mục từ",
-    "back_to_top": "Về đầu trang"
+    "back_to_top": "Về đầu trang",
+    "standard_abbreviations": "Các chữ viết tắt tiêu chuẩn được dùng ở đây"
   },
   "discourse": {
     "role": "Vai trò diễn ngôn",

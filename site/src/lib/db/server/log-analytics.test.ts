@@ -258,19 +258,23 @@ describe(get_log_analytics, () => {
     add_log({ day: '2026-06-30', message: 'session_start', app_version: stale, context: { session_id: 's4' } })
     // The stuck user signs in AFTER session_start — still named on the stale build.
     add_log({ day: '2026-06-30', level: 'warn', message: 'sync_failed', user_id: 'greg', app_version: stale, context: { session_id: 's4', kind: 'client_behind' } })
-    // Unparseable build id (dev) → unknown bucket.
+    // A build id that isn't a clock (a commit sha, or 'dev') is dated by the
+    // FIRST time it was seen — here, today — so it buckets as merely behind
+    // rather than unknown. `kit.version.name` has been the commit sha since
+    // 2026-08-04; without the first-seen fallback every non-current build would
+    // silently land in `unknown` and this panel would stop saying anything.
     add_log({ day: '2026-06-30', message: 'session_start', app_version: 'dev', context: { session_id: 's5' } })
     // A session_start older than 24h is not "active" — ignored.
     add_log({ day: '2026-06-28', message: 'session_start', app_version: stale, context: { session_id: 's6' } })
 
     const { build_adoption } = await get_log_analytics({ shared_db: db, logs_db, days: 30, now, current_app_version: cur })
     expect(build_adoption.current).toBe(2)
-    expect(build_adoption.behind).toBe(1)
+    expect(build_adoption.behind).toBe(2) // the 1-day-old build + the sha-named one, first seen today
     expect(build_adoption.stale).toBe(1)
-    expect(build_adoption.unknown).toBe(1)
+    expect(build_adoption.unknown).toBe(0)
     expect(build_adoption.total).toBe(5)
-    // "50% of active sessions can't receive fixes" (2 of 4 judgeable).
-    expect(build_adoption.stranded_pct).toBe(0.5)
+    // "60% of active sessions aren't on the current build" (3 of 5 judgeable).
+    expect(build_adoption.stranded_pct).toBe(0.6)
     // Oldest (most stranded) build first, with its signed-in users named.
     expect(build_adoption.builds[0]).toMatchObject({ app_version: stale, sessions: 1, users: ['greg'], is_current: false, age_days: 4.9 })
     const current_build = build_adoption.builds.find(row => row.is_current)
@@ -383,6 +387,43 @@ describe(get_log_analytics, () => {
     const analytics = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
     expect(analytics.top_routes[0]).toEqual({ route: 'about', count: 3, sessions: 3 })
     expect(analytics.top_routes[1]).toEqual({ route: 'dictionary:entries', count: 50, sessions: 1 })
+  })
+
+  test('sign_in raises the flatline alarm for a method that was live all week and produced nothing yesterday', async () => {
+    // Judged day is 06-29 (the last COMPLETE day; NOW is midday on the 30th).
+    // Google logs in every day up to and including the 28th, then stops.
+    for (let offset = 8; offset >= 2; offset--) {
+      const day = new Date(NOW.getTime() - offset * 86_400_000).toISOString().slice(0, 10)
+      add_log({ day, source: 'server', message: 'auth_login', context: { method: 'google', created: false } })
+      add_log({ day, source: 'server', message: 'auth_login', context: { method: 'email', created: false } })
+    }
+    // 06-29: email still works, google is silent. One of them is a new account.
+    add_log({ day: '2026-06-29', source: 'server', message: 'auth_login', context: { method: 'email', created: true } })
+    add_log({ day: '2026-06-29', source: 'server', message: 'auth_login', context: { method: 'email', created: false } })
+    // Today's rows must be ignored — an in-progress day is not evidence.
+    add_log({ day: '2026-06-30', source: 'server', message: 'auth_login', context: { method: 'google', created: false } })
+
+    const { sign_in } = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    expect(sign_in.day).toBe('2026-06-29')
+    expect(sign_in.logins).toBe(2)
+    expect(sign_in.new_accounts).toBe(1)
+    expect(sign_in.flatlined).toEqual(['google'])
+    const google = sign_in.methods.find(method => method.method === 'google')
+    expect(google).toMatchObject({ logins: 0, active_days_before: 7, daily_average_before: 1, flatlined: true })
+    expect(sign_in.methods.find(method => method.method === 'email')).toMatchObject({ logins: 2, flatlined: false })
+    // The day series carries both methods, oldest first, today excluded.
+    expect(sign_in.daily[sign_in.daily.length - 1]).toEqual({ day: '2026-06-29', total: 2, new_accounts: 1, methods: { email: 2 } })
+  })
+
+  test('sign_in stays quiet for a method that was never busy enough to judge', async () => {
+    // Two days of logins in the baseline week is not a reliable signal — a
+    // threshold on a small count is a false-alarm generator.
+    add_log({ day: '2026-06-26', source: 'server', message: 'auth_login', context: { method: 'google', created: false } })
+    add_log({ day: '2026-06-27', source: 'server', message: 'auth_login', context: { method: 'google', created: false } })
+
+    const { sign_in } = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    expect(sign_in.flatlined).toEqual([])
+    expect(sign_in.methods[0]).toMatchObject({ method: 'google', logins: 0, active_days_before: 2, flatlined: false })
   })
 
   test('api_v1 panel aggregates server v1_* events by day / event / dictionary / via with a failure split', async () => {
@@ -838,7 +879,7 @@ describe(get_log_analytics, () => {
             "behind": 0,
             "builds": [
               {
-                "age_days": null,
+                "age_days": 0,
                 "app_version": "v-cur",
                 "is_current": true,
                 "last_seen": "2026-06-30T10:00:00.000Z",
@@ -1879,6 +1920,14 @@ describe(get_log_analytics, () => {
             ],
             "schema_drift_count": 0,
             "total": 1,
+          },
+          "sign_in": {
+            "daily": [],
+            "day": "2026-06-29",
+            "flatlined": [],
+            "logins": 0,
+            "methods": [],
+            "new_accounts": 0,
           },
           "storage": {
             "dbs": [],

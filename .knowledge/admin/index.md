@@ -21,3 +21,7 @@ Knowledge for the local-first super-admin area (`/admin/*`).
 - [email-threading.md](./email-threading.md) — inbound email gotchas (LD ⇄ house): SES overwrites
   our `Message-ID` (so replies match only via the subject heuristic unless we persist the SES id),
   reply-must-reopen-resolved-thread, and the assignee-first notification precedence.
+- [measuring-what-stopped.md](./measuring-what-stopped.md) — the thirty-day silent Google sign-in
+  outage: why a dashboard made only of counters is blind to a broken integration (it produces FEWER
+  rows, not more), the rule that an integration's acceptance test is its own success metric, and the
+  shape of the zero-logins alarm (last complete day, 5-of-7 baseline, re-arms rather than nags).

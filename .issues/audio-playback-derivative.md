@@ -479,3 +479,97 @@ DOM update then calls `audio.load()` so in-place prop changes rerun resource
 selection. Final rerun: 25 unit tests passed; TypeScript and lint passed;
 Svelte check remained at 0 errors / 48 pre-existing warnings; `git diff --check`
 passed. No commit or push was made.
+
+## Corpus backfill — run log
+
+### Run 1 (2026-08-03 04:40 UTC) — DIED at 1.5%
+
+Started with `workers=4`, wrote **2,210** of 146,997 derivatives, **0 failures**,
+then stopped silently at **04:52:12 UTC**.
+
+**Cause: the backfill was a child of the agent session's process group.** When
+that horse session was aborted (`abortChildProcess` / `AbortSignal.onAbortListener`
+in the journal at 04:52:12) the whole group died. Nothing was wrong with the
+backfill itself — no FAIL lines, no stderr error, no OOM. The 2,210 objects it
+did write are valid and are picked up by `--resume`.
+
+> **Lesson: never run a multi-hour job as a plain background child of an agent
+> session.** Use a detached `systemd-run --user` unit (mustang has `Linger=yes`,
+> so user units survive logout).
+
+### Run 2 (2026-08-03 20:46 UTC) — in progress
+
+Relaunched as a detached systemd user unit:
+
+```bash
+systemd-run --user --unit=ld-audio-backfill \
+  --working-directory=/home/jacob/code/living-dictionaries/scripts/audio-derivative \
+  --property=EnvironmentFile=/home/jacob/ld-audio/r2.env \
+  --property=StandardOutput=append:/home/jacob/ld-audio/backfill-run.log \
+  --property=StandardError=append:/home/jacob/ld-audio/backfill-run.err \
+  --property=Nice=19 --property=Restart=no \
+  node backfill.mjs --keys=/home/jacob/ld-audio/worklist.tsv \
+    --limit=200000 --workers=6 --apply --resume=/home/jacob/ld-audio/backfill-run.log
+```
+
+Operational notes:
+
+- **Worklist moved out of `/tmp`** to `~/ld-audio/worklist.tsv` (146,997 keys;
+  146,975 `trim=1` + 22 `trim=0` text/sentence/timed clips) so a tmp sweep can't
+  destroy it mid-run.
+- **R2 creds** are pulled from prod (`ssh living`, `/opt/hosting/sveltekit/.env`)
+  into `~/ld-audio/r2.env`, `chmod 600`, outside the repo. `secrets-decrypted/`
+  does not exist on mustang.
+- **Log is appended, not replaced** — `--resume` reads `backfill-run.log` at
+  startup and stdout appends to that same file, so ONE log accumulates every
+  LEDGER line across restarts and is the single input to `apply-ledger.cjs`.
+  `--limit` defaults to 20 and MUST be set high.
+- **`workers=6` measured 4.6/s vs 2.9/s at `workers=4`** on mustang's 2 cores —
+  the job is partly network-bound (CDN GET + R2 PUT), so oversubscribing cores
+  pays. Everything is `nice -n 19`.
+- **`Restart=on-failure` + `RestartSec=60`** (with `StartLimitBurst=100`,
+  `StartLimitIntervalSec=0`) so a mid-run crash self-heals within a minute
+  instead of idling until the follow-up cron. This is safe precisely because
+  `--resume` is idempotent: every restart re-reads the log and skips finished
+  keys, losing only the handful of in-flight encodes. A premature `exit 0`
+  needs no restart — the script only exits 0 once every job is done.
+
+### Mid-run quality verification (2026-08-03 20:55)
+
+Spot-probed four shipped derivatives against their originals, recomputing the
+recipe's gain from the originals' own measurements. Output matched prediction
+within ~0.1 dB in every case, and format is `mp3 / 32000 Hz / mono` as designed:
+
+| key | orig I | sample peak | gain | branch | deriv I |
+|---|---|---|---|---|---|
+| babanki/…6041659e | -16.8 | -1.30 | +0.30 | peak-capped | -16.1 |
+| sengwer/…b53f60c5 | -20.2 | -2.74 | +1.74 | peak-capped | -18.4 |
+| babanki/…5599c77d | -14.7 | -2.59 | -1.30 | LUFS-targeted | -15.8 |
+| sengwer/…ee9a5709 | -19.2 | -7.66 | +3.20 | LUFS-targeted | -16.1 |
+
+Both branches behave: LUFS-targeted clips land on -16, and peak-capped clips
+deliberately stop short of -16 rather than clip. This also confirms the
+review's corrected LUFS parser is what the corpus run is actually using — the
+old bug would have pinned every clip to the `I=-20` fallback. Quiet clips can
+land slightly ABOVE -16 (a -34.1 LUFS clip landed at -14.9) because trimming
+leading/trailing silence raises the integrated loudness of the survivor; that
+is expected, not a gain error.
+
+Resume verified clean: `144,787 keys to process (2,210 already done)`.
+ETA ~8.7h from 20:50 UTC → **~05:35 UTC 2026-08-04**.
+
+### Remaining steps (after the run finishes)
+
+1. Confirm `systemctl --user is-active ld-audio-backfill` is `inactive` and the
+   `[backfill] DONE` line is in `backfill-run.err`; `grep -c '^LEDGER'` should be
+   ~146,997. Investigate if FAIL lines > 100.
+2. Apply the ledger: `scp ~/ld-audio/backfill-run.log living:/tmp/`, then inside
+   the live container — `DERIVATIVE_LOG=… SHARED_DB=/data/shared.db node apply-ledger.cjs`.
+3. Verify: ffmpeg `ebur128` probe of 3 random `_p1.mp3` CDN urls (expect near
+   -16 LUFS, or less gain when sample-peak-capped), and a shared.db count of
+   `media_type='audio' AND is_variant=1` rows (~146k).
+4. Update this report and give Jacob the final numbers.
+
+Follow-up scheduled via horse cron: **`c-223e77`**, one-time at 2026-08-04 06:15 UTC
+on mustang. It re-checks, relaunches if the run died again, applies the ledger,
+verifies, and reports.

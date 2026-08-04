@@ -382,12 +382,56 @@ export interface LogAnalytics {
   boot_health: BootHealth
   /** Synthetic external uptime + latency (`uptime_probe`, hot window only). */
   uptime: UptimeSummary
+  /** Logins per day by method + the zero-day alarm — the "a subsystem stopped working" panel. */
+  sign_in: SignInHealth
   /**
    * Whole-box host resources (live snapshot + hot-window trend from `host_stats`).
    * Always null from `get_log_analytics` (the cached blob must not carry a "live"
    * reading) — the analytics API endpoint injects it fresh for level-3 admins.
    */
   host: HostStatsSummary | null
+}
+
+/**
+ * SIGN-IN HEALTH — the panel that counts something that STOPPED happening.
+ *
+ * Living Dictionaries' Google sign-in was dead from 2026-07-04 to 2026-08-02:
+ * thirty days, and on the day it came back it carried 23 of the site's 23 logins
+ * and created 7 new accounts. Nothing noticed, because a broken third-party
+ * integration produces FEWER log rows, not more, and every other panel on these
+ * dashboards counts things that happened. Eight consecutive nightly reviews
+ * verified that the change which broke it had been APPLIED — never that signing
+ * in still worked.
+ *
+ * So the acceptance test for an integration is its own success metric. This is
+ * that metric. It needs no new telemetry: `auth_login` has carried
+ * `{ method, created }` since June.
+ */
+export interface SignInMethodHealth {
+  /** `google` | `email`. */
+  method: string
+  /** Logins on `SignInHealth.day` (the last COMPLETE day). */
+  logins: number
+  /** Of the 7 days before that, how many had at least one login by this method. */
+  active_days_before: number
+  /** Mean logins/day over those 7 days. */
+  daily_average_before: number
+  /** Last moment this method logged anybody in, over the whole window. */
+  last_login_at: string | null
+  /** Was reliably live (≥`SIGN_IN_ACTIVE_DAYS_REQUIRED` of 7) and produced ZERO on `day`. */
+  flatlined: boolean
+}
+export interface SignInHealth {
+  /** The last COMPLETE UTC day — today is deliberately excluded, it is always partial. */
+  day: string
+  /** Totals for `day`. */
+  logins: number
+  new_accounts: number
+  methods: SignInMethodHealth[]
+  /** Per-day logins by method across the window, oldest first (`methods` is method → count). */
+  daily: { day: string, total: number, new_accounts: number, methods: Record<string, number> }[]
+  /** Methods matching the alarm rule. Empty is the healthy reading. */
+  flatlined: string[]
 }
 
 /** One day of synthetic-probe availability + latency (hot window). */
@@ -994,7 +1038,7 @@ function compute_log_analytics({ shared_db, logs_db, archive_db, days, now, curr
 
   const leader_health = stage({ timings, label: 'build_leader_health', run: () => build_leader_health(ctx) })
   const sync_health = stage({ timings, label: 'build_sync_health', run: () => build_sync_health(ctx) })
-  const build_adoption = stage({ timings, label: 'build_build_adoption', run: () => build_build_adoption(ctx) })
+  const build_adoption = stage({ timings, label: 'build_build_adoption', run: () => build_build_adoption(ctx, deploys) })
   const storage = stage({ timings, label: 'build_storage', run: () => build_storage({ shared_db, logs_db, archive_db }) })
   const api_v1 = stage({ timings, label: 'build_api_v1', run: () => build_api_v1_activity(ctx) })
   const entry_edits = stage({ timings, label: 'build_entry_edits', run: () => build_entry_edit_channels({ ctx, rollup_rows, live_by_day }) })
@@ -1003,6 +1047,7 @@ function compute_log_analytics({ shared_db, logs_db, archive_db, days, now, curr
   const missing_i18n_keys = stage({ timings, label: 'build_missing_i18n', run: () => build_missing_i18n_keys(ctx) })
   const boot_health = stage({ timings, label: 'build_boot_health', run: () => build_boot_health(ctx) })
   const uptime = stage({ timings, label: 'build_uptime', run: () => build_uptime(ctx) })
+  const sign_in = stage({ timings, label: 'build_sign_in_health', run: () => build_sign_in_health(ctx) })
 
   return {
     audience,
@@ -1041,6 +1086,7 @@ function compute_log_analytics({ shared_db, logs_db, archive_db, days, now, curr
     missing_i18n_keys,
     boot_health,
     uptime,
+    sign_in,
     // The logged half (sample count, latest sample, hourly trend) rides the daily
     // checkpoint like everything else. `now` is whatever the child read from
     // /proc while computing; the API endpoint overwrites it with a live reading,
@@ -1309,6 +1355,86 @@ function populate_temp_set({ logs_db, table, column, values }: {
  * The mustang off-box prober POSTs `{ status, ok, ttfb_ms, total_ms, vantage }` to
  * `/api/log` (trusted `X-Log-Source-Secret` path → `source='server'`) every few min.
  */
+/** Days of the baseline week a method must have been live on before its silence counts as a fault. */
+export const SIGN_IN_ACTIVE_DAYS_REQUIRED = 5
+/** Length of that baseline, in days, immediately before the day being judged. */
+export const SIGN_IN_BASELINE_DAYS = 7
+
+/**
+ * The alarm rule, pure so it is testable without a database: a method that
+ * logged somebody in on at least 5 of the previous 7 days and NOBODY on the day
+ * being judged has stopped working. Deliberately not "fewer than usual" — a
+ * threshold on a small count is a false-alarm generator, whereas a live method
+ * going to exactly zero for a whole day is unambiguous.
+ */
+export function sign_in_flatlined({ logins, active_days_before }: { logins: number, active_days_before: number }): boolean {
+  return logins === 0 && active_days_before >= SIGN_IN_ACTIVE_DAYS_REQUIRED
+}
+
+/**
+ * Logins per day by method (see `SignInHealth`). Judged on the last COMPLETE UTC
+ * day: `now` is always a partial day, and "zero so far today" at 11:00 UTC is
+ * normal on a site whose traffic is mostly American afternoons.
+ */
+function build_sign_in_health(ctx: AnalyticsContext): SignInHealth {
+  const rows = ctx.logs_db.prepare(`
+    SELECT substr(received_at, 1, 10)                                                          day,
+           coalesce(json_extract(CASE WHEN json_valid(context) THEN context END, '$.method'), 'unknown') method,
+           SUM(CASE WHEN json_extract(CASE WHEN json_valid(context) THEN context END, '$.created') IN (1, 'true') THEN 1 ELSE 0 END) new_accounts,
+           COUNT(*)                                                                            logins,
+           MAX(received_at)                                                                    last_login_at
+    FROM client_logs
+    WHERE received_at >= ? AND source = 'server' AND message = 'auth_login'
+    GROUP BY day, method
+    ORDER BY day
+  `).all(ctx.window_start_iso) as { day: string, method: string, new_accounts: number, logins: number, last_login_at: string }[]
+
+  const judged_day = day_string(new Date(ctx.now.getTime() - 86_400_000))
+  const baseline_start = day_string(new Date(ctx.now.getTime() - (SIGN_IN_BASELINE_DAYS + 1) * 86_400_000))
+
+  const daily = new Map<string, { day: string, total: number, new_accounts: number, methods: Record<string, number> }>()
+  const totals = new Map<string, { logins: number, active_days_before: number, last_login_at: string | null }>()
+  for (const row of rows) {
+    if (row.day > judged_day)
+      continue // today, still in progress
+    const point = daily.get(row.day) ?? { day: row.day, total: 0, new_accounts: 0, methods: {} }
+    point.total += row.logins
+    point.new_accounts += row.new_accounts
+    point.methods[row.method] = (point.methods[row.method] ?? 0) + row.logins
+    daily.set(row.day, point)
+
+    const method = totals.get(row.method) ?? { logins: 0, active_days_before: 0, last_login_at: null }
+    if (row.day === judged_day)
+      method.logins += row.logins
+    else if (row.day >= baseline_start && row.logins > 0)
+      method.active_days_before += 1
+    if (method.last_login_at === null || row.last_login_at > method.last_login_at)
+      method.last_login_at = row.last_login_at
+    totals.set(row.method, method)
+  }
+
+  const judged = daily.get(judged_day)
+  const methods: SignInMethodHealth[] = [...totals].map(([method, value]) => ({
+    method,
+    logins: value.logins,
+    active_days_before: value.active_days_before,
+    daily_average_before: Math.round((rows
+      .filter(row => row.method === method && row.day >= baseline_start && row.day < judged_day)
+      .reduce((sum, row) => sum + row.logins, 0) / SIGN_IN_BASELINE_DAYS) * 10) / 10,
+    last_login_at: value.last_login_at,
+    flatlined: sign_in_flatlined(value),
+  })).sort((first, second) => second.logins - first.logins || first.method.localeCompare(second.method))
+
+  return {
+    day: judged_day,
+    logins: judged?.total ?? 0,
+    new_accounts: judged?.new_accounts ?? 0,
+    methods,
+    daily: [...daily.values()].sort((first, second) => first.day.localeCompare(second.day)),
+    flatlined: methods.filter(method => method.flatlined).map(method => method.method),
+  }
+}
+
 function build_uptime(ctx: AnalyticsContext): UptimeSummary {
   const rows = ctx.logs_db.prepare(`
     SELECT substr(received_at, 1, 10)               day,
@@ -2459,13 +2585,37 @@ function build_epoch_ms(app_version: string | null): number | null {
 }
 
 /**
- * Build adoption (see `BuildAdoption` doc): last-24h `session_start` rows grouped
- * by `app_version`, the build epoch decoded to an age bucket relative to the
- * current build. Signed-in users per stale build are named so "who to nudge" is
- * one glance, not a hand query.
+ * When a build was made, in epoch ms. Two sources, in order:
+ *
+ *  1. the `app_version` itself, back when it WAS a clock (SvelteKit's default
+ *     `kit.version.name`);
+ *  2. the first moment any browser reported that build — which is what
+ *     `deploys[].first_seen` already is.
+ *
+ * (2) exists because `kit.version.name` is now the COMMIT SHA (2026-08-04 — a
+ * clock-derived name is the poly.education blank-page defect, see
+ * `svelte.config.js`). Without this fallback every non-current build would land
+ * in the "unknown age" bucket and the stranded-tab panel would silently stop
+ * saying anything — the exact "a broken instrument produces fewer rows, not
+ * more" failure this dashboard exists to catch.
  */
-function build_build_adoption(ctx: AnalyticsContext): BuildAdoption {
+function build_time_ms({ app_version, first_seen }: { app_version: string | null, first_seen: Map<string, number> }): number | null {
+  const epoch = build_epoch_ms(app_version)
+  if (epoch !== null)
+    return epoch
+  const seen = app_version === null ? undefined : first_seen.get(app_version)
+  return seen ?? null
+}
+
+/**
+ * Build adoption (see `BuildAdoption` doc): last-24h `session_start` rows grouped
+ * by `app_version`, the build's age decoded to a bucket relative to the current
+ * build. Signed-in users per stale build are named so "who to nudge" is one
+ * glance, not a hand query.
+ */
+function build_build_adoption(ctx: AnalyticsContext, deploys: Deploy[]): BuildAdoption {
   const { logs_db, current_app_version, now } = ctx
+  const first_seen = new Map(deploys.map(deploy => [deploy.version, Date.parse(deploy.first_seen)]).filter(([, ms]) => Number.isFinite(ms)) as [string, number][])
   const active_start_iso = new Date(Math.max(now.getTime() - BUILD_ADOPTION_ACTIVE_HOURS * 3600_000, Date.parse(ctx.window_start_iso))).toISOString()
   const rows = logs_db.prepare(`
     SELECT app_version, COUNT(DISTINCT session_id) sessions, MAX(received_at) last_seen
@@ -2486,17 +2636,17 @@ function build_build_adoption(ctx: AnalyticsContext): BuildAdoption {
     users_by_build.set(row.app_version, list)
   }
 
-  // Age is measured against the current build's epoch (falling back to now when
-  // the deployed version isn't a parseable epoch, e.g. dev).
-  const reference_ms = build_epoch_ms(current_app_version) ?? now.getTime()
+  // Age is measured against the current build's own timestamp (falling back to
+  // now when neither source knows it, e.g. dev).
+  const reference_ms = build_time_ms({ app_version: current_app_version, first_seen }) ?? now.getTime()
   let current = 0
   let behind = 0
   let stale = 0
   let unknown = 0
   const builds = rows.map((row) => {
     const is_current = current_app_version != null && row.app_version === current_app_version
-    const epoch = build_epoch_ms(row.app_version)
-    const age_days = epoch != null ? Math.max(0, Math.round(((reference_ms - epoch) / 86_400_000) * 10) / 10) : null
+    const built_at = build_time_ms({ app_version: row.app_version, first_seen })
+    const age_days = built_at != null ? Math.max(0, Math.round(((reference_ms - built_at) / 86_400_000) * 10) / 10) : null
     if (is_current)
       current += row.sessions
     else if (age_days == null)

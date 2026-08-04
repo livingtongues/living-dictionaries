@@ -162,7 +162,18 @@
     "agree_for_non-commercial": "Saya setuju bahwa karya ini bersifat non-komersial.",
     "source_question": "Dari mana data dalam kamus ini berasal? Mohon jelaskan jika Anda mengumpulkan data tersebut sendiri. Jika Anda menggunakan sumber referensi yang telah dipublikasikan, mohon cantumkan di sini.",
     "use_question": "Siapa yang akan menggunakan kamus ini? Apakah kamus ini akan digunakan dalam proyek pendidikan atau media?",
-    "conlang_warning": "Jika kamus ini untuk bahasa buatan (atau artifisial), dan Anda tidak menunjukkannya, kami berhak untuk menghapusnya."
+    "conlang_warning": "Jika kamus ini untuk bahasa buatan (atau artifisial), dan Anda tidak menunjukkannya, kami berhak untuk menghapusnya.",
+    "page_title": "Buat kamus untuk bahasa Anda",
+    "lede_1": "Kamus Hidup adalah kamus multimedia yang gratis dan kolaboratif — dibangun oleh Anda dan komunitas Anda, untuk generasi mendatang. Kami mendukung bahasa-bahasa yang terancam punah, kurang terwakili, dan bahasa minoritas di seluruh dunia.",
+    "lede_2": "Sebutkan nama bahasa Anda untuk memulai.",
+    "faq_what_q": "Apa itu Kamus Hidup?",
+    "faq_what_a": "Kamus Hidup adalah kamus daring yang dibangun oleh dan untuk sebuah komunitas bahasa. Setiap entri dapat memuat rekaman audio dari penutur yang disebutkan namanya, foto, video, transkripsi fonetis, contoh kalimat, dan terjemahan ke berbagai bahasa. Anda dapat memasukkan daftar kata yang sudah ada, mengekspor data Anda kapan saja, dan bekerja bersama kontributor di mana pun di dunia.",
+    "faq_who_q": "Untuk siapa Kamus Hidup dibuat?",
+    "faq_who_a": "Misi kami adalah mendukung bahasa-bahasa yang terancam punah, kurang terwakili, kurang terdokumentasi, dan bahasa minoritas — bahasa hidup yang dituturkan atau diisyaratkan oleh komunitas nyata. Kamus Hidup dipimpin oleh para penggerak komunitas dan ahli bahasa di seluruh dunia: penutur fasih dan para tetua yang merekam suara mereka, pembelajar yang merebut kembali bahasa warisannya, dan peneliti yang bekerja berdampingan dengan komunitas. Jika itu terdengar seperti Anda, alat ini dibuat untuk Anda.",
+    "faq_need_q": "Apa yang Anda perlukan sebelum mulai?",
+    "faq_need_a": "Cukup nama bahasa Anda dan hubungan dengan orang-orang yang menuturkannya. Karena sebuah kamus membawa suara sebuah komunitas, formulirnya menanyakan apakah komunitas bahasa telah memberi izin dan bagaimana Anda mengenal bahasa itu — bagi banyak bahasa yang terancam punah, persetujuan dan kepemilikan sangatlah penting. Jika Anda masih mengupayakan izin tersebut, Anda dapat menyampaikannya; kamus Anda dimulai sebagai pribadi, dan Anda yang menentukan kapan kamus itu siap dibagikan.",
+    "faq_after_q": "Apa yang terjadi setelah Anda membuat kamus?",
+    "faq_after_a": "Kamus Anda langsung siap: Anda akan tiba di halaman entrinya dan dapat segera mulai menambahkan kata, dari ponsel maupun komputer. Sebagai pengelola, Anda dapat mengundang pengelola dan kontributor lain, menambahkan penutur yang suaranya menghidupkan entri, menyiapkan bahasa glos dan papan ketik khusus, serta memutuskan kapan kamus dijadikan umum. Kamus umum bergabung dengan ratusan kamus lain di peta dunia kami, dan dapat dicari oleh siapa saja."
   },
   "dictionary": {
     "latitude": "Garis Lintang",
@@ -258,7 +269,17 @@
   "error": {
     "run_into_error": "Maaf, sistem kami mengalami masalah",
     "error_recorded": "Kesalahan telah dicatat dan kami akan memeriksanya",
-    "please_explain": "Dapatkah anda kirimkan catatan singkat yang menjelaskan apa yang terjadi "
+    "please_explain": "Dapatkah anda kirimkan catatan singkat yang menjelaskan apa yang terjadi ",
+    "page_not_found": "Halaman ini tidak ada",
+    "entry_not_found": "Entri ini tidak ada",
+    "not_found_explain": "Mungkin entri ini telah dihapus, atau tautannya tidak lengkap.",
+    "page_moved_explain": "Tautannya mungkin tidak lengkap, atau halaman ini mungkin telah dipindahkan.",
+    "dictionary_unaffected": "Bagian lain dari {dictionary} tidak terpengaruh.",
+    "browse_entries": "Jelajahi entri",
+    "dictionary_home": "Beranda kamus",
+    "go_home": "Ke halaman utama",
+    "browse_dictionaries": "Jelajahi kamus",
+    "think_mistake": "Merasa ini keliru?"
   },
   "map": {
     "webgl_unavailable": "Peta interaktif tidak dapat dimuat karena peramban atau perangkat Anda tidak mendukung WebGL."
@@ -285,7 +306,8 @@
     "no_results": "Tidak Ada Hasil",
     "open_dictionary": "Buka Kamus",
     "my_dictionaries": "Kamus Saya",
-    "read_more": "Baca Lebih Lengkap"
+    "read_more": "Baca Lebih Lengkap",
+    "search_dictionaries": "Cari berdasarkan nama bahasa, kode, atau lokasi"
   },
   "misc": {
     "settings": "Pengaturan",
@@ -332,7 +354,12 @@
     "pause": "Jeda",
     "clear": "Hapus",
     "sync_paused_repeated_failure": "Perubahan Anda tidak tersimpan ke server. Kesalahan yang sama terus terjadi, sehingga sinkronisasi dijeda. Pekerjaan Anda aman di perangkat ini — muat ulang halaman untuk mencoba lagi, dan hubungi kami jika pesan ini muncul kembali.",
-    "done": "Selesai"
+    "done": "Selesai",
+    "dict_open_failed": "Kamus ini tidak dapat dibuka di perangkat ini.",
+    "dict_open_failed_explanation": "Peramban Anda menolak membuka salinan luring kamus ini. Mengunduh salinan baru biasanya mengatasinya.",
+    "dict_open_failed_editor_warning": "Anda dapat menyunting kamus ini. Jika perangkat ini menyimpan perubahan yang tidak pernah sampai ke server, mengunduh ulang akan menghapusnya — kami tidak dapat memeriksanya tanpa membuka berkasnya. Hubungi kami dahulu jika Anda mungkin memiliki pekerjaan yang belum tersimpan.",
+    "dict_reset_and_redownload": "Atur ulang dan unduh ulang",
+    "dict_reset_confirm": "Hapus salinan di perangkat ini dan unduh yang baru?"
   },
   "settings": {
     "community_permission": "Apakah komunitas penutur bahasa mengijinkan bahasa ini online?",
@@ -764,7 +791,8 @@
     "open_sentence": "Buka kalimat",
     "contents": "Daftar isi",
     "multiple_entries": "Beberapa entri",
-    "back_to_top": "Kembali ke atas"
+    "back_to_top": "Kembali ke atas",
+    "standard_abbreviations": "Singkatan baku yang digunakan di sini"
   },
   "discourse": {
     "role": "Peran wacana",
