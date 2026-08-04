@@ -42,7 +42,7 @@ describe(get_featured_cards, () => {
       parts_of_speech: null,
       dialect: null,
       photo_storage_path: null,
-      audio_storage_path: null,
+      audios: [],
     })
     expect(cards[1]).toEqual({
       id: 'f1',
@@ -53,8 +53,24 @@ describe(get_featured_cards, () => {
       parts_of_speech: ['n'],
       dialect: 'Northern',
       photo_storage_path: 'photos/e1.jpg',
-      audio_storage_path: 'audio/e1.mp3',
+      audios: [{ id: 'e1-a1', storage_path: 'audio/e1.mp3', speaker_name: null }],
     })
+  })
+
+  test('cards carry ALL audio options in created_at order with first speaker names', () => {
+    const db = open_dictionary_db_in_memory('test-dict')
+    seed_entry(db, { id: 'e1', lexeme: 'apple', created_at: '2026-01-01T00:00:00.000Z', with_audio: true })
+    const audit = (created_at: string) => `'u1', '${created_at}', 'u1', '${created_at}'`
+    db.prepare(`INSERT INTO audio (id, entry_id, storage_path, created_by_user_id, created_at, updated_by_user_id, updated_at) VALUES ('e1-a2', 'e1', 'audio/e1-second.mp3', ${audit('2026-01-02T00:00:00.000Z')})`).run()
+    db.prepare(`INSERT INTO speakers (id, name, created_by_user_id, created_at, updated_by_user_id, updated_at) VALUES ('sp1', 'Rosa Lopez', ${audit('2026-01-01T00:00:00.000Z')})`).run()
+    db.prepare(`INSERT INTO audio_speakers (id, audio_id, speaker_id, created_by_user_id, created_at, updated_by_user_id, updated_at) VALUES ('as1', 'e1-a2', 'sp1', ${audit('2026-01-02T00:00:00.000Z')})`).run()
+    star_entry(db, { id: 'f1', entry_id: 'e1', sort_key: 'm' })
+
+    const cards = get_featured_cards({ db })
+    expect(cards[0].audios).toEqual([
+      { id: 'e1-a1', storage_path: 'audio/e1.mp3', speaker_name: null },
+      { id: 'e1-a2', storage_path: 'audio/e1-second.mp3', speaker_name: 'Rosa Lopez' },
+    ])
   })
 
   test('unstarring via a deletes tombstone removes the card (cascade trigger)', () => {

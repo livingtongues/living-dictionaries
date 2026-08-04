@@ -337,3 +337,39 @@ export const EditorNeedsReviewWithAlternateSpelling: Story<typeof Component> = {
     }),
   },
 }
+
+// ————— multi-audio speaker chooser —————
+
+const six_audios = [
+  { id: 'a1', storage_path: 'demo/audio/a1.mp3', speakers: [{ name: 'Marta Rodriguez' }] },
+  { id: 'a2', storage_path: 'demo/audio/a2.mp3', speakers: [{ name: 'Marta Rodriguez' }] },
+  { id: 'a3', storage_path: 'demo/audio/a3.mp3', speakers: [{ name: 'Sam Brown' }] },
+  { id: 'a4', storage_path: 'demo/audio/a4.mp3', speakers: [{ name: 'Sam Brown' }] },
+  { id: 'a5', storage_path: 'demo/audio/a5.mp3', speakers: [{ name: 'Josefina Altagracia Amaya de la Cruz' }] },
+  { id: 'a6', storage_path: 'demo/audio/a6.mp3' },
+] as unknown as EntryData['audios']
+
+/** Count badge on the row's ear — same footprint as a single recording. */
+export const VisitorMultiAudioCollapsed: Story<typeof Component> = {
+  props: {
+    ...shared_props,
+    entry: full_entry({ senses: [{ glosses: { en: 'mourning dove' } }], audios: six_audios }),
+  },
+}
+
+/** Tap → chooser popover over the list (recording 1 playing). */
+export const VisitorMultiAudioExpanded: Story<typeof Component> = {
+  viewports: [{ width: 700, height: 380 }],
+  csr: true,
+  interactions: async (page) => {
+    await page.evaluate(() => {
+      HTMLMediaElement.prototype.play = () => new Promise<void>(() => {})
+    })
+    await page.click('button.trigger')
+    await page.waitForSelector('.row')
+  },
+  props: {
+    ...shared_props,
+    entry: full_entry({ senses: [{ glosses: { en: 'mourning dove' } }], audios: six_audios }),
+  },
+}

@@ -5,6 +5,8 @@
     TablesUpdate,
   } from '$lib/types'
   import Audio from '../components/Audio.svelte'
+  import EntryAudioControl from '$lib/entry/entry-audio/EntryAudioControl.svelte'
+  import { from_entry_audios } from '$lib/entry/entry-audio/audio-option-labels'
   import Textbox from './cells/Textbox.svelte'
   import SelectSpeakerCell from './cells/SelectSpeakerCell.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
@@ -20,6 +22,7 @@
   import ReviewIndicator from '$lib/components/entry/ReviewIndicator.svelte'
   import IconIcOutlineCloudUpload from '~icons/ic/outline-cloud-upload'
   import IconIcOutlineCameraAlt from '~icons/ic/outline-camera-alt'
+  import IconMdiPencil from '~icons/mdi/pencil'
 
   interface Props {
     column: IColumn
@@ -59,7 +62,33 @@
   class:sompeng={column.display === 'Sompeng'}
   class="cell">
   {#if column.field === 'audio'}
-    <Audio class="table-audio-cell" context="table" {can_edit} sound_file={entry.audios?.[0] || null} {entry} />
+    {#if entry.audios?.length}
+      <!-- Listen (speaker chooser when multiple) for everyone; editors get the pencil. -->
+      <div class="table-audio-wrap">
+        <EntryAudioControl audios={from_entry_audios(entry.audios)} entry_id={entry.id} surface="table" entry_name={headword.value} />
+        {#if can_edit}
+          <ShowHide>
+            {#snippet children({ show, toggle })}
+              <button
+                type="button"
+                class="edit-audio-button"
+                title={page.data.t('audio.edit_audio')}
+                aria-label={page.data.t('audio.edit_audio')}
+                onclick={toggle}>
+                <IconMdiPencil style="font-size: 0.875rem" />
+              </button>
+              {#if show}
+                {#await import('$lib/components/audio/EditAudio.svelte') then { default: EditAudio }}
+                  <EditAudio {entry} sound_file={entry.audios[0]} context="table" on_close={toggle} />
+                {/await}
+              {/if}
+            {/snippet}
+          </ShowHide>
+        {/if}
+      </div>
+    {:else}
+      <Audio class="table-audio-cell" context="table" {can_edit} sound_file={null} {entry} />
+    {/if}
   {:else if column.field === 'photo'}
     {#if first_photo}
       <Image
@@ -319,6 +348,34 @@
     height: 100%;
     font-size: 0.875rem;
     line-height: 1.25rem;
+  }
+
+  .table-audio-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    width: 100%;
+    height: 100%;
+  }
+
+  .edit-audio-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--color-secondary);
+    cursor: pointer;
+    transition: background var(--transition-time, 150ms);
+  }
+
+  .edit-audio-button:hover {
+    background: color-mix(in srgb, var(--color) 10%, transparent);
   }
 
   .photo-upload {

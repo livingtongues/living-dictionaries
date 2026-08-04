@@ -18,7 +18,7 @@ const ssr_cards: DictHomeCard[] = story_cards.slice(0, 6).map((card, index) => (
   parts_of_speech: index % 3 === 0 ? ['n'] : null,
   dialect: null,
   photo_storage_path: card.photo_storage_path,
-  audio_storage_path: card.audio_storage_path,
+  audios: card.audio_storage_path ? [{ id: `${card.entry_id}-a1`, storage_path: card.audio_storage_path, speaker_name: 'Rosa Lopez' }] : [],
 }))
 
 const dictionary = {

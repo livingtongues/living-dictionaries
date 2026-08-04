@@ -1,14 +1,13 @@
 <script lang="ts">
   import type { EntryData, Tables } from '$lib/types'
   import GalleryImage from './GalleryImage.svelte'
-  import { url_from_storage_path } from '$lib/utils/media-url'
-  import { create_exclusive_audio } from '$lib/utils/exclusive-audio.svelte'
+  import EntryAudioControl from '$lib/entry/entry-audio/EntryAudioControl.svelte'
+  import { from_entry_audios } from '$lib/entry/entry-audio/audio-option-labels'
   import { get_headword } from '$lib/orthography/orthographies'
   import { get_local_orthographies } from '$lib/entry/get-local-orthographies'
   import { add_periods_and_comma_separate_parts_of_speech } from '$lib/entry/format-parts-of-speech'
   import { top_glosses } from '../../home/home-helpers'
   import ReviewIndicator from '$lib/components/entry/ReviewIndicator.svelte'
-  import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'
   import { page } from '$app/state'
 
   interface Props {
@@ -38,9 +37,7 @@
     return top_glosses({ glosses: first_glosses, gloss_languages: dictionary.gloss_languages })
   })
   const dialect = $derived(entry.dialects?.[0]?.name?.default ?? null)
-  const audio_storage_path = $derived(entry.audios?.[0]?.storage_path ?? null)
-
-  const audio = create_exclusive_audio()
+  const has_audio = $derived(!!entry.audios?.length)
 </script>
 
 {#if first_photo}
@@ -67,7 +64,7 @@
         <div class="phonetic">[{phonetic}]</div>
       {/if}
       <div class="spacer"></div>
-      <div class="bottom" class:room-for-ear={!!audio_storage_path}>
+      <div class="bottom" class:room-for-ear={has_audio}>
         {#if pos}
           <div class="pos">{pos}</div>
         {/if}
@@ -76,15 +73,8 @@
         {/each}
       </div>
     </div>
-    {#if audio_storage_path}
-      <button
-        type="button"
-        class="overlay-button play"
-        class:playing={audio.playing}
-        onclick={() => audio.toggle(url_from_storage_path(audio_storage_path))}
-        aria-label="{audio.playing ? t('misc.pause') : t('misc.play')} {headword.value}">
-        <IconMaterialSymbolsHearing />
-      </button>
+    {#if has_audio}
+      <EntryAudioControl class="gallery-play" audios={from_entry_audios(entry.audios)} entry_id={entry.id} surface="gallery" appearance="overlay" entry_name={headword.value} />
     {/if}
   </div>
 {/if}
@@ -200,32 +190,7 @@
     opacity: 0.7;
   }
 
-  .overlay-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    border: none;
-    border-radius: 9999px;
-    background: rgb(255 255 255 / 0.22);
-    backdrop-filter: blur(4px);
-    color: white;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background 200ms, transform 75ms;
-  }
-
-  .overlay-button:hover,
-  .overlay-button.playing {
-    background: rgb(255 255 255 / 0.42);
-  }
-
-  .overlay-button:active {
-    transform: scale(0.88);
-  }
-
-  .play {
+  .card :global(.gallery-play) {
     position: absolute;
     right: 0.4375rem;
     bottom: 0.4375rem;

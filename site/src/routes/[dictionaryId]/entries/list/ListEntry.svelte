@@ -1,7 +1,8 @@
 <script lang="ts">
   import type { EntryData, Tables } from '$lib/types'
   import sanitize from 'xss'
-  import Audio from '../components/Audio.svelte'
+  import EntryAudioControl from '$lib/entry/entry-audio/EntryAudioControl.svelte'
+  import { from_entry_audios } from '$lib/entry/entry-audio/audio-option-labels'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import Popover from '$lib/components/ui/Popover.svelte'
   import Image from '$lib/components/image/Image.svelte'
@@ -124,7 +125,8 @@
     route_dropped_file(e.dataTransfer?.files?.[0])
   }}>
   {#if entry.audios?.[0]}
-    <Audio class="list-audio-cell" {entry} sound_file={entry.audios[0]} {can_edit} context="list" />
+    <!-- Listen-only for EVERYONE (editors edit via the row's ⋯ menu). -->
+    <EntryAudioControl class="list-audio-cell" audios={from_entry_audios(entry.audios)} entry_id={entry.id} surface="list" entry_name={headword.value} />
   {/if}
   <a
     href="/{dictionary.url}/entry/{entry.id}"

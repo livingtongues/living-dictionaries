@@ -7,6 +7,7 @@
   import MapboxStatic from '$lib/components/maps/mapbox/static/MapboxStatic.svelte'
   import Image from '$lib/components/image/Image.svelte'
   import { get_headword } from '$lib/orthography/orthographies'
+  import { audio_option_labels, from_entry_audios } from '$lib/entry/entry-audio/audio-option-labels'
   import { dedupe_keyed_children } from '$lib/utils/dedupe-keyed-children'
   import { page } from '$app/state'
   import type { GuardedWrites } from '$lib/db/dict-client/guarded-writes'
@@ -37,6 +38,8 @@
   const photos = $derived(dedupe_keyed_children({ rows: entry?.senses?.map(({ photos }) => photos).filter(Boolean).flat() ?? [], child_kind: 'photos', entry_id: entry.id, dict_id: dictionary.id }))
   const videos = $derived(dedupe_keyed_children({ rows: entry?.senses?.map(({ videos }) => videos).filter(Boolean).flat() ?? [], child_kind: 'videos', entry_id: entry.id, dict_id: dictionary.id }))
   const audios = $derived(dedupe_keyed_children({ rows: entry.audios ?? [], child_kind: 'audios', entry_id: entry.id, dict_id: dictionary.id }))
+  // Same labels as the compact chooser: name, duplicate-name ordinals, bare position when speakerless.
+  const audio_labels = $derived(audio_option_labels(from_entry_audios(audios)))
   const headword = $derived(get_headword({ lexeme: entry.main.lexeme, orthographies: dictionary.orthographies }))
 
   // Coordinates persist straight to the live `dict_db` entries row (auto-stamps
@@ -48,8 +51,8 @@
   {#if entry.audios?.length > 0 || can_edit}
     {#await import('../../entries/components/Audio.svelte') then { default: Audio }}
       {#if entry.audios?.length > 0}
-        {#each audios as sound_file (sound_file.id)}
-          <Audio {entry} {sound_file} {can_edit} context="entry" class="entry-audio-tile" />
+        {#each audios as sound_file, index (sound_file.id)}
+          <Audio {entry} {sound_file} speaker_label={audio_labels[index]} {can_edit} context="entry" class="entry-audio-tile" />
         {/each}
       {/if}
       <Audio {entry} {can_edit} context="entry" class="entry-audio-tile" />

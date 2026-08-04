@@ -62,3 +62,18 @@ export const FullscreenViewer: Story<typeof Component> = {
   },
   props: { dictionary, can_edit: true, entry: make_entry({ lexeme: 'adiʔol', gloss: 'cotton leaves', full: true }) },
 }
+
+/** Multiple recordings → count badge on the overlay ear. */
+export const MultiAudio: Story<typeof Component> = {
+  props: {
+    dictionary,
+    can_edit: false,
+    entry: {
+      ...make_entry({ lexeme: 'adiʔol', gloss: 'cotton leaves', full: true }),
+      audios: [
+        { id: 'a1', storage_path: 'demo/audio/e1.mp3', speakers: [{ name: 'Rosa Lopez' }] },
+        { id: 'a2', storage_path: 'demo/audio/e2.mp3', speakers: [{ name: 'Sam Brown' }] },
+      ],
+    } as unknown as EntryData,
+  },
+}
