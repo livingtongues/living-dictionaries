@@ -13,7 +13,7 @@
   import { browser } from '$app/environment'
   import Popover from '$lib/components/ui/Popover.svelte'
   import type { GuardedWrites } from '$lib/db/dict-client/guarded-writes'
-  import IconFaSolidPlus from '~icons/fa-solid/plus'
+  import IconMdiArrowExpandAll from '~icons/mdi/arrow-expand-all'
   import IconStreamlineEyeOff from '~icons/streamline/interface-edit-view-off-disable-eye-eyeball-hide-off-view'
   import IconTeenyiconsThumbtackSolid from '~icons/teenyicons/thumbtack-solid'
   import IconTeenyiconsThumbtackOutline from '~icons/teenyicons/thumbtack-outline'
@@ -26,6 +26,7 @@
     dictionary: Tables<'dictionaries'>
     preferred_table_columns: IColumn[]
     writes: GuardedWrites
+    on_open_entry: (event: MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement }, entry: EntryData) => void
   }
 
   const {
@@ -34,6 +35,7 @@
     dictionary,
     preferred_table_columns,
     writes,
+    on_open_entry,
   }: Props = $props()
 
   const columns = $derived(set_up_columns(preferred_table_columns, dictionary))
@@ -126,7 +128,8 @@
         active = true
         dragging_field = column.field
       }
-      const header_cells = [...header_row.children].map(cell => cell.getBoundingClientRect())
+      // Skip the editors-only select-col <th> — gap indices must align with `columns`.
+      const header_cells = [...header_row.children].slice(can_edit ? 1 : 0).map(cell => cell.getBoundingClientRect())
       drop_gap = resolve_gap_index({ client_x: move_event.clientX, header_cells })
     }
     const up = (up_event: PointerEvent) => {
@@ -235,14 +238,14 @@
                       next_row={sense_scoped ? next_sense_row : next_entry_row}
                       {can_edit}
                       {writes} />
-                    {#if can_edit && column.field === 'lexeme'}
-                      <button
-                        type="button"
-                        class="add-sense empty-affordance"
-                        title={page.data.t('sense.add')}
-                        onclick={async () => await writes.insert_sense(entry.id)}>
-                        <IconFaSolidPlus style="font-size: 0.625rem" />
-                      </button>
+                    {#if column.field === 'lexeme'}
+                      <a
+                        href="/{dictionary.url}/entry/{entry.id}"
+                        class="open-entry empty-affordance"
+                        title={page.data.t('entry.view_entry')}
+                        onclick={event => on_open_entry(event, entry)}>
+                        <IconMdiArrowExpandAll style="font-size: 0.75rem" />
+                      </a>
                     {/if}
                   </td>
                 {/if}
@@ -536,24 +539,26 @@
     pointer-events: none;
   }
 
-  .add-sense {
+  .open-entry {
     position: absolute;
-    bottom: 0.125rem;
-    right: 0.125rem;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 0.25rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.125rem;
-    height: 1.125rem;
-    border: none;
-    border-radius: 9999px;
-    background: color-mix(in srgb, var(--color) 8%, transparent);
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 0.375rem;
+    border: 1px solid color-mix(in srgb, var(--color) 20%, transparent);
+    background: var(--background);
     color: var(--color-secondary);
-    cursor: pointer;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
   }
 
-  .add-sense:hover {
-    background: color-mix(in srgb, var(--color) 16%, transparent);
+  .open-entry:hover {
+    background: color-mix(in srgb, var(--color) 8%, var(--background));
+    color: var(--color);
   }
 
   /* Media/add affordances in empty cells only surface on entry hover (pointer devices) —

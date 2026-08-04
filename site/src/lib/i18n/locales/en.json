@@ -385,6 +385,7 @@
   },
   "entry": {
     "view_entries": "View Entries",
+    "view_entry": "View entry",
     "signed_in_as_manager": "You must be signed in as a manager of this dictionary to make changes.",
     "delete_entry": "Delete entry?",
     "table": "Table",

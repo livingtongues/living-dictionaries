@@ -142,12 +142,15 @@
 
       <ToggleStyle />
     </Map>
-    <div style="margin-top: 0.25rem">
-      {#if mounted}
+  </div>
+
+  <div class="modal-footer">
+    {#if mounted}
+      <div class="add-actions">
         <InitableShowHide show={addPoint}>
           {#snippet children({ show, toggle })}
-            <HeadlessButton class="btn btn-sm" onclick={toggle}>
-              <IconMdiMapMarkerPlus style="margin-right: 0.25rem; margin-top: -3px;" />
+            <HeadlessButton class="btn btn-default" onclick={toggle}>
+              <IconMdiMapMarkerPlus style="margin-right: 0.25rem; margin-top: -3px; flex-shrink: 0;" />
               {page.data.t('create.select_coordinates')}
             </HeadlessButton>
             {#if show}
@@ -167,8 +170,8 @@
 
         <InitableShowHide show={addRegion}>
           {#snippet children({ show, toggle })}
-            <HeadlessButton class="btn btn-sm" onclick={toggle}>
-              <IconMdiMapMarkerPath style="margin-right: 0.25rem; margin-top: -2px;" />
+            <HeadlessButton class="btn btn-default" onclick={toggle}>
+              <IconMdiMapMarkerPath style="margin-right: 0.25rem; margin-top: -2px; flex-shrink: 0;" />
               {page.data.t('create.select_region')}
             </HeadlessButton>
             {#if show}
@@ -183,13 +186,19 @@
             {/if}
           {/snippet}
         </InitableShowHide>
-      {/if}
-    </div>
-  </div>
-
-  <div class="modal-footer">
+      </div>
+    {/if}
     <HeadlessButton class="btn-ghost btn-default" onclick={on_close}>
       {page.data.t('misc.close')}
     </HeadlessButton>
   </div>
 </Modal>
+
+<style>
+  .add-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-right: auto;
+  }
+</style>

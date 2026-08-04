@@ -76,17 +76,6 @@
           can_edit={can_edit}
           on_click={(e) => { handle_entry_click(e, entry) }}
           {writes} />
-
-        {#if page.state.entry_id === entry.id}
-          <Modal noscroll class="entry-overlay-modal" on_close={() => history.back()} show_x={false}>
-            <EntryPage
-              data={{
-                ...page_data,
-                entry_from_page: entry,
-                shallow: true,
-              }} />
-          </Modal>
-        {/if}
       {/each}
     {:else if search_params.value.view === 'table'}
       <EntriesTable
@@ -94,6 +83,7 @@
         preferred_table_columns={preferred_table_columns.value}
         {dictionary}
         can_edit={can_edit}
+        on_open_entry={handle_entry_click}
         {writes} />
     {:else if search_params.value.view === 'gallery'}
       <EntriesGallery
@@ -106,6 +96,20 @@
         {entries}
         {dictionary}
         can_edit={can_edit} />
+    {/if}
+
+    {#if page.state.entry_id}
+      {@const overlay_entry = entries.find(entry => entry.id === page.state.entry_id)}
+      {#if overlay_entry}
+        <Modal noscroll class="entry-overlay-modal" on_close={() => history.back()} show_x={false}>
+          <EntryPage
+            data={{
+              ...page_data,
+              entry_from_page: overlay_entry,
+              shallow: true,
+            }} />
+        </Modal>
+      {/if}
     {/if}
 
     {#snippet failed(_error, reset)}
