@@ -3,6 +3,8 @@
   import { page } from '$app/state'
   import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'
   import IconIcOutlineImage from '~icons/ic/outline-image'
+  import IconBiCameraVideo from '~icons/bi/camera-video'
+  import IconMdiMapMarker from '~icons/mdi/map-marker'
 
   interface Props {
     column: IColumn
@@ -21,6 +23,12 @@
   {:else if column.field === 'photo'}
     <IconIcOutlineImage style="font-size: 1.25rem; margin-left: auto; margin-right: auto" />
     {#if verbose}{page.data.t('entry.image')}{/if}
+  {:else if column.field === 'video'}
+    <IconBiCameraVideo style="font-size: 1.125rem; margin-left: auto; margin-right: auto" />
+    {#if verbose}{page.data.t('entry_field.video')}{/if}
+  {:else if column.field === 'coordinates'}
+    <IconMdiMapMarker style="font-size: 1.125rem; margin-left: auto; margin-right: auto" />
+    {#if verbose}{page.data.t('entry_field.coordinates')}{/if}
     <!-- {:else if column.field === 'checked'} ✓ -->
   {:else if ['gloss', 'definition', 'example_sentence', 'local_orthography'].includes(column.field)}
     <span style="text-transform: capitalize" title={column.explanation}> {column.display || page.data.t(i18nKey)} </span>

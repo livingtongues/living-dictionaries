@@ -1,5 +1,6 @@
 enum EntryFields {
   lexeme = 'lx',
+  homograph = 'hm',
   phonetic = 'ph',
   notes = 'nt',
   linguistic_history = 'lh',
@@ -15,6 +16,8 @@ enum EntryFields {
   dialects = 'di',
   variant = 'va',
   sources = 'sr',
+  sense_sources = 'sense_sources', // not actual db value — senses.sources in the table
+  video = 'video', // not actual db value
   elicitation_id = 'ei',
   parts_of_speech = 'ps',
   semantic_domains = 'sdn',
@@ -22,11 +25,11 @@ enum EntryFields {
   definition = 'de',
   photo = 'pf',
   audio = 'sf',
-  coordinates = 'co', // not known in i18n
+  coordinates = 'co',
   ID = 'id', // not i18n required
 }
 
 export type EntryFieldValue = keyof typeof EntryFields
 // export type EntryFieldKey = `${EntryFields}`;
 
-export type i18nEntryFieldKey = `entry_field.${Exclude<EntryFieldValue, 'coordinates' | 'ID'>}`
+export type i18nEntryFieldKey = `entry_field.${Exclude<EntryFieldValue, 'ID'>}`

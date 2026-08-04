@@ -558,6 +558,32 @@ is expected, not a gain error.
 Resume verified clean: `144,787 keys to process (2,210 already done)`.
 ETA ~8.7h from 20:50 UTC → **~05:35 UTC 2026-08-04**.
 
+### Checkpoint (2026-08-04 06:20 UTC, +9h27m) — 71%, still running
+
+Unit `active (running)`, PID 4151132, no restarts. **104,163 LEDGER / 45 FAIL**
+of 146,997 keys. Measured live rate over a 60s window: **3.53/s** — the run has
+settled at **~3.0–3.5/s, not the 4.6/s the short `workers=6` benchmark
+predicted**, so the ETA slipped from 05:35 UTC to **~09:40–10:15 UTC**. Memory
+210 MB (peak 391 MB), CPU 10h23m across the 2 cores at `nice 19`.
+
+> **Lesson: a 60-second throughput benchmark over-predicts a 9-hour run.** The
+> corpus is not uniform — clip lengths, CDN latency and R2 PUT time all vary by
+> dictionary, and the sustained average landed ~30% below the sample. Budget
+> long media jobs off the sustained rate, not the burst rate.
+
+**The 45 FAILs are benign and self-explaining** (0.04%):
+
+| count | kind |
+|---|---|
+| 43 | `ffprobe exited 1: Failed to read frame size: Could not seek to 1026` on `.wav` originals — concentrated in temboka (14), werikyana (12), kihehe (9), tiv/galo/atomb (2 each) |
+| 1 | `curl exited 56` — a transient CDN read failure (gta) |
+| 1 | corrupt original misdetected by ffmpeg as a `vvc` video stream (siletz-dee-ni) |
+
+The dominant mode is the encode producing an unreadable output mp3 for certain
+`.wav` sources; playback for those rows simply keeps falling back to the
+original, which is the designed behaviour. Worth a small follow-up pass, not a
+blocker.
+
 ### Remaining steps (after the run finishes)
 
 1. Confirm `systemctl --user is-active ld-audio-backfill` is `inactive` and the
@@ -570,6 +596,9 @@ ETA ~8.7h from 20:50 UTC → **~05:35 UTC 2026-08-04**.
    `media_type='audio' AND is_variant=1` rows (~146k).
 4. Update this report and give Jacob the final numbers.
 
-Follow-up scheduled via horse cron: **`c-223e77`**, one-time at 2026-08-04 06:15 UTC
-on mustang. It re-checks, relaunches if the run died again, applies the ledger,
-verifies, and reports.
+Follow-up crons (each re-checks, relaunches if the run died, applies the ledger,
+verifies, reports — and reschedules itself if the run is still going):
+
+- ~~`c-223e77`, 2026-08-04 06:15 UTC~~ — ran; found the job healthy at 71% and
+  rescheduled (see checkpoint above).
+- **`c-eafbaf`**, one-time at **2026-08-04 10:30 UTC** on mustang — current.

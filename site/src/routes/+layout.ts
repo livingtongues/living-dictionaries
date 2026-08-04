@@ -41,7 +41,7 @@ export const load: LayoutLoad = async ({ url: { searchParams }, data: { serverLo
   const dictionaries = create_dictionaries_store()
   const my_dictionaries = create_my_dictionaries_store({ user_id: ssr_user?.id })
 
-  const columns_key = `table_columns_03.18.2024-${ssr_user?.id ?? 'anon'}` // rename when adding more columns to invalidate the user's cache
+  const columns_key = `table_columns_2026-08-04-${ssr_user?.id ?? 'anon'}` // rename when adding more columns to invalidate the user's cache
   let preferred_table_columns = table_columns_states.get(columns_key)
   if (!preferred_table_columns) {
     preferred_table_columns = new PersistedState(columns_key, default_columns)

@@ -7,6 +7,7 @@
   import MarkdownEditor from '$lib/markdown/MarkdownEditor.svelte'
   import { page } from '$app/state'
   import IconFa6SolidChevronRight from '~icons/fa6-solid/chevron-right'
+  import IconFa6SolidChevronDown from '~icons/fa6-solid/chevron-down'
 
   interface Props {
     value?: string
@@ -16,6 +17,8 @@
     bcp?: string
     on_update: (new_value: string) => void | Promise<void>
     on_close: () => void
+    /** Shows a "Save ↓" action (also Ctrl+Enter) that saves, closes, then continues down the column. */
+    on_save_next?: () => void
   }
 
   let {
@@ -26,14 +29,20 @@
     bcp = undefined,
     on_update,
     on_close,
+    on_save_next = undefined,
   }: Props = $props()
 
   let inputEl: HTMLInputElement = $state()
 
   async function save() {
-    value = inputEl?.value || value // IpaKeyboard modifies input's value from outside this component so the bound value here doesn't update. This is hacky and the alternative is to emit events from the IpaKeyboard rather than bind to any neighboring element. This makes the adding and backspacing functions potentially needing to be applied in every context where the IPA keyboard is used. Until we know more how the IPA keyboard will be used, this line here is sufficient.
+    value = inputEl?.value || value || '' // IpaKeyboard modifies input's value from outside this component so the bound value here doesn't update. This is hacky and the alternative is to emit events from the IpaKeyboard rather than bind to any neighboring element. This makes the adding and backspacing functions potentially needing to be applied in every context where the IPA keyboard is used. Until we know more how the IPA keyboard will be used, this line here is sufficient.
     await on_update(value.trim())
     on_close()
+  }
+
+  async function save_and_next() {
+    await save()
+    on_save_next()
   }
 
   function autofocus(node: HTMLInputElement) {
@@ -109,6 +118,14 @@
   }
 </script>
 
+<svelte:window
+  onkeydown={(event) => {
+    if (on_save_next && event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+      event.preventDefault()
+      save_and_next()
+    }
+  }} />
+
 <Form onsubmit={save}>
   {#snippet children({ loading })}
     <div class="field-editor">
@@ -127,7 +144,7 @@
             class:sompeng={isSompeng}
             class="keyboard-input" />
         </Keyman>
-      {:else if field === 'local_orthography' || field === 'lexeme' || field === 'linguistic_history'}
+      {:else if field === 'local_orthography' || field === 'lexeme' || field === 'linguistic_history' || field === 'plural_form'}
         <Keyman fixed {bcp} canChooseKeyboard>
           <input
             bind:this={inputEl}
@@ -194,6 +211,17 @@
           <IconFa6SolidChevronRight class="rtl-x-flip" style="margin-top: -0.125rem" />
         </HeadlessButton>
       {:else}
+        {#if on_save_next}
+          <HeadlessButton
+            class="btn-ghost btn-default"
+            disabled={loading}
+            title="{page.data.t('misc.save')} + {page.data.t('misc.next')} (Ctrl+Enter)"
+            onclick={save_and_next}>
+            {page.data.t('misc.save')}
+            <IconFa6SolidChevronDown style="margin-top: -0.125rem" />
+          </HeadlessButton>
+          <div style="width: 0.25rem"></div>
+        {/if}
         <HeadlessButton class="btn-primary btn-default" {loading} type="submit">
           {page.data.t('misc.save')}
         </HeadlessButton>

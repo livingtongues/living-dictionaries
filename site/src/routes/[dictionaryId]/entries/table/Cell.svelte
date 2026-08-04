@@ -8,7 +8,10 @@
   import EntryAudioControl from '$lib/entry/entry-audio/EntryAudioControl.svelte'
   import { from_entry_audios } from '$lib/entry/entry-audio/audio-option-labels'
   import Textbox from './cells/Textbox.svelte'
+  import { SENSE_FIELDS } from './sense-fields'
   import SelectSpeakerCell from './cells/SelectSpeakerCell.svelte'
+  import VideoCell from './cells/VideoCell.svelte'
+  import CoordinatesCell from './cells/CoordinatesCell.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { get_headword } from '$lib/orthography/orthographies'
   import { page } from '$app/state'
@@ -27,6 +30,12 @@
   interface Props {
     column: IColumn
     entry: EntryData
+    /** The sense this row renders (null for a sense-less entry's single row). Entry-level
+     *  cells span all sense rows and receive the first sense. */
+    sense: EntryData['senses'][0] | null
+    /** The next row in this column's scope (next sense row for sense-level columns, next
+     *  entry otherwise) — powers the edit modal's "Save ↓" column run. */
+    next_row?: { entry: EntryData, sense: EntryData['senses'][0] | null } | null
     can_edit?: boolean
     writes: GuardedWrites
   }
@@ -34,12 +43,20 @@
   const {
     column,
     entry = $bindable(),
+    sense,
+    next_row = null,
     can_edit = false,
     writes,
   }: Props = $props()
 
-  const sense = $derived(entry.senses?.[0])
-  const first_photo = $derived(entry.senses?.[0]?.photos?.[0])
+  function run_id({ entry_id, sense_id }: { entry_id: string, sense_id: string | null }) {
+    const row_id = SENSE_FIELDS.has(column.field) ? (sense_id || entry_id) : entry_id
+    return `${column.field}|${column.bcp || ''}|${column.orthography_code || ''}|${row_id}`
+  }
+  const run_cell_id = $derived(run_id({ entry_id: entry.id, sense_id: sense?.id || null }))
+  const next_run_cell_id = $derived(next_row ? run_id({ entry_id: next_row.entry.id, sense_id: next_row.sense?.id || null }) : undefined)
+
+  const first_photo = $derived(sense?.photos?.[0])
   // Display-only headword fallback (photo title); the editable lexeme cell below stays on raw `default`.
   const headword = $derived(get_headword({ lexeme: entry.main.lexeme, orthographies: page.data.dictionary?.orthographies }))
 
@@ -54,7 +71,17 @@
     dict_db?.entries.update({ ...update, id: entry.id })
   }
   function update_sense(update: TablesUpdate<'senses'>) {
+    if (!sense?.id) return
     dict_db?.senses.update({ ...update, id: sense.id })
+  }
+
+  // MultiString edits from the table only touch the `default` locale — merge into the
+  // existing map (preserving other locales) and allow clearing (empty → key removed).
+  function merged_default(existing: Record<string, string> | null | undefined, new_value: string) {
+    const merged = { ...existing }
+    if (new_value) merged.default = new_value
+    else delete merged.default
+    return Object.keys(merged).length ? merged : null
   }
 </script>
 
@@ -87,23 +114,23 @@
         {/if}
       </div>
     {:else}
-      <Audio class="table-audio-cell" context="table" {can_edit} sound_file={null} {entry} />
+      <Audio class="table-audio-cell empty-affordance" context="table" {can_edit} sound_file={null} {entry} />
     {/if}
   {:else if column.field === 'photo'}
     {#if first_photo}
       <Image
-        square={60}
+        square={112}
         title={headword.value}
         photo={first_photo}
+        photos={sense.photos}
         photo_source={first_photo.source}
         photographer={first_photo.photographer}
         {can_edit}
-        on_delete_image={async () => await writes.delete_photo(first_photo.id)} />
-    {:else if can_edit}
-      <!-- <div class="h-20 bg-gray-100 hover:bg-gray-300 mb-2 flex flex-col"> -->
+        on_delete_image={async photo_id => await writes.delete_photo(photo_id ?? first_photo.id)} />
+    {:else if can_edit && sense?.id}
       <ShowHide>
         {#snippet children({ show, toggle })}
-          <div class="photo-upload" onclick={toggle}>
+          <div class="photo-upload empty-affordance" onclick={toggle}>
             <span class="desktop-only">
               <IconIcOutlineCloudUpload style="font-size: 1.5rem" />
             </span>
@@ -119,8 +146,11 @@
           {/if}
         {/snippet}
       </ShowHide>
-      <!-- </div> -->
     {/if}
+  {:else if column.field === 'video'}
+    <VideoCell {entry} {sense} {can_edit} title={headword.value} />
+  {:else if column.field === 'coordinates'}
+    <CoordinatesCell {entry} {can_edit} />
   {:else if column.field === 'speaker'}
     <SelectSpeakerCell {can_edit} {entry} />
   {:else if column.field === 'parts_of_speech'}
@@ -129,7 +159,7 @@
       value={sense?.parts_of_speech}
       showPlus={false}
       on_update={(new_value) => {
-        if (writes.check_ready()) return
+        if (writes.check_ready() || !sense) return
         sense.parts_of_speech = new_value
         update_sense({ parts_of_speech: new_value })
       }} />
@@ -140,12 +170,12 @@
       semantic_domain_keys={sense?.semantic_domains}
       write_in_semantic_domains={sense?.write_in_semantic_domains}
       on_update={(new_value) => {
-        if (writes.check_ready()) return
+        if (writes.check_ready() || !sense) return
         sense.semantic_domains = new_value
         update_sense({ semantic_domains: new_value })
       }}
       on_update_write_in={(new_value) => {
-        if (writes.check_ready()) return
+        if (writes.check_ready() || !sense) return
         sense.write_in_semantic_domains = new_value
         update_sense({ write_in_semantic_domains: new_value })
       }} />
@@ -165,28 +195,44 @@
     <EntrySource
       {can_edit}
       value={entry.main.sources}
+      citations={entry.main.citations}
       on_update={(new_value) => {
         if (writes.check_ready()) return
         entry.main.sources = new_value
         update_entry({ sources: new_value })
       }} />
+  {:else if column.field === 'sense_sources'}
+    {#if sense}
+      <EntrySource
+        {can_edit}
+        value={sense.sources}
+        on_update={(new_value) => {
+          if (writes.check_ready() || !sense) return
+          sense.sources = new_value
+          update_sense({ sources: new_value })
+        }} />
+    {/if}
   {:else if column.field === 'gloss'}
     <Textbox
+      {run_cell_id}
+      {next_run_cell_id}
       field={column.field}
       value={sense?.glosses?.[column.bcp]}
       display={column.display}
       on_update={(new_value) => {
-        if (writes.check_ready()) return
+        if (writes.check_ready() || !sense) return
         sense.glosses = { ...sense.glosses, [column.bcp]: new_value }
         update_sense({ glosses: sense?.glosses })
       }} />
   {:else if column.field === 'definition'}
     <Textbox
+      {run_cell_id}
+      {next_run_cell_id}
       field={column.field}
       value={sense?.definition?.[column.bcp]}
       display={column.display}
       on_update={(new_value) => {
-        if (writes.check_ready()) return
+        if (writes.check_ready() || !sense) return
         sense.definition = { ...sense.definition, [column.bcp]: new_value }
         update_sense({ definition: sense.definition })
       }} />
@@ -194,6 +240,8 @@
     {@const sentence = sense?.sentences?.[0]}
     {#if column.bcp === 'vn'}
       <Textbox
+        {run_cell_id}
+        {next_run_cell_id}
         field={column.field}
         value={sentence?.text?.default}
         display={page.data.t('entry_field.example_sentence')}
@@ -213,6 +261,8 @@
     {:else}
       {#if sentence}
         <Textbox
+          {run_cell_id}
+          {next_run_cell_id}
           field={column.field}
           value={sentence?.translation?.[column.bcp]}
           display="{page.data.t({ dynamicKey: `gl.${column.bcp}`, fallback: column.bcp })}: {page.data.t('entry_field.example_sentence')}"
@@ -226,22 +276,29 @@
             })
           }} />
       {:else}
-        <div onclick={() => alert('First add example sentence.')} style="height: 100%"></div>
+        <div class="needs-sentence-first" title={page.data.t('entry.add_example_sentence_first')}></div>
       {/if}
     {/if}
   {:else if column.field === 'scientific_names'}
     <Textbox
+      {run_cell_id}
+      {next_run_cell_id}
+      inline
       field={column.field}
       value={entry.main.scientific_names?.[0]}
       display={page.data.t('entry_field.scientific_names')}
       on_update={(new_value) => {
         if (writes.check_ready()) return
-        entry.main.scientific_names = [new_value]
+        const additional_names = entry.main.scientific_names?.slice(1) || []
+        const names = new_value ? [new_value, ...additional_names] : additional_names
+        entry.main.scientific_names = names.length ? names : null
         update_entry({ scientific_names: entry.main.scientific_names })
       }} />
   {:else if column.field === 'local_orthography'}
     {@const orthography_field = column.orthography_code}
     <Textbox
+      {run_cell_id}
+      {next_run_cell_id}
       field={column.field}
       value={entry.main.lexeme[orthography_field]}
       display={column.display}
@@ -253,6 +310,8 @@
   {:else if column.field === 'lexeme'}
     {#if entry.main.review}<span class="table-review"><ReviewIndicator review={entry.main.review} /></span>{/if}
     <Textbox
+      {run_cell_id}
+      {next_run_cell_id}
       field={column.field}
       value={entry.main.lexeme.default}
       display={page.data.t('entry_field.lexeme')}
@@ -265,30 +324,33 @@
       }} />
   {:else if column.field === 'notes'}
     <Textbox
+      {run_cell_id}
+      {next_run_cell_id}
       field={column.field}
       value={entry.main.notes?.default}
       display={page.data.t('entry_field.notes')}
       on_update={(new_value) => {
         if (writes.check_ready()) return
-        if (new_value) {
-          entry.main.notes = { default: new_value }
-          update_entry({ notes: entry.main.notes })
-        }
+        entry.main.notes = merged_default(entry.main.notes, new_value)
+        update_entry({ notes: entry.main.notes })
       }} />
   {:else if column.field === 'linguistic_history'}
     <Textbox
+      {run_cell_id}
+      {next_run_cell_id}
       field={column.field}
       value={entry.main.linguistic_history?.default}
       display={page.data.t('entry_field.linguistic_history')}
       on_update={(new_value) => {
         if (writes.check_ready()) return
-        if (new_value) {
-          entry.main.linguistic_history = { default: new_value }
-          update_entry({ linguistic_history: entry.main.linguistic_history })
-        }
+        entry.main.linguistic_history = merged_default(entry.main.linguistic_history, new_value)
+        update_entry({ linguistic_history: entry.main.linguistic_history })
       }} />
   {:else if column.field === 'interlinearization' || column.field === 'morphology' || column.field === 'phonetic' || column.field === 'elicitation_id'}
     <Textbox
+      {run_cell_id}
+      {next_run_cell_id}
+      inline={column.field !== 'phonetic'}
       field={column.field}
       value={entry.main[column.field]}
       display={page.data.t(`entry_field.${column.field}`)}
@@ -300,23 +362,54 @@
       }} />
   {:else if column.field === 'noun_class'}
     <Textbox
+      {run_cell_id}
+      {next_run_cell_id}
+      inline
       field={column.field}
       value={sense?.noun_class}
       display={page.data.t(`entry_field.${column.field}`)}
       on_update={(new_value) => {
-        if (writes.check_ready()) return
+        if (writes.check_ready() || !sense) return
         sense.noun_class = new_value
         update_sense({ noun_class: new_value })
       }} />
   {:else if column.field === 'plural_form'}
     <Textbox
+      {run_cell_id}
+      {next_run_cell_id}
       field={column.field}
       value={sense?.plural_form?.default}
       display={page.data.t(`entry_field.${column.field}`)}
       on_update={(new_value) => {
+        if (writes.check_ready() || !sense) return
+        sense.plural_form = merged_default(sense.plural_form, new_value)
+        update_sense({ plural_form: sense.plural_form })
+      }} />
+  {:else if column.field === 'variant'}
+    <Textbox
+      {run_cell_id}
+      {next_run_cell_id}
+      inline
+      field={column.field}
+      value={sense?.variant?.default}
+      display={page.data.t('entry_field.variant')}
+      on_update={(new_value) => {
+        if (writes.check_ready() || !sense) return
+        sense.variant = merged_default(sense.variant, new_value)
+        update_sense({ variant: sense.variant })
+      }} />
+  {:else if column.field === 'homograph'}
+    <Textbox
+      {run_cell_id}
+      {next_run_cell_id}
+      inline
+      field={column.field}
+      value={entry.main.homograph}
+      display={page.data.t('entry_field.homograph')}
+      on_update={(new_value) => {
         if (writes.check_ready()) return
-        sense.plural_form = { default: new_value }
-        update_sense({ plural_form: sense?.plural_form })
+        entry.main.homograph = new_value || null
+        update_entry({ homograph: entry.main.homograph })
       }} />
   {/if}
 </div>
@@ -378,9 +471,18 @@
     background: color-mix(in srgb, var(--color) 10%, transparent);
   }
 
+  .needs-sentence-first {
+    height: 100%;
+    background: repeating-linear-gradient(-45deg, transparent, transparent 6px, color-mix(in srgb, var(--color) 4%, transparent) 6px, color-mix(in srgb, var(--color) 4%, transparent) 12px);
+  }
+
   .photo-upload {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
     color: color-mix(in srgb, var(--color) 75%, var(--background)); /* ≈ gray-600 */
-    text-align: center;
     cursor: pointer;
   }
 

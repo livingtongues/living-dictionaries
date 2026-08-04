@@ -50,10 +50,21 @@
   // layout: doing so quivered rows forever (see the CSS comments below).
   const show_video = $derived(!!first_video && !dictionary.con_language_description)
   const show_photo = $derived(!!first_sense.photos?.length)
-  const thumb_count = $derived((show_video ? 1 : 0) + (show_photo ? 1 : 0))
 
   const video_thumb_url = $derived(first_video ? video_thumb_src(first_video) : null)
   let video_thumb_errored = $state(false)
+
+  // A video with no thumbnail yet (generation runs shortly after upload; legacy/failed stay
+  // bare) renders as a compact chip, not a featureless full square — only real thumbnails
+  // earn the flush treatment.
+  const video_has_thumb = $derived(!!video_thumb_url && !video_thumb_errored)
+  const video_chip = $derived(show_video && !video_has_thumb)
+  const thumb_count = $derived((show_video && video_has_thumb ? 1 : 0) + (show_photo ? 1 : 0))
+  const media_slot_width = $derived.by(() => {
+    const items = thumb_count + (video_chip ? 1 : 0)
+    if (!items) return '0rem'
+    return `calc(${thumb_count} * 6.5rem + ${video_chip ? 1 : 0} * 2.75rem + ${items - 1} * 2px)`
+  })
 
   // No language-name labels in the list — values only, languages separated by '·'.
   function multistring_text(value: EntryData['senses'][0]['glosses']): string {
@@ -254,13 +265,13 @@
     </button>
   {/if}
 
-  {#if thumb_count}
-    <div class="media-slot" style="--thumb-count: {thumb_count}">
+  {#if thumb_count || video_chip}
+    <div class="media-slot" style="width: {media_slot_width}">
       <div class="media-rail">
         {#if show_video}
           <ShowHide>
             {#snippet children({ show, toggle })}
-              <button type="button" class="media-thumb video-thumb" title={page.data.t('video.view')} onclick={toggle}>
+              <button type="button" class="media-thumb video-thumb" class:video-chip={!video_has_thumb} title={page.data.t('video.view')} onclick={toggle}>
                 {#if video_thumb_url && !video_thumb_errored}
                   <img src={video_thumb_url} alt="" onerror={() => video_thumb_errored = true} />
                   <span class="play-overlay"><IconMdiPlay style="font-size: 1.25rem" /></span>
@@ -502,7 +513,7 @@
     align-self: stretch;
     flex-shrink: 0;
     position: relative;
-    width: calc(var(--thumb-count, 1) * 6.5rem + (var(--thumb-count, 1) - 1) * 2px);
+    /* width set inline (thumb squares + optional video chip) — still FIXED per the rules above */
     margin: -0.5rem -0.625rem -0.5rem 0.125rem;
     container-type: size;
   }
@@ -553,6 +564,14 @@
     justify-content: center;
     color: var(--color-secondary);
     cursor: pointer;
+  }
+
+  /* No-thumbnail video: a small centered circular chip instead of a featureless square. */
+  .media-thumb.video-chip {
+    flex: 0 0 2.25rem;
+    align-self: center;
+    height: 2.25rem;
+    border-radius: 50%;
   }
 
   .video-thumb img {

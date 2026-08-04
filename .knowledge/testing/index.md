@@ -25,6 +25,14 @@ Durable conventions/gotchas for verifying LD beyond what the code shows.
   a logged-out viewer pulls the real snapshot from public R2 and `/api/dev-media` 302s photos to
   R2, so the local page is byte-identical to prod (recipe in
   `.issues/entries-list-row-quiver.md`).
+- **Headless Chrome reports `hover: none` / `pointer: coarse`** — any `@media (hover: hover)`
+  UI (e.g. the entries-table hover-revealed affordances + desktop drag interactions) silently
+  renders in its TOUCH state under vanilla headless puppeteer, and
+  `page.emulateMediaFeatures`/CDP `Emulation.setEmulatedMedia` do NOT change these two
+  features. Launch with
+  `--blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4`
+  to verify the desktop pointer state (`matchMedia('(hover: hover)')` then matches). The default
+  headless state doubles as the mobile/touch verification pass.
 - [browser-deep-flow.md](./browser-deep-flow.md) — the puppeteer-core deep-flow harness
   (`site/e2e/achi-flow.mjs` + `db-ops-flow.mjs`): why puppeteer-core over Playwright, server
   options (self-boot `node build` vs `BASE_URL=:3041` — media/admin need dev mode), real-auth

@@ -65,6 +65,12 @@
   let loading = $state(false)
   let viewing = $state(false)
   let view_index = $state(0)
+  let thumb_errored = $state(false)
+
+  $effect(() => {
+    void photo
+    thumb_errored = false
+  })
 
   const gallery = $derived(photos && photos.length > 1 ? photos : null)
   // Clamp against live deletes shrinking the array while the viewer is open.
@@ -112,13 +118,20 @@
 
 <div class="image-wrap">
   {#if !viewing}
-    <img
-      class="thumb"
-      onclick={load}
-      in:receive={{ key }}
-      out:send={{ key }}
-      alt={title}
-      src={photo_src({ photo, variant: thumbnail_variant })} />
+    {#if thumb_errored}
+      <div class="thumb-fallback" title={title}>
+        <IconMdiCameraOutline style="font-size: 1.125rem; opacity: 0.4" />
+      </div>
+    {:else}
+      <img
+        class="thumb"
+        onclick={load}
+        onerror={() => thumb_errored = true}
+        in:receive={{ key }}
+        out:send={{ key }}
+        alt={title}
+        src={photo_src({ photo, variant: thumbnail_variant })} />
+    {/if}
     {#if loading}
       <IconGgSpinner class="spinner" />
     {:else if photographer === 'AI'}
@@ -202,6 +215,16 @@
     width: 100%;
     object-fit: cover;
     cursor: pointer;
+    background: color-mix(in srgb, var(--color) 8%, transparent);
+  }
+
+  .thumb-fallback {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--color) 8%, transparent);
   }
 
   .image-wrap :global(.spinner) {
