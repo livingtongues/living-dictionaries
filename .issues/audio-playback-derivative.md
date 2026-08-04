@@ -584,21 +584,210 @@ The dominant mode is the encode producing an unreadable output mp3 for certain
 original, which is the designed behaviour. Worth a small follow-up pass, not a
 blocker.
 
-### Remaining steps (after the run finishes)
+### ✅ Run 2 COMPLETE (2026-08-04 09:45 UTC, 772 min) — corpus done
 
-1. Confirm `systemctl --user is-active ld-audio-backfill` is `inactive` and the
-   `[backfill] DONE` line is in `backfill-run.err`; `grep -c '^LEDGER'` should be
-   ~146,997. Investigate if FAIL lines > 100.
-2. Apply the ledger: `scp ~/ld-audio/backfill-run.log living:/tmp/`, then inside
-   the live container — `DERIVATIVE_LOG=… SHARED_DB=/data/shared.db node apply-ledger.cjs`.
-3. Verify: ffmpeg `ebur128` probe of 3 random `_p1.mp3` CDN urls (expect near
-   -16 LUFS, or less gain when sample-peak-capped), and a shared.db count of
-   `media_type='audio' AND is_variant=1` rows (~146k).
-4. Update this report and give Jacob the final numbers.
+`[backfill] DONE 143085/143085, 319 failed, 772 min`; unit `inactive`, exit 0,
+**zero restarts** across the whole 12h52m. (The `143085` denominator is run 2's
+own queue — the 2,210 keys run 1 had already finished were skipped by `--resume`.)
 
-Follow-up crons (each re-checks, relaunches if the run died, applies the ledger,
-verifies, reports — and reschedules itself if the run is still going):
+| | |
+|---|---|
+| worklist | **146,997** keys |
+| LEDGER lines | **146,678** (99.78%) |
+| FAIL lines | **319** (0.22%) |
+| wall time | 12h52m (run 2) at a sustained **3.1/s** |
+| derivative bytes | **1.93 GB** for **87.6 h** of audio |
+| originals | 147,038 rows / **29.12 GB** — derivatives are **6.6%** of that |
 
-- ~~`c-223e77`, 2026-08-04 06:15 UTC~~ — ran; found the job healthy at 71% and
-  rescheduled (see checkpoint above).
-- **`c-eafbaf`**, one-time at **2026-08-04 10:30 UTC** on mustang — current.
+### The 319 FAILs are 317 EMPTY SOURCE FILES, not encoder bugs
+
+Root cause finally pinned by downloading the failing originals: they are
+**44-byte header-only WAV files with zero PCM data** — failed/aborted recordings
+that were uploaded as empty containers. ffmpeg dutifully encodes zero samples,
+the output mp3 has no frames, and `ffprobe` fails with
+`Failed to read frame size: Could not seek to 1026`. Eight sampled at random
+across five dictionaries: **every single one was exactly 44 bytes.**
+
+So the earlier read ("the encode produces an unreadable output for certain `.wav`
+sources") was wrong in an important way — there is nothing to fix in the pipeline
+and nothing to retry. **This is a data-quality finding, not a media-pipeline
+finding.** Those rows keep falling back to the original, which is correct.
+
+| count | key size | kind |
+|---|---|---|
+| 313 | 44 B | empty container — galadagon 177, dogon 60, dymetris 28, temboka 13, werikyana 12, kihehe 9, + 8 dicts with ≤4 |
+| 4 | 49 KB – 1.5 MB | **valid wav, pure digital silence** (−91.0 dB mean AND max, every sample zero) — temboka, atomb, niaya, kruniflu |
+| 1 | 58.5 KB | corrupt container, undecodable as audio (ffmpeg parses it as `vvc` video) — siletz-dee-ni |
+| 1 | 39.2 KB | real audio, `curl exited 56` — transient CDN blip (gta), retryable |
+
+> **Lesson: when a media job fails in clusters by dictionary, suspect the
+> uploads, not the encoder.** One `curl -o /dev/null -w '%{size_download}'` over
+> a random sample of failing keys answered in seconds what an ffmpeg-flag
+> investigation would have chased for an hour.
+
+### The FAIL list is a FREE corpus-wide silence scan (2026-08-04)
+
+The trim stage removes leading/trailing silence, so a file that is **entirely**
+below the trim threshold produces a zero-frame mp3 and fails `ffprobe`. Any file
+with even a trace of signal converted fine. Therefore the 319 FAILs are not a
+sample — **they are every silent or unreadable audio object in the corpus**, and
+we got that scan for free. Corpus-wide there are exactly **4** silent recordings
+and **1** corrupt one out of 146,997.
+
+### What is actually user-facing: 5 rows, not 317 (corrected 2026-08-04)
+
+The first read of this run claimed "~317 entries carry silently empty audio."
+**That was wrong.** Checked against prod, three ways (`audio.id`,
+`audio.storage_path` exact, `storage_path LIKE`):
+
+- **The 313 empty containers have NO `audio` row in any dict.db** — zero of 313
+  matched. They are failed uploads that left bytes in R2 without ever creating a
+  row. No entry references them, no user can reach them, and the media sweep had
+  **already marked all 313 `orphaned_at` on 2026-07-30**; they get really deleted
+  at the end of the 30-day grace (~2026-08-29) with the 1-year backup mirror
+  behind them. **Nothing to tombstone and nothing to do.**
+- **Exactly 6 of 319 match a live `audio` row**, all six attached to an entry —
+  and they are precisely the six non-empty files. Of those, **5 are genuinely
+  misleading**: 4 play pure silence, 1 is undecodable. The 6th (gta) is real
+  audio that hit a network blip and just needs a retry.
+
+> **Lesson: "an orphaned object in the bucket" and "a row users can see" are
+> different populations, and a per-dictionary failure histogram tells you nothing
+> about which one you're looking at.** Join to the content DB before claiming user
+> impact. Here the join moved the number from 317 to 5.
+
+galadagon is the extreme case: **177 empty objects against 104 real audio rows** —
+that dictionary's uploader failed more often than it succeeded at some point.
+
+### Ledger applied to prod (2026-08-04 10:35 UTC)
+
+`apply-ledger.cjs` run inside `sveltekit_blue` against `/data/shared.db`:
+
+```
+{"recorded":146678,"bytes":1926047125}
+{"count":146719,"bytes":1927854406}
+```
+
+Gotchas hit while applying, for next time:
+
+- **Caddy load-balances across BOTH `sveltekit_blue` and `sveltekit_green`**
+  (`reverse_proxy sveltekit_blue:3000 sveltekit_green:3000`), so there is no
+  single "live" container to hunt for — both are live and both bind-mount the
+  same `/data`. Either one is the right place to run a DB script.
+- The app root in the container is **`/workspace/site`** (not `/app`), and
+  `node_modules` sits at `/workspace/node_modules`. A script `docker cp`'d to
+  `/tmp` **cannot resolve `better-sqlite3`** — Node resolves from the script's
+  own directory. Copy it into `/workspace/site` and run it with `-w /workspace/site`.
+
+Final prod state (`media_objects`): **146,719** rows `media_type='audio' AND
+is_variant=1`, 1.93 GB, 315,335,041 ms of audio, **0 with NULL duration, 0
+orphaned**. The 41-row gap above the ledger count is derivatives the live
+post-upload ping had already recorded outside this run.
+
+### Post-apply verification
+
+Three random `_p1.mp3` CDN urls, cache-busted, probed with `ebur128` against
+their originals — all `mp3 / 32000 Hz / mono` as designed:
+
+| key | orig I | deriv I |
+|---|---|---|
+| han/…3473ba1 | -15.3 | **-15.9** |
+| syloti/…f9944ec3 | -33.9 | **-14.8** |
+| weri/…9147 | -15.3 | **-15.8** |
+
+The syloti clip is the documented silence-trim effect: a -33.9 LUFS original
+lands slightly above -16 because trimming the silence raises the survivor's
+integrated loudness. Both other clips sit on target.
+
+### Done / not done
+
+- ✅ Corpus backfill complete, ledger applied, prod verified.
+- ⏸️ Nothing committed from this session — the site code was already committed
+  and pushed before the run.
+- ✅ mustang scratch cleaned (2026-08-04): `r2.env` **shredded**, worklist +
+  stderr + the two old dashboards deleted, `backfill-run.log` gzipped and kept as
+  the run record. `~/ld-audio` is now 3.9 MB.
+- ✅ **The 5 misleading audio rows are deleted** and the 313 empty objects are
+  purged from R2 (both approved by Jacob 2026-08-04 — see the two sections
+  below). gta needed no action; the daily sweep retries it.
+
+### ✅ Cleanup executed (2026-08-04 10:50 UTC)
+
+**The 5 rows — deleted through the real v1 endpoint, not a script.**
+`DELETE /api/v1/dictionaries/{dict}/entries/{entryId}/audio/{audioId}`, authed
+with a **600-second** admin JWT minted inside the container (so `JWT_SECRET` and
+the token never left the VPS), acting as Jacob. All 5 returned
+`200 {"result":"deleted"}`, and each verified four ways: `row_gone=true`,
+`tombstone=true`, `speakers_cascaded=true` (FK cascade swept `audio_speakers`),
+and a `delete` history event in the dict's `.history.db` attributed to Jacob.
+
+> **Reuse the shipped endpoint instead of replicating its steps.** The handler
+> already does tombstone + cascade + cursor bump + history + `mirror_dictionary_cursor`
+> (the shared.db `updated_at` bump that triggers the snapshot rebuild) + a
+> `v1_media_deleted` server event. A hand-rolled script would have had to
+> reproduce all six and would have silently skipped history. This is the
+> human/agent parity direction paying off on an ops task.
+
+**The 313 empty objects — force-deleted from R2** (Jacob chose this over waiting
+for the ~Aug 29 grace expiry). Two safety properties worth keeping if this is
+ever repeated:
+
+- **The delete set was computed fresh, never from the run log**: ledger audio
+  originals with `bytes <= 200` MINUS anything still referenced by a live
+  `audio.storage_path` in any dict.db (0 were), plus a `SANITY_MAX_DELETES=400`
+  abort cap.
+- **Every single delete was preceded by its own `HEAD`** re-confirming the object
+  is ≤200 bytes; a mismatch refuses that key rather than the batch. Result:
+  **deleted 313, already-absent 0, failed 0.**
+
+`@aws-sdk` is bundled into the server build and NOT requireable from
+`docker exec` (see [share-card-store-tiers.md](../.knowledge/server/share-card-store-tiers.md)),
+so the script **signs S3 SigV4 itself with `node:crypto`** (~25 lines). That was
+the better trade anyway: no credential ever left the VPS, versus pulling R2 keys
+onto mustang again. The VPS has neither `rclone` nor `aws` installed.
+
+Verified after: three purged keys return **404** from the CDN while a real
+galadagon recording still serves **200 / 344 KB**; ledger `tiny originals = 0`;
+audio originals **147,038 → 146,725** (exactly −313).
+
+The 5 deleted rows' R2 objects were deliberately **left** to the normal 30-day
+orphan grace rather than force-deleted — they are real files, so the recovery
+window is worth more than the bytes.
+
+### What was deleted
+
+| dict | entry | reason | file |
+|---|---|---|---|
+| temboka | `Gheee` | all samples zero (−91.0 dB) | 147 KB / 0.84s |
+| atomb | `yikisək` | all samples zero — entry keeps 1 other, working recording | 49 KB / 0.26s |
+| niaya | `KKK` | all samples zero | 1.5 MB / 7.68s |
+| kruniflu | `Uneuw` | all samples zero | 311 KB / 1.62s |
+| siletz-dee-ni | `bv-nee-nvsh` | corrupt container, undecodable by ffmpeg or a browser | 58 KB |
+
+Recoverable three ways if anyone objects: the `delete` history event carries the
+full pre-delete snapshot, the R2 object survives the 30-day grace, and the
+backups bucket holds it for a year.
+
+### Why this needed BOTH propagation channels
+
+Per [`.knowledge/db/server-side-content-cleanup-sync.md`](../.knowledge/db/server-side-content-cleanup-sync.md),
+a server-side dict.db edit only converges if it feeds both:
+
+1. **`/changes` delta pull → already-open editors.** The `deletes` tombstone
+   fires `process_delete_cascade` (hard-delete + FK cascade) and bumps the dict
+   cursor. Handled by `delete_dict_row` inside the endpoint.
+2. **R2 snapshot rebuild → cold/first loaders.** `mirror_dictionary_cursor`
+   bumps `shared.db.dictionaries.updated_at`, and `sweep_dirty_dictionaries`
+   (≤30 min) rebuilds any dict whose `updated_at > snapshot_uploaded_at`.
+   All 5 were `REBUILD PENDING` immediately after the delete — **confirmed
+   rebuilt before this session ended** by polling until every one flipped.
+   Don't skip this check: an editor seeing the fix while a fresh visitor still
+   loads a stale snapshot is exactly the bug this channel exists to prevent.
+
+The 50%-per-dict orphan brake was never a concern here (1 object per dictionary).
+
+Follow-up crons (all fired; chain closed):
+
+- ~~`c-223e77`, 2026-08-04 06:15 UTC~~ — found the job healthy at 71%, rescheduled.
+- ~~`c-eafbaf`, 2026-08-04 10:30 UTC~~ — found the run COMPLETE, applied the
+  ledger, verified, wrote this section. **No further cron scheduled.**

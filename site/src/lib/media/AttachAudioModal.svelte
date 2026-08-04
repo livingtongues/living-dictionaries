@@ -8,7 +8,6 @@
   import { add_audio } from '$lib/media/add-media'
   import { run_auto_align } from '$lib/media/auto-align'
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
-  import JSON from '$lib/components/ui/JSON.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
   import Waveform from '$lib/components/audio/Waveform.svelte'
   import SelectAudio from '$lib/components/audio/SelectAudio.svelte'
@@ -27,7 +26,7 @@
 
   const { on_close, title, text_id, sentence_id, audio = null }: Props = $props()
 
-  const { auth_user, writes, url_from_storage_path } = $derived(page.data)
+  const { writes, url_from_storage_path } = $derived(page.data)
 
   let upload_triggered = $state(false)
   // Must match RecordAudio's $bindable fallbacks — see EditAudio's note on props_invalid_value.
@@ -132,11 +131,6 @@
 
   <div class="modal-footer">
     {#if audio}
-      {#if auth_user.admin_level >= 3}
-        <JSON obj={audio} />
-        <div style="width: 0.25rem"></div>
-      {/if}
-
       <HeadlessButton class="btn btn-default" href={url_from_storage_path(audio.storage_path)} target="_blank">
         <IconDownload />
         <span class="wide-only">{page.data.t('misc.download')}</span>

@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { TablesUpdate } from '$lib/types'
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
-  import JSON from '$lib/components/ui/JSON.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
   import PublicCheckbox from '$lib/components/settings/PublicCheckbox.svelte' // only used here - perhaps colocate
@@ -79,11 +78,6 @@
     </div>
   {/if}
 
-  {#if auth_user.admin_level >= 3}
-    <div style="margin-top: 1.25rem">
-      <JSON obj={dictionary} />
-    </div>
-  {/if}
 </div>
 
 <SeoMetaTags

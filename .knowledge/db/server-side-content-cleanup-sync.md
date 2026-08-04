@@ -60,3 +60,29 @@ verbose in `/changes`.
 Under blue/green, `docker exec sveltekit_blue` is NOT necessarily the container
 Caddy serves — `localhost:3000` inside it can `ECONNREFUSED`. Mint locally, call
 the public URL.
+
+## Running a one-off node script inside the container (2026-08-04)
+
+For a script that only touches the **database** (not HTTP), the blue/green
+distinction does not matter at all: Caddy is configured
+`reverse_proxy sveltekit_blue:3000 sveltekit_green:3000` — it **load-balances
+across both**, both are live, and both bind-mount the same host `/data`. Pick
+either; don't go hunting for "the live one".
+
+Two things that will waste your time:
+
+- The app root is **`/workspace/site`**, not `/app`. `node_modules` is one level
+  up at `/workspace/node_modules`.
+- Node resolves `require`/`import` from the **script's own directory**, so a
+  script `docker cp`'d to `/tmp` fails with `Cannot find module 'better-sqlite3'`
+  even though the module is right there in the image. Copy it into
+  `/workspace/site` and run with `-w /workspace/site`, then delete it:
+
+```bash
+docker cp ./job.cjs sveltekit_blue:/workspace/site/job.cjs
+docker exec -w /workspace/site -e SHARED_DB=/data/shared.db sveltekit_blue node ./job.cjs
+docker exec sveltekit_blue rm -f /workspace/site/job.cjs
+```
+
+(Separately, `@aws-sdk` is bundled rather than externalized, so it is NOT
+requireable this way — see [share-card-store-tiers.md](../server/share-card-store-tiers.md).)

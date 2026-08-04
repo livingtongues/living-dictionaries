@@ -6,7 +6,6 @@
   import type { MediaUploadContext } from '$lib/media/add-media'
   import { add_audio } from '$lib/media/add-media'
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
-  import JSON from '$lib/components/ui/JSON.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
   import { page } from '$app/state'
   import Waveform from '$lib/components/audio/Waveform.svelte'
@@ -28,7 +27,7 @@
   const { on_close, entry, sound_file, initial_file = undefined, context = 'entry' }: Props = $props()
 
   let upload_triggered = $state(false)
-  const { auth_user, writes, url_from_storage_path } = $derived(page.data)
+  const { writes, url_from_storage_path } = $derived(page.data)
   const headword = $derived(get_headword({ lexeme: entry.main.lexeme, orthographies: page.data.dictionary?.orthographies }))
   // Must match RecordAudio's $bindable fallbacks (permissionGranted = false, audioBlob = null):
   // binding an `undefined` $state to a prop with a non-undefined fallback throws Svelte's
@@ -123,11 +122,6 @@
 
   <div class="modal-footer">
     {#if sound_file}
-      {#if auth_user.admin_level >= 3}
-        <JSON obj={sound_file} />
-        <div style="width: 0.25rem"></div>
-      {/if}
-
       <HeadlessButton class="btn btn-default" href={url_from_storage_path(sound_file.storage_path)} target="_blank">
         <IconDownload />
         <span class="wide-only">{page.data.t('misc.download')}</span>

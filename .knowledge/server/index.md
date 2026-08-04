@@ -42,3 +42,12 @@ this category is about the runtime.
   in the HOOKS chunk (and start a second cron scheduler in every child), what is different inside a
   child (`$env/dynamic/private` is empty, never `get_shared_db()`, keep it read-only + report over
   IPC), and why every such job must emit `blocking_ms` and not just `duration_ms`.
+- [long-running-corpus-jobs.md](./long-running-corpus-jobs.md) — one-off multi-hour operator passes
+  over the whole corpus (from the 13-hour, 147k-object audio-derivative backfill): why it must be a
+  detached `systemd-run --user` unit and never an agent-session child, the append-only log that
+  doubles as the resume checkpoint (and why the post-resume progress denominator misleads), why a
+  60-second benchmark over-predicted the sustained rate by 30%, the rule that failures clustered
+  by dictionary mean bad INPUT (313 were 44-byte empty WAVs), not a bad transform, and — the one
+  that cost a wrong report — **an orphaned bucket object is not a row a user can see**: join to the
+  content DB before quantifying impact (it moved the number from 317 to 5). Ends with how to delete
+  what you find: reuse the shipped v1 endpoint, and sign SigV4 by hand rather than move credentials.
