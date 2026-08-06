@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { EntryFieldValue } from '$lib/types'
-  import sanitize from 'xss'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
   import GlossedText from '$lib/corpus/GlossedText.svelte'
@@ -8,7 +7,6 @@
 
   interface Props {
     value: string
-    htmlValue?: string
     field: EntryFieldValue
     bcp?: string
     display: string
@@ -19,7 +17,6 @@
 
   const {
     value,
-    htmlValue = undefined,
     field,
     bcp = undefined,
     display,
@@ -27,8 +24,6 @@
     gloss_codes = false,
   }: Props = $props()
   const { can_edit } = $derived(page.data)
-
-  const sanitizedHtml = $derived(sanitize(htmlValue || value) || '')
 </script>
 
 <ShowHide>
