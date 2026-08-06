@@ -413,11 +413,17 @@ export const mock_analytics: LogAnalytics = {
     stuck: [
       { user_id: 'greg', dict_id: 'apatani', app_version: '1783096241136', count: 2405, first_seen: new Date(Date.now() - 36 * 3600_000).toISOString(), last_seen: new Date(Date.now() - 4 * 60_000).toISOString() },
       { user_id: null, dict_id: 'river', app_version: '1783053248757', count: 1746, first_seen: new Date(Date.now() - 30 * 3600_000).toISOString(), last_seen: new Date(Date.now() - 9 * 60_000).toISOString() },
-      { user_id: 'marlene', dict_id: 'zapoteco-de-analco', app_version: '1783172350007', count: 1158, first_seen: new Date(Date.now() - 20 * 3600_000).toISOString(), last_seen: new Date(Date.now() - 15 * 60_000).toISOString() },
+      { user_id: 'marlene', dict_id: 'zapoteco-de-analco', app_version: '776f945a83c1d0e4f27a5b6c8d9e0f1a2b3c4d5e', count: 1158, first_seen: new Date(Date.now() - 20 * 3600_000).toISOString(), last_seen: new Date(Date.now() - 15 * 60_000).toISOString() },
     ],
   },
   // The 07-08 shape: most sessions on the fresh build, a couple riding yesterday's,
   // and a few tabs stranded on a 5-day-old build (incl. named users to nudge).
+  //
+  // Build NAMES span all three live shapes on purpose, so a story exercises every
+  // label `short_version` has to render: the current build is compound
+  // (`<sha>-<build id>`, since 2026-08-06), one is a bare commit sha (2026-08-04),
+  // and the two oldest keep the clock names every build carried before that — they
+  // stay in the 30-day window for a month after the scheme changed.
   build_adoption: {
     total: 212,
     current: 187,
@@ -428,8 +434,8 @@ export const mock_analytics: LogAnalytics = {
     builds: [
       { app_version: '1783096241136', age_days: 5.1, sessions: 3, users: ['greg', 'marlene'], last_seen: new Date(Date.now() - 4 * 60_000).toISOString(), is_current: false },
       { app_version: '1783053248757', age_days: 5.0, sessions: 1, users: [], last_seen: new Date(Date.now() - 42 * 60_000).toISOString(), is_current: false },
-      { app_version: '1783431428497', age_days: 1.2, sessions: 19, users: ['diego'], last_seen: new Date(Date.now() - 11 * 60_000).toISOString(), is_current: false },
-      { app_version: '1783526000580', age_days: 0.2, sessions: 187, users: ['jacob', 'anna'], last_seen: new Date(Date.now() - 60_000).toISOString(), is_current: true },
+      { app_version: 'b4b47e55ac6c866e5c9bcb91d7ea18234d5642e2', age_days: 1.2, sessions: 19, users: ['diego'], last_seen: new Date(Date.now() - 11 * 60_000).toISOString(), is_current: false },
+      { app_version: 'ec9d8d9c1f0a3b6d9e2c4a70f1b83d5c6e7a9012-20260806152200', age_days: 0.2, sessions: 187, users: ['jacob', 'anna'], last_seen: new Date(Date.now() - 60_000).toISOString(), is_current: true },
     ],
   },
   // logs.db carrying the raw-log bulk (healthy WAL); shared.db small; the ~1,300

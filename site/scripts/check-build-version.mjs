@@ -23,20 +23,52 @@
  *      must BE that hash. Checking it too means the three aren't merely equal,
  *      they're all provably derived from the same version name.
  *
+ * …and each of those is checked in its PRECOMPRESSED form too. `adapter-node`
+ * writes a `.br` and a `.gz` beside every compressible artifact and serves those
+ * to any browser sending `Accept-Encoding` — which is all of them. A mismatch
+ * that exists only in the compressed copy is invisible in the plain file and
+ * reaches every real person. (Ported from tutor 2026-08-06, after the fleet
+ * review measured this guard missing it on two consecutive nights.)
+ *
+ * The guard also rejects a version NAME that is a bare clock reading, even when
+ * every artifact agrees. Such a build passed by luck: the name is SvelteKit's
+ * default `Date.now().toString()`, re-read on each of this build's four config
+ * loads across three realms, so the next build is the outage.
+ *
  * NOT a mismatch, deliberately ignored: `server/index.js` contains the SSR
  * runtime's own source — the template `` `__sveltekit_${options.version_hash}` ``
  * and the literal `globalThis.__sveltekit_sw` used by the service-worker env
  * endpoint. Neither is a build stamp, so only `version_hash: "…"` is read from
- * the server side.
+ * the server side, and the fixed framework names are excluded by name as well —
+ * belt and braces, because `__sveltekit_sw` reaches the CLIENT tree the moment
+ * the service worker starts importing `$service-worker`'s `env`.
+ *
+ * Usage: node scripts/check-build-version.mjs [build_dir]   (default: ../build)
+ * The argument exists so the test suite can point it at a synthetic build tree.
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs'
-import { join } from 'node:path'
+import { join, relative, resolve } from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
+import { brotliDecompressSync, gunzipSync } from 'node:zlib'
 
-const BUILD_DIR = join(fileURLToPath(new URL('..', import.meta.url)), 'build')
+const BUILD_DIR = resolve(process.argv[2] ?? join(fileURLToPath(new URL('..', import.meta.url)), 'build'))
 const CLIENT_GLOBAL = /__sveltekit_([a-z0-9]+)/g
 const SERVER_HASH = /version_hash: *"([a-z0-9]+)"/g
+
+/**
+ * `__sveltekit_<suffix>` globals whose suffix is a FIXED framework name, not a
+ * djb2 of `kit.version.name`: `sw` is the service-worker `env` endpoint and
+ * `dev` the dev-mode global. Counting either as a stamp rejects a healthy build.
+ */
+const NON_VERSION_GLOBALS = new Set(['sw', 'dev'])
+
+/**
+ * The pre-2026-08-03 shape — SvelteKit's default `kit.version.name`. A build
+ * wearing one can agree with itself and still be one scheduling accident from
+ * serving a blank page, because the value is re-read on every config load.
+ */
+const CLOCK_NAME = /^\d{10,}$/
 
 /** SvelteKit's own djb2 (`@sveltejs/kit/src/utils/hash.js`). */
 function djb2(value) {
@@ -62,26 +94,50 @@ function* walk(dir) {
   }
 }
 
+/**
+ * The `.br`/`.gz` copies adapter-node writes beside a compressible artifact —
+ * the bytes a real browser receives. A stale one ships the wrong stamp to
+ * everybody while the plain file next to it looks perfect.
+ */
+function compressed_siblings(path) {
+  const siblings = []
+  for (const [suffix, decompress] of [['.br', brotliDecompressSync], ['.gz', gunzipSync]]) {
+    try {
+      siblings.push({ path: path + suffix, text: decompress(readFileSync(path + suffix)).toString('utf8') })
+    } catch {
+      // absent (not precompressed) or unreadable — nothing to compare
+    }
+  }
+  return siblings
+}
+
 /** hash → the first few files it appeared in, for a useful error. */
-function collect({ dir, pattern }) {
+function collect({ dir, pattern, skip_fixed_names = false }) {
   const found = new Map()
-  for (const path of walk(join(BUILD_DIR, dir))) {
-    for (const [, hash] of readFileSync(path, 'utf8').matchAll(pattern)) {
+  const record = (text, path) => {
+    for (const [, hash] of text.matchAll(pattern)) {
+      if (skip_fixed_names && NON_VERSION_GLOBALS.has(hash))
+        continue
       const files = found.get(hash) ?? []
       if (files.length < 3 && !files.includes(path))
         files.push(path)
       found.set(hash, files)
     }
   }
+  for (const path of walk(join(BUILD_DIR, dir))) {
+    record(readFileSync(path, 'utf8'), path)
+    for (const sibling of compressed_siblings(path))
+      record(sibling.text, sibling.path)
+  }
   return found
 }
 
 function fail(lines) {
-  console.error(`\n[31m✗ build version check failed[0m\n${lines.join('\n')}\n`)
+  console.error(`\n\x1B[31m✗ build version check failed\x1B[0m\n${lines.join('\n')}\n`)
   process.exit(1)
 }
 
-const client = collect({ dir: 'client', pattern: CLIENT_GLOBAL })
+const client = collect({ dir: 'client', pattern: CLIENT_GLOBAL, skip_fixed_names: true })
 const server = collect({ dir: 'server', pattern: SERVER_HASH })
 const all = new Map([...client, ...server])
 
@@ -93,7 +149,7 @@ if (all.size > 1) {
     `${all.size} DIFFERENT build version stamps in one build — the page shell and its`,
     'JavaScript will not recognise each other and every route will render blank (HTTP 200).',
     '',
-    ...[...all].map(([hash, files]) => `  ${hash}  ${files.map(file => file.slice(BUILD_DIR.length + 1)).join(', ')}`),
+    ...[...all].map(([hash, files]) => `  ${hash}  ${files.map(file => relative(BUILD_DIR, file)).join(', ')}`),
     '',
     'Cause: `kit.version.name` was not constant across config loads. See svelte.config.js.',
   ])
@@ -101,11 +157,37 @@ if (all.size > 1) {
 
 const [hash] = [...all.keys()]
 
+const version_file = join(BUILD_DIR, 'client/_app/version.json')
 let version
 try {
-  ({ version } = JSON.parse(readFileSync(join(BUILD_DIR, 'client/_app/version.json'), 'utf8')))
+  ({ version } = JSON.parse(readFileSync(version_file, 'utf8')))
 } catch (error) {
   fail([`Could not read build/client/_app/version.json: ${error.message}`])
+}
+
+if (CLOCK_NAME.test(version)) {
+  fail([
+    `kit.version.name is a bare clock reading ("${version}") — every artifact agrees, so this`,
+    'build passed by luck. That value is SvelteKit\'s default and is re-read on each of this',
+    'build\'s four config loads across three realms (vite build, postbuild/analyse,',
+    'postbuild/prerender), which share process.env but not globalThis. Derive the name from',
+    'the commit instead — see resolve_version_name() in svelte.config.js.',
+  ])
+}
+
+for (const sibling of compressed_siblings(version_file)) {
+  let compressed_version
+  try {
+    ({ version: compressed_version } = JSON.parse(sibling.text))
+  } catch (error) {
+    fail([`${relative(BUILD_DIR, sibling.path)} is not readable JSON: ${error.message}`])
+  }
+  if (compressed_version !== version) {
+    fail([
+      `${relative(BUILD_DIR, sibling.path)} says version "${compressed_version}" but version.json says "${version}".`,
+      'Long-lived tabs poll this file for a changed string; the compressed copy is what they receive.',
+    ])
+  }
 }
 
 if (djb2(version) !== hash) {
@@ -115,4 +197,4 @@ if (djb2(version) !== hash) {
   ])
 }
 
-console.info(`✓ build version check: one stamp — __sveltekit_${hash} = djb2("${version}")`)
+console.info(`✓ build version check: one stamp — __sveltekit_${hash} = djb2("${version}"), including the .br/.gz copies`)

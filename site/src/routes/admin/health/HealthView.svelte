@@ -37,10 +37,12 @@
       ? [{ label: 'From stale builds', color: 'var(--color-secondary)', points: daily.map(point => ({ date: point.day, value: point.stale_errors })) }]
       : []),
   ])
-  // Deploy markers for the error timeline (app_version = build epoch ms).
-  // Historical builds were named with a clock; since 2026-08-04 the name is the
-  // commit sha (see svelte.config.js), which has no time in it — show the short
-  // sha and let the "first seen" row above carry the when.
+  // Deploy markers for the error timeline. Historical builds were named with a
+  // clock; since 2026-08-04 the name is the commit sha and since 2026-08-06 the
+  // sha plus a per-build id (see svelte.config.js) — neither has a time in it,
+  // so show the short label and let the "first seen" row above carry the when.
+  // `short_version` knows both commit shapes; without that it would slice the
+  // compound name and the result would read as a commit.
   function deploy_build_time(version: string): string {
     const ms = Number(version)
     return Number.isFinite(ms) && ms > 1e12 ? format_date_time(new Date(ms)) : short_version(version)

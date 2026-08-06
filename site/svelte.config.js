@@ -49,16 +49,42 @@ import adapter from '@sveltejs/adapter-node'
  * afterwards, which fails the build unless the client chunks, the server bundle
  * and `version.json` all carry ONE stamp. Whatever names a build, it cannot ship
  * mismatched.
+ *
+ * CONSTANT WITHIN a build is only half of it. The name must also be DISTINCT
+ * BETWEEN builds, and a bare sha is not — measured 2026-08-05, when this commit
+ * was built twice in one day. The two images were genuinely different
+ * applications (the build bakes in answers fetched from the still-running site:
+ * `fetch-baked-i18n.mjs` + `fetch-homepage-baked.mjs`, so every content-addressed
+ * file name changed) wearing one name. Three instruments went blind at once:
+ * SvelteKit's own 60-second version poll could never fire, so no open tab
+ * learned a new build existed; the dashboard's "current build vs stale build"
+ * error split filed thirteen stale-bundle failures against the CURRENT build —
+ * the exact number that is supposed to mean "what we just shipped is broken";
+ * and the day's deploy vanished from the deploy timeline, which marks the first
+ * day each distinct name is seen.
+ *
+ * So the name is `<sha>-<BUILD_ID>` whenever a build id is supplied. It is still
+ * ONE constant string for the whole build — `BUILD_ID` comes from the
+ * environment, which worker threads inherit — so every guarantee above holds
+ * unchanged. See the Dockerfile for where the id is minted, and note that
+ * `short_version()` in `$lib/analytics/dashboard-format` knows this shape: a
+ * reader that does not would slice the compound string and render the result as
+ * though it were a commit.
  */
 function resolve_version_name() {
+  // A per-build discriminator, optional. Trimmed and required non-empty for the
+  // same reason GIT_SHA is: compose passes unset build args through as `''`.
+  const build_id = (process.env.BUILD_ID || '').trim().replace(/[^a-z0-9]/gi, '')
+  const with_build_id = sha => (build_id ? `${sha}-${build_id}` : sha)
+
   const git_sha = (process.env.GIT_SHA || '').trim()
   if (git_sha)
-    return git_sha
+    return with_build_id(git_sha)
 
   try {
     const head = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim()
     if (head)
-      return head
+      return with_build_id(head)
   } catch {
     // no git binary / no .git dir / a tool with a sanitized PATH — fall through
   }
@@ -112,7 +138,8 @@ const config = {
     // for every cookie-authed form post.
     csrf: { trustedOrigins: ['*'] },
     version: {
-      // The commit being built — see `resolve_version_name()` above. NEVER a clock.
+      // The commit being built, plus a per-build id when the deploy supplies one
+      // (`<sha>-<BUILD_ID>`) — see `resolve_version_name()` above. NEVER a clock.
       name: resolve_version_name(),
       // Poll `_app/version.json` every 60s so long-lived open tabs detect a new
       // deploy and the root +layout shows a non-blocking "reload" toast. The

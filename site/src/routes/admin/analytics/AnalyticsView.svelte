@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { PageData } from './$types'
-  import { BROWSER_COLORS, country_flag, db_tier_color, DEVICE_META, one_decimal, OS_COLORS, USERS_COLOR } from '$lib/analytics/dashboard-format'
+  import { BROWSER_COLORS, country_flag, db_tier_color, DEVICE_META, one_decimal, OS_COLORS, short_version, USERS_COLOR } from '$lib/analytics/dashboard-format'
   import { get_locale_display_name } from '$lib/i18n/locales'
   import { log_insights } from '$lib/analytics/insights'
   import AtAGlance from '$lib/analytics/AtAGlance.svelte'
@@ -36,11 +36,16 @@
     { label: 'Sessions', color: 'var(--primary)', points: daily.map(point => ({ date: point.day, value: point.sessions })) },
     ...(is_bots ? [] : [{ label: 'Users', color: USERS_COLOR, points: daily.map(point => ({ date: point.day, value: point.users })) }]),
   ])
-  // Deploy markers for the traffic timeline: a vertical chip per build
-  // (app_version = build epoch ms), so a spike pins to the deploy that caused it.
+  // Deploy markers for the traffic timeline: a vertical chip per build, so a
+  // spike pins to the deploy that caused it. A pre-2026-08-04 build was NAMED
+  // with a clock, so its name is its build time; everything since is named with
+  // the commit (and, since 2026-08-06, the commit plus a per-build id), which
+  // carries no time — show the short label and let the "first seen" row above
+  // carry the when. Printing the raw name here put a full 40-character sha in a
+  // tooltip cell.
   function deploy_build_time(version: string): string {
     const ms = Number(version)
-    return Number.isFinite(ms) && ms > 1e12 ? format_date_time(new Date(ms)) : version
+    return Number.isFinite(ms) && ms > 1e12 ? format_date_time(new Date(ms)) : short_version(version)
   }
   const deploy_events = $derived(analytics.deploys.map(d => ({
     date: d.day,

@@ -52,7 +52,25 @@ RUN node site/scripts/fetch-baked-i18n.mjs
 # (fetch from the still-serving old container; never fails the build).
 RUN node site/scripts/fetch-homepage-baked.mjs
 
-RUN pnpm --filter=site build
+# The per-build half of `kit.version.name` (`<GIT_SHA>-<BUILD_ID>`, see
+# resolve_version_name in site/svelte.config.js). Two builds of ONE commit are
+# two different applications here — the two RUN steps above bake in answers
+# fetched from the still-running site — and until 2026-08-06 they shipped under
+# one name, which blinded the update poll, the stale-build error split and the
+# deploy timeline all at once (log review 2026-08-05 §1.1).
+#
+# Minted in the SAME shell as the build on purpose. `process.env` is inherited by
+# SvelteKit's postbuild worker threads while `globalThis` is not, so an env var
+# set once here is seen identically by all four config loads; a clock read INSIDE
+# the config would give each of them a different answer, which is the outage.
+#
+# The `date` runs only when this layer is not cached — and a cached layer means a
+# byte-identical build, which SHOULD keep its name. `ARG BUILD_ID` lets deploy.sh
+# supply its own id later without touching this file; empty is the normal case.
+ARG BUILD_ID=""
+RUN BUILD_ID="${BUILD_ID:-$(date -u +%Y%m%d%H%M%S)}" && export BUILD_ID && \
+    echo "Building with BUILD_ID=$BUILD_ID" && \
+    pnpm --filter=site build
 
 
 FROM node:24-alpine AS runner

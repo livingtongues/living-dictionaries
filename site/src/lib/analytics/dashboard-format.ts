@@ -74,15 +74,85 @@ export function format_bytes(bytes: number | null): string {
   return `${bytes} B`
 }
 
-/** Build ids are long; show a short slice for readability. */
+/**
+ * The commit sha inside a build `version` string, or null if the name carries
+ * none. THE one place that knows the shape of a build name — every reader goes
+ * through here, because the 2026-08-04 stamp change broke precisely by having
+ * each reader carry its own private assumption about that shape.
+ *
+ * Three shapes are live at once:
+ *   - `b4b47e55…`                 a bare 40-hex commit sha (2026-08-04 → 08-06);
+ *   - `b4b47e55…-20260805144153`  commit + a per-build id (since 2026-08-06, so
+ *                                 two builds of ONE commit stop colliding — see
+ *                                 `resolve_version_name()` in svelte.config.js);
+ *   - `1783526000580`             a bare clock reading, every build before
+ *                                 2026-08-04 and still inside the 30-day window.
+ */
+export function commit_sha_of_build(version: string | null): string | null {
+  if (!version)
+    return null
+  const match = /^([0-9a-f]{7,40})(?:-[0-9a-z]+)?$/i.exec(version)
+  // A clock reading is all digits, and all digits are also valid hex.
+  if (!match || /^\d+$/.test(match[1]))
+    return null
+  return match[1].toLowerCase()
+}
+
+/**
+ * Build ids are long; show a short slice for readability.
+ *
+ * A commit shortens the way git shortens it — leading 7 — so it pastes straight
+ * into `git show`. A compound `<sha>-<build id>` name keeps BOTH halves visible:
+ * the previous version of this function fell through to a trailing slice for
+ * anything that was not exactly 40 hex, so it would have rendered a piece of the
+ * BUILD ID as though it were the commit. Not a crash — a label that quietly
+ * stops meaning what it says.
+ */
 export function short_version(version: string | null): string {
   if (!version)
     return 'unknown'
-  // A commit sha (what `kit.version.name` carries since 2026-08-04) shortens the
-  // way git shortens it — leading 7 — so it pastes straight into `git show`.
-  if (/^[0-9a-f]{40}$/.test(version))
-    return version.slice(0, 7)
+  const sha = commit_sha_of_build(version)
+  if (sha) {
+    const build_id = version.slice(sha.length + 1)
+    return build_id ? `${sha.slice(0, 7)}·${build_id.slice(-6)}` : sha.slice(0, 7)
+  }
   return version.length > 10 ? `…${version.slice(-8)}` : version
+}
+
+if (import.meta.vitest) {
+  describe(commit_sha_of_build, () => {
+    it('reads a bare commit sha', () => {
+      expect(commit_sha_of_build('b4b47e55ac6c866e5c9bcb91d7ea18234d5642e2')).toBe('b4b47e55ac6c866e5c9bcb91d7ea18234d5642e2')
+    })
+    it('reads the commit half of the compound `<sha>-<build id>` name', () => {
+      expect(commit_sha_of_build('b4b47e55ac6c866e5c9bcb91d7ea18234d5642e2-20260805144153')).toBe('b4b47e55ac6c866e5c9bcb91d7ea18234d5642e2')
+    })
+    it('refuses a bare clock reading, which is also valid hex', () => {
+      expect(commit_sha_of_build('1783526000580')).toBeNull()
+    })
+    it('refuses nothing, and a dev-session name', () => {
+      expect(commit_sha_of_build(null)).toBeNull()
+      expect(commit_sha_of_build('local-1783526000580')).toBeNull()
+    })
+  })
+
+  describe(short_version, () => {
+    it('shortens a commit the way git does, so it pastes into `git show`', () => {
+      expect(short_version('b4b47e55ac6c866e5c9bcb91d7ea18234d5642e2')).toBe('b4b47e5')
+    })
+    it('keeps BOTH halves of a compound name rather than slicing it into a fake commit', () => {
+      // The trap this closes: the old trailing-slice fallback took anything that
+      // was not exactly 40 hex and showed its last 8 characters — which for a
+      // compound name is a piece of the BUILD ID, reading as a commit.
+      expect(short_version('b4b47e55ac6c866e5c9bcb91d7ea18234d5642e2-20260805144153')).toBe('b4b47e5·144153')
+    })
+    it('keeps the varying tail of a legacy clock name', () => {
+      expect(short_version('1783526000580')).toBe('…26000580')
+    })
+    it('says so when there is no build', () => {
+      expect(short_version(null)).toBe('unknown')
+    })
+  })
 }
 
 /** Country code → flag emoji (regional-indicator pair). Non-ISO sentinels (XX/T1) fall back to a globe. */
