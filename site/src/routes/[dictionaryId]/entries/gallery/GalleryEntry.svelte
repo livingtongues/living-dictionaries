@@ -4,6 +4,7 @@
   import { url_from_storage_path } from '$lib/utils/media-url'
   import { create_exclusive_audio } from '$lib/utils/exclusive-audio.svelte'
   import { get_headword } from '$lib/orthography/orthographies'
+  import StruckText from '$lib/orthography/StruckText.svelte'
   import { get_local_orthographies } from '$lib/entry/get-local-orthographies'
   import { add_periods_and_comma_separate_parts_of_speech } from '$lib/entry/format-parts-of-speech'
   import { top_glosses } from '../../home/home-helpers'
@@ -59,9 +60,9 @@
       {#if dialect}
         <span class="dialect">{dialect}</span>
       {/if}
-      <div class="lexeme">{headword.value}{#if entry.main.review}<ReviewIndicator review={entry.main.review} />{/if}</div>
+      <div class="lexeme"><StruckText text={headword.value} />{#if entry.main.review}<ReviewIndicator review={entry.main.review} />{/if}</div>
       {#if alt}
-        <div class="alt">{alt}</div>
+        <div class="alt"><StruckText text={alt} /></div>
       {/if}
       {#if phonetic}
         <div class="phonetic">[{phonetic}]</div>

@@ -2,6 +2,7 @@
   import { photo_src, url_from_storage_path } from '$lib/utils/media-url'
   import { create_exclusive_audio } from '$lib/utils/exclusive-audio.svelte'
   import { card_hue } from './home-helpers'
+  import StruckText from '$lib/orthography/StruckText.svelte'
   import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'
   import IconMdiStarOff from '~icons/mdi/star-off'
   import IconMdiChevronLeft from '~icons/mdi/chevron-left'
@@ -78,9 +79,9 @@
     {#if dialect}
       <span class="dialect">{dialect}</span>
     {/if}
-    <div class="lexeme" class:solo={sparse}>{lexeme}</div>
+    <div class="lexeme" class:solo={sparse}><StruckText text={lexeme} /></div>
     {#if alt}
-      <div class="alt">{alt}</div>
+      <div class="alt"><StruckText text={alt} /></div>
     {/if}
     {#if phonetic}
       <div class="phonetic">[{phonetic}]</div>

@@ -3,6 +3,7 @@
   import sanitize from 'xss'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import GlossedText from '$lib/corpus/GlossedText.svelte'
+  import StruckText from '$lib/orthography/StruckText.svelte'
   import { render_markdown_to_html } from '$lib/markdown/render'
   import { sanitize_rich_text } from '$lib/markdown/sanitize-rich-text'
   import IconFa6SolidPencil from '~icons/fa6-solid/pencil'
@@ -60,7 +61,7 @@
               {:else if field === 'scientific_names' && !value?.includes('<i>')}
                 <i>{value}</i>
               {:else}
-                {value}{#if sup}<sup class="homograph">{sup}</sup>{/if}
+                <StruckText text={value} />{#if sup}<sup class="homograph">{sup}</sup>{/if}
               {/if}
             </div>
           {:else}<IconFa6SolidPencil style="opacity: 0.4; font-size: 0.875rem" />{/if}

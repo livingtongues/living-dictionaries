@@ -7,6 +7,7 @@
   import Image from '$lib/components/image/Image.svelte'
   import { order_glosses } from '$lib/gloss/order-glosses'
   import { get_headword } from '$lib/orthography/orthographies'
+  import StruckText from '$lib/orthography/StruckText.svelte'
   import ReviewIndicator from '$lib/components/entry/ReviewIndicator.svelte'
   import { minutes_ago_in_ms } from '$lib/utils/time'
   import { video_thumb_src } from '$lib/utils/media-url'
@@ -131,7 +132,7 @@
     onclick={on_click}
     class="entry-link">
     <div class="headword-line">
-      <span class="lexeme">{headword.value}{#if entry.main.homograph}<sup class="homograph">{entry.main.homograph}</sup>{/if}</span>
+      <span class="lexeme"><StruckText text={headword.value} />{#if entry.main.homograph}<sup class="homograph">{entry.main.homograph}</sup>{/if}</span>
       {#if entry.main.phonetic}
         <span class="phonetic">[{entry.main.phonetic}]</span>
       {/if}
@@ -139,7 +140,7 @@
       {#if dictionary.id !== 'garifuna'}
         {#each Object.entries(entry.main.lexeme) as [key, value] (key)}
           {#if key !== 'default' && key !== headword.code}
-            <i class="spaced" class:sompeng={dictionary.id === 'sora' && key === 'srb-sora'}>{value}</i>
+            <i class="spaced" class:sompeng={dictionary.id === 'sora' && key === 'srb-sora'}><StruckText text={value} /></i>
           {/if}
         {/each}
       {/if}
