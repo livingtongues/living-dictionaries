@@ -1,6 +1,6 @@
 <script lang="ts">
   import { marked } from 'marked'
-  import { diff_markdown } from '$lib/components/legal-review/legal-diff'
+  import { diff_markdown } from '$lib/legal-review/legal-diff'
   import terms_before from '$lib/legal/before/terms-before.md?raw'
   import privacy_before from '$lib/legal/before/privacy-before.md?raw'
   import terms_after from '$lib/legal/terms-of-use.md?raw'

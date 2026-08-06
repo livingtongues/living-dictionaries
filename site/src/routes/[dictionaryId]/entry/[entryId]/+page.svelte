@@ -13,7 +13,7 @@
   import { get_headword } from '$lib/orthography/orthographies'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import JsonLd from '$lib/components/JsonLd.svelte'
-  import ChangeHistory from '$lib/components/history/ChangeHistory.svelte'
+  import ChangeHistory from '$lib/history/ChangeHistory.svelte'
   import { track } from '$lib/debug/remote-log'
   import { ENTRY_FEATURED, ENTRY_OPENED, ENTRY_UNFEATURED } from '$lib/debug/log-events'
   import { page } from '$app/state'

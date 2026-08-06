@@ -132,20 +132,16 @@ never preloads it. *Cheaper option not taken:* `libheif-js`'s separate `.wasm` i
 `?url` asset wired through Vite by hand and loses Live-Photo/multi-image handling. See
 `.knowledge/domain/heic-photo-uploads.md`.
 
-## 5. Zero-logins alarm (approved item 11) ✅
+## 5. Sign-in panel (approved item 11) ✅ — alarm REMOVED 2026-08-05
 
 - `sign_in` added to the analytics payload (`build_sign_in_health`), computed in the daily niced
   child from the existing `auth_login` `{method, created}` events. `SNAPSHOT_FORMAT` bumped 1 → 2.
-- `/admin/health` **Sign-in** panel — `SignInPanel.svelte` + stories (Flatlined / Healthy /
-  NoLogins), screenshotted light + dark.
-- `sign-in-alarm` cron at 04:30 PT reads the checkpoint FILE (zero queries, zero request-path cost)
-  and posts to the admin chat `notifications` room.
+- `/admin/health` **Sign-in** panel — `SignInPanel.svelte` + stories, screenshotted light + dark.
 
-Rule: **≥1 login on ≥5 of the previous 7 days, and exactly 0 on the last COMPLETE day.** Judging
-"today" would false-alarm at 11:30 UTC on an American-afternoon site; the cost is firing ~2 days
-after a break instead of 1, against 30 days of blindness. Anti-noise: fire once, weekly reminder
-while still down, one recovery notice, state in `db_metadata.sign_in_alarm_state`. Unit-tested
-including the "never busy enough to judge" and "stays silent on day 2" cases.
+The zero-logins alarm that originally shipped with this (a cron posting into the admin chat
+`notifications` room) was **removed at Jacob's request on 2026-08-05** — he does not want login
+notifications. Only the plain logins-per-method panel remains. See
+`.issues/remove-sign-in-alarm.md`; do not rebuild the alarm.
 
 ---
 
@@ -154,7 +150,6 @@ including the "never busy enough to judge" and "stays silent on day 2" cases.
 - **`SNAPSHOT_FORMAT` 1 → 2** means `/admin/analytics` + `/admin/health` show the "no checkpoint yet"
   state until the boot-catchup child recomputes (~3 min after the container boots). Expected, not a
   fault.
-- The `sign-in-alarm` cron no-ops (info log, no ping) until a v2 checkpoint exists.
 - `heic-to` was added to `site/package.json` dependencies → `pnpm-lock.yaml` is modified.
 - The corpus audio backfill running on mustang (`~/ld-audio`, horse cron `c-223e77`) is untouched;
   this change only alters what the *app* does from now on.

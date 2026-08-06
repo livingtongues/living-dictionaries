@@ -110,25 +110,14 @@ proposals against this lens.
 
 ## Shipped (2026-08-04, `.issues/nightly-2026-08-03-approved-items.md`) — UNCOMMITTED
 
-- ✅ **"Sign-in health" on `/admin/health`, with the zero-day alarm** *(filed 2026-08-03, built
-  2026-08-04).* `routes/admin/health/SignInPanel.svelte` (+ stories) renders logins/day by method,
-  new accounts, and a per-method flatline warning; `build_sign_in_health` in `log-analytics.ts`
-  computes it in the daily niced child from the existing `auth_login` `{ method, created }` events;
-  the `sign-in-alarm` cron (`$lib/db/server/sign-in-alarm-cron.ts`, 04:30 PT) reads the checkpoint
-  FILE — zero queries — and posts to the admin chat `notifications` room. Rationale and the
-  thirty-day story: `.knowledge/admin/measuring-what-stopped.md`.
+- ✅ **"Sign-in" panel on `/admin/health`** *(filed 2026-08-03, built 2026-08-04).*
+  `routes/admin/health/SignInPanel.svelte` (+ stories) renders logins/day by method and new
+  accounts; `build_sign_in_health` in `log-analytics.ts` computes it in the daily niced child from
+  the existing `auth_login` `{ method, created }` events. It is a chart you go and look at.
 
-  **Two deliberate deviations from the 2026-08-03 proposal (`.cron/log-reviews/2026-08-03.md` §6),
-  so nobody "fixes" them back:**
-  (1) the rule is judged on the **last COMPLETE UTC day**, not "today" — the cron runs ≈11:30 UTC and
-  "zero logins so far today" is normal at that hour on an American-afternoon site; the cost is firing
-  ~2 days after a break instead of 1, which is nothing against 30 days of blindness. (2) it does NOT
-  fire "every morning after" — that is thirty notifications Jacob would learn to ignore. It fires
-  once, reminds weekly while still down, and posts one recovery notice; state lives in
-  `db_metadata.sign_in_alarm_state`.
-
-  **STILL OPEN — the outbound broadcast.** house + tutor run the same Google One Tap + email
-  one-time-code pattern and neither has this panel. Only LD's was built.
+  **The zero-logins ALARM that originally shipped with it is GONE (Jacob, 2026-08-05):** the cron,
+  the flatline rule and the chat ping were all removed — he does not want to be notified about
+  sign-in. Do not propose it again for LD, house or tutor. See `.issues/remove-sign-in-alarm.md`.
 
 ## Open proposals
 
@@ -153,6 +142,33 @@ proposals against this lens.
   deploy = `server_started` / `deploy-metrics.jsonl`; maintenance = `log_retention_swept` start+duration;
   everything else = unexplained, which is the only bucket that needs a human. Aggregate health, no
   error list.
+
+  **2026-08-04 — the case is now overwhelming, and the CAUSE VOCABULARY is complete.** Re-verified
+  absent again tonight (zero `loop_lag` anywhere under `src/routes/admin/`). Every freeze today had a
+  nameable cause from rows the server already writes, so the panel can say *what was running*, not just
+  how bad it was: **29,561 ms at 14:38 = the Docker image build during a deploy** (`server_started` two
+  minutes later); **19,935 / 14,602 / 14,266 / 13,793 / 9,392 ms = `snapshot_sweep_completed.step_ms.reconcile`**,
+  once per container start; maintenance = `log_retention_swept`. Meanwhile `loop_lag_p99_ms` never
+  exceeded **18.6 ms** all day — a percentile-only panel would have read "perfectly healthy" through a
+  29-second freeze. The panel's success story is equally invisible today: the audio-sweep fix moved the
+  MEDIAN worst-freeze-per-window from **798 ms to 98 ms** across the 01:07 deploy, and no existing panel
+  can show it.
+
+- **★★ NEW — Count telemetry inserts dropped to lock contention, and report the count on the
+  `host_stats` sample** *(ported from house 2026-08-04 · LOW cost).* `insert_client_log`
+  (`src/lib/server/insert-client-log.ts:125`) swallows a failed insert into a `console.error` that dies
+  with the container, while `/api/log` still answers `{ ok: true }` — so a log database under write
+  contention loses rows silently and every dashboard reads "quiet". house found this after shortening
+  its own log-database write wait; LD has NOT shortened its wait, which makes the counter cheap
+  insurance rather than a fix. Surface it as a single number beside the existing host sample, not a
+  panel.
+
+- **★ NEW — Filter crawler noise at INGEST, extended to warning/error families** *(ported from house
+  2026-08-04 · LOW cost).* house drops 1,390 crawler service-worker rows/day at ingest but its filter
+  covers informational events only; LD has no ingest-side crawler filter at all
+  (`src/routes/api/log/+server.ts`) and stores ~62 `Rejected` service-worker **errors** a day, all from
+  robots. Same shape, one order of magnitude smaller — do it when the ingest path is next touched, not
+  on its own.
 
 - **★★ NEW — Share-card (Open Graph) family row on `/admin/storage`** *(ported from house 2026-08-01,
   accepted 2026-08-02 · LOW-MEDIUM cost · verified absent: `src/routes/admin/storage/` contains no
@@ -753,3 +769,50 @@ house's **/admin/revenue** dashboard (no payments).
   serving-side `shared.db` busy timeout, so the lock still crosses the process boundary.
 - **Already shipped in LD, so no longer inbound-portable:** `server_started` and the per-cron
   heartbeat row (both house's/tutor's 08-01 borrows FROM LD; LD shipped them 2026-08-02).
+
+### Cross-pollination update — 2026-08-04 (read house + tutor 08-03 reviews/backlogs)
+
+- **Inbound, ACCEPTED from house (2, both filed as open proposals above):** count telemetry inserts
+  dropped to lock contention; extend crawler filtering to the ingest path for warning/error families.
+- **Inbound, DECLINED from tutor:** their Cloudflare stale-compressed-asset finding. LD gzips its
+  dictionary snapshots itself before storing them, so there is no uncompressed cached copy to purge.
+- **Outbound to house + tutor:** (1) *(withdrawn 2026-08-05 — the sign-in alarm was removed at
+  Jacob's request; do not broadcast it.)* (2) A
+  `docker compose build` **freezes the serving container** — 29.6 s measured at LD today, the third day
+  running; both siblings deploy the same way onto small boxes, and `nice` on the command is a no-op.
+  (3) **A memo keyed by the full input string is a cache that can never hit** — LD's share-card font
+  cache is keyed by the entire headword, so 13% of fresh cards blew a 10 s render deadline on
+  cache-miss font fetches; both siblings memoise network work in render paths.
+
+### Cross-pollination update — 2026-08-05 (read house + tutor 08-04 reviews/backlogs)
+
+- **Inbound, ACCEPTED from house (2):**
+  1. **The dead-end / stale-chunk classifier produces FALSE POSITIVES in all three apps.** House found
+     the parallel-chunk false positive in `stale-chunk-reload.ts`; LD's equivalent is the
+     `missing_build_artifact`-BY-CONSTRUCTION path in `db-client.ts:134` (`spawned.onerror` never
+     consults `navigator.onLine` and never records the script URL). LD found its own independently the
+     same night — two Vietnam sessions got an unusable "app update needed" toast for a worker chunk
+     that is present on both production containers.
+  2. **Cross-realm `Error` objects lose their message and stack in `remote-log.ts`.** Verified
+     applicable to LD: lines 656/662/697/700 branch on `reason instanceof Error`, which is false for an
+     Error thrown in a worker — exactly where LD's sync engine and leader worker live. Likely why the
+     08-05 sync stack-overflow row carried no stack.
+- **Inbound, VERIFIED ALREADY DONE in LD (dropped, not filed):** house's "a rejected sync push is
+  invisible in the shared sync engine" (LD logs `dict_changes_push_refused` at
+  `api/dictionary/[id]/changes/+server.ts:103` and `:153`, plus `dict_changes_orphans_skipped` at
+  `:145` — LD's only hole is the 409 `schema_outdated` at `:71`, already on the list); tutor's "no
+  boot-error reporter in `app.html`" (LD's `app.html:88` registers both `error` and
+  `unhandledrejection`, guarded by `boot-error-reporter.test.ts`).
+- **CORRECTNESS BUG filed (not a new panel) — `app_version` is not a build identity.** Three existing
+  computations assume it is: the current-vs-stale error split (`log-analytics.ts:1517`), the deploy
+  markers (`:303`), and the nightly old-tab population query. On 2026-08-05 LD rebuilt one commit and
+  every asset hash changed while `app_version` did not — so 13 deleted-file errors were filed as
+  CURRENT-build errors and the day's deploy left no timeline marker. Dashboard fix and app fix are the
+  same one line: `${GIT_SHA}-${BUILD_ID}` as `kit.version.name`.
+- **Outbound to house + tutor (3):**
+  1. **CORRECTION on the sign-in borrow both siblings filed 08-04:** Jacob removed LD's zero-logins
+     ALARM on 2026-08-05. Build the panel (a chart you go and look at); do not build the alarm.
+  2. **A git commit identifier is not a build identity** — see the correctness bug above; if your image
+     build bakes anything fetched-at-build-time into the bundle, check your own `version.name`.
+  3. **An immutable-asset archive is forward-only and its first run protects nobody** — copy from the
+     RUNNING container as well as the new image if you want it correct on day one.

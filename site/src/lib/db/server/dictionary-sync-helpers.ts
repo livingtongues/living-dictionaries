@@ -2,6 +2,7 @@ import type Database from 'better-sqlite3'
 import type { Table } from 'drizzle-orm'
 import type { HistoryEvent } from './dictionary-history-db'
 import type { DictSyncableTable } from '$lib/db/dict-syncable-tables'
+import type { RejectedRow } from '$lib/db/sync/rejected-rows'
 import { parse_dict_row, stringify_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import * as dict_schema from '$lib/db/schemas/dictionary'
 import { getTableColumns } from 'drizzle-orm'
@@ -141,6 +142,12 @@ export interface DictChangesResponse {
    */
   skipped_orphans?: SkippedOrphan[]
   /**
+   * EVERY pushed row the server refused, with a typed reason (the refused-write
+   * contract — see `$lib/db/sync/rejected-rows`). Additive: `skipped_orphans`
+   * stays for pre-contract clients and carries the same FK-orphan subset.
+   */
+  rejected_rows?: RejectedRow[]
+  /**
    * Answer to `dirty_probes`: ids whose canonical copy is already at least as
    * new as the client's, so the local `dirty` flag has nothing left to
    * contribute and is safe to clear. Absent when nothing was probed.
@@ -224,6 +231,9 @@ export function process_dict_changes(params: {
       const skip_keys = new Set(orphans.map(orphan => `${orphan.table_name}::${orphan.id}`))
       const response = apply_dict_changes({ ...params, skip_keys })
       response.skipped_orphans = orphans
+      // Additive refused-write contract: the orphans join whatever
+      // `apply_dict_changes` already refused (duplicates) in ONE typed list.
+      add_rejected_rows(response, orphans.map(orphan => ({ table_name: orphan.table_name, id: orphan.id, reason: 'orphan' as const })))
       return response
     } catch {
       throw error
@@ -313,6 +323,8 @@ function apply_dict_changes({ db, request, user_id, is_editor, history_db, skip_
   // Natural-key dedup losers (see merge_dict_row) — echoed as deletes + their
   // canonical rows so the pushing client converges instead of wedging.
   const deduped_losers: { table_name: DictSyncableTable, id: string, canonical_id: string }[] = []
+  // Refused-write contract: every pushed row this round trip drops, with a reason.
+  const rejections: RejectedRow[] = []
 
   // Defensive cursor normalization: a legacy ISO-string cursor (pre-server_seq
   // bundle that somehow slipped past the migration handshake) means a full pull.
@@ -346,6 +358,12 @@ function apply_dict_changes({ db, request, user_id, is_editor, history_db, skip_
         ).run(table_name, id)
       }
     }
+
+    // A caller without the editing role pushed anyway (their local role went
+    // stale — the client only builds a push when it believes it may edit). The
+    // rows are dropped; say so instead of accepting the round trip in silence.
+    if (!is_editor)
+      rejections.push(...collect_unauthorized_push_rejections(request))
 
     // PUSH: dirty rows (editor only).
     if (is_editor && request.dirty_rows) {
@@ -425,6 +443,8 @@ function apply_dict_changes({ db, request, user_id, is_editor, history_db, skip_
     if (deduped_losers.length) {
       const echoed = new Set(response.deletes.map(del => `${del.table_name}::${del.id}`))
       for (const loser of deduped_losers) {
+        // The pushed id itself was refused — the canonical row absorbed its content.
+        rejections.push({ table_name: loser.table_name, id: loser.id, reason: 'duplicate' })
         if (!echoed.has(`${loser.table_name}::${loser.id}`)) {
           echoed.add(`${loser.table_name}::${loser.id}`)
           response.deletes.push({ table_name: loser.table_name, id: loser.id })
@@ -448,6 +468,8 @@ function apply_dict_changes({ db, request, user_id, is_editor, history_db, skip_
       if (Object.keys(redundant).length)
         response.redundant_dirty = redundant
     }
+
+    add_rejected_rows(response, rejections)
 
     // New cursor = the counter's current value. Exact under BEGIN IMMEDIATE:
     // every row in this DB with server_seq ≤ counter is visible in this txn.
@@ -702,6 +724,44 @@ export function delete_dict_row({ db, table_name, id, user_id, at, api_key_id }:
     ? { table_name, row_id: id, op: 'delete', user_id, at, snapshot: build_snapshot(table_name, image), delta: null, api_key_id: api_key_id ?? null, owners }
     : null
   return { deleted: true, event }
+}
+
+/**
+ * Ceiling on refused rows carried in one response. A stale-role client can hold
+ * a whole session of pending edits, and the point of the list is to name the
+ * failure — not to ship an unbounded uuid dump back down the wire.
+ */
+export const MAX_REJECTED_ROWS_PER_RESPONSE = 200
+
+/** Append to the response's refused-write list, creating it on first use. */
+function add_rejected_rows(response: DictChangesResponse, rows: RejectedRow[]): void {
+  if (!rows.length)
+    return
+  const existing = response.rejected_rows ?? []
+  response.rejected_rows = [...existing, ...rows].slice(0, MAX_REJECTED_ROWS_PER_RESPONSE)
+}
+
+/**
+ * Every row/tombstone a NON-editor tried to push. The endpoint drops them
+ * (`is_editor` gates both push stages), which is exactly the silent-refusal
+ * class the contract exists to end: a contributor whose role lapsed mid-session
+ * keeps editing into a void otherwise. Exported because the endpoint's fast-bail
+ * branch returns before `process_dict_changes` ever runs.
+ */
+export function collect_unauthorized_push_rejections(request: Pick<DictChangesRequest, 'dirty_rows' | 'deletes'>): RejectedRow[] {
+  const rejected: RejectedRow[] = []
+  for (const table_name of DICT_SYNCABLE_TABLES) {
+    for (const row of request.dirty_rows?.[table_name] ?? []) {
+      const { id } = row as { id?: string }
+      if (id)
+        rejected.push({ table_name, id, reason: 'unauthorized' })
+    }
+  }
+  for (const { table_name, id } of request.deletes ?? []) {
+    if (is_dict_syncable_table(table_name))
+      rejected.push({ table_name, id, reason: 'unauthorized' })
+  }
+  return rejected.slice(0, MAX_REJECTED_ROWS_PER_RESPONSE)
 }
 
 /** Strip the `.sql` extension for tolerant comparison of migration names. */

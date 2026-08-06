@@ -4,14 +4,17 @@
   import IconMdiArrowUp from '~icons/mdi/arrow-up'
   import IconMdiBookOpenPageVariantOutline from '~icons/mdi/book-open-page-variant-outline'
   import IconMdiClipboardTextOutline from '~icons/mdi/clipboard-text-outline'
+  import AssigneeDropdown from '$lib/admin/AssigneeDropdown.svelte'
   import { IMPORT_STATUS_ORDER } from '$lib/import/import-status'
   import { format_date_time, format_relative_time } from '$lib/utils/format-relative-time'
 
   interface Props {
     imports: AdminImportRow[]
+    admin_user_id_by_email: Map<string, string>
     on_copy_brief: (row: AdminImportRow) => void
+    on_assigned: (row: AdminImportRow, next_user_id: string | null) => void | Promise<void>
   }
-  const { imports, on_copy_brief }: Props = $props()
+  const { imports, admin_user_id_by_email, on_copy_brief, on_assigned }: Props = $props()
 
   type SortKey = 'dictionary' | 'requester' | 'status' | 'waiting_on' | 'materials' | 'questions' | 'assignee' | 'updated'
 
@@ -135,7 +138,14 @@
     {/if}
   </td>
 
-  <td class="secondary">{row.assignee_name || row.assignee_email || '—'}</td>
+  <td>
+    <AssigneeDropdown
+      thread_id={row.thread_id}
+      assigned_to_user_id={row.assigned_to_user_id}
+      {admin_user_id_by_email}
+      size="sm"
+      onassigned={async (next_user_id) => { await on_assigned(row, next_user_id) }} />
+  </td>
 
   <td class="secondary nowrap" title={format_date_time(row.last_message_at)}>
     {format_relative_time(row.last_message_at)}

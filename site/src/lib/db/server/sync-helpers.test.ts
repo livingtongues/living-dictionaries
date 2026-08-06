@@ -193,6 +193,25 @@ describe('FK-orphan push recovery (skip + report)', () => {
     expect(response.skipped_orphans).toEqual([
       { table_name: 'dictionary_roles', id: 'role_orphan', parent_table: 'dictionaries' },
     ])
+    // Refused-write contract: the same refusal, typed, for the client to report.
+    expect(response.rejected_rows).toEqual([
+      { table_name: 'dictionary_roles', id: 'role_orphan', reason: 'orphan' },
+    ])
+  })
+
+  test('a push to a server-owned readonly table is refused as `unauthorized`, not ignored', () => {
+    const request = empty_request()
+    request.synced_up_to = 0
+    request.dirty_rows = {
+      users: [{ id: 'u-forged', email: 'forged@example.com', providers: [], created_at: T0, updated_at: T0 } as never],
+    }
+
+    const response = process_sync({ db, request, user_id: 'u1' })
+
+    expect(db.prepare(`SELECT 1 FROM users WHERE id = 'u-forged'`).get()).toBeFalsy()
+    expect(response.rejected_rows).toEqual([
+      { table_name: 'users', id: 'u-forged', reason: 'unauthorized' },
+    ])
   })
 
   test('an FK violation NOT attributable to a pushed row still surfaces', () => {

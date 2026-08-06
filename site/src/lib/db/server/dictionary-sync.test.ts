@@ -250,6 +250,34 @@ describe('dictionary.db push + pull', () => {
     expect(db.prepare('SELECT id FROM entries WHERE id = ?').get('good_entry')).toBeTruthy()
     expect(db.prepare('SELECT id FROM senses WHERE id = ?').get('orphan_sense')).toBeUndefined()
     expect(response.skipped_orphans).toEqual([{ table_name: 'senses', id: 'orphan_sense', parent_table: 'entries' }])
+    // Refused-write contract: the same refusal, typed, for the client to report.
+    expect(response.rejected_rows).toEqual([{ table_name: 'senses', id: 'orphan_sense', reason: 'orphan' }])
+    db.close()
+  })
+
+  test('a non-editor push is refused as `unauthorized` instead of dropped in silence', () => {
+    const db = open_dictionary_db_in_memory('test_dict')
+    const now = new Date().toISOString()
+
+    const response = process_dict_changes({
+      db,
+      request: {
+        synced_up_to: null,
+        dirty_rows: {
+          entries: [{ id: 'lapsed_role_entry', lexeme: { en: 'kya' }, dirty: 1, created_at: now, updated_at: now }],
+        },
+        deletes: [{ table_name: 'entries', id: 'other_entry' }],
+        latest_dict_migration: '20260606_initial.sql',
+      },
+      user_id: 'viewer',
+      is_editor: false,
+    })
+
+    expect(db.prepare('SELECT id FROM entries WHERE id = ?').get('lapsed_role_entry')).toBeUndefined()
+    expect(response.rejected_rows).toEqual([
+      { table_name: 'entries', id: 'lapsed_role_entry', reason: 'unauthorized' },
+      { table_name: 'entries', id: 'other_entry', reason: 'unauthorized' },
+    ])
     db.close()
   })
 
@@ -491,6 +519,8 @@ describe('junction natural-key dedup echoes the loser delete + canonical row (cl
     // …AND the canonical row echoed explicitly (its updated_at may predate the
     // client's cursor, so the normal pull filter can miss it).
     expect((response.changes.entry_tags ?? []).map(row => row.id)).toContain('link_A')
+    // Refused-write contract: the pushed id itself was refused.
+    expect(response.rejected_rows).toEqual([{ table_name: 'entry_tags', id: 'link_B', reason: 'duplicate' }])
     db.close()
   })
 

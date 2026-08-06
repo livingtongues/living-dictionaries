@@ -2,6 +2,7 @@
   import { get } from 'svelte/store'
   import type { EntrySelection } from './entry-selection.svelte'
   import type { GuardedWrites } from '$lib/db/dict-client/guarded-writes'
+  import { apply_bulk_review, apply_bulk_source } from './bulk-actions'
   import Popover from '$lib/components/ui/Popover.svelte'
   import { page } from '$app/state'
   import { review_category_labels } from '$lib/entry/review-category'
@@ -22,7 +23,7 @@
   const { selection, writes }: Props = $props()
 
   const { t } = $derived(page.data)
-  const { tags: dictionary_tags, dialects: dictionary_dialects, sources, dict_db, entries_data } = $derived(page.data)
+  const { tags: dictionary_tags, dialects: dictionary_dialects, sources, entries_data } = $derived(page.data)
 
   let open_picker: 'tags' | 'dialects' | 'sources' | 'review' | null = $state(null)
   let picker_anchor: HTMLElement | null = $state(null)
@@ -82,28 +83,22 @@
     })
   }
 
+  // Both loops live in `bulk-actions.ts`: they go through the guarded write
+  // facade and paint the on-screen row only AFTER the write resolves.
   async function bulk_add_source(slug: string) {
     await run(async () => {
-      const data = get(entries_data)
-      for (const entry_id of selected_ids) {
-        const entry = data[entry_id]
-        if (!entry || entry.main.sources?.includes(slug)) continue
-        const merged = [...(entry.main.sources || []), slug]
-        entry.main.sources = merged
-        await dict_db?.entries.update({ id: entry_id, sources: merged })
-      }
+      await apply_bulk_source({ writes, entries: get(entries_data), entry_ids: selected_ids, slug })
     })
   }
 
   async function bulk_review(category: string | null) {
     await run(async () => {
-      const data = get(entries_data)
-      for (const entry_id of selected_ids) {
-        const entry = data[entry_id]
-        const review = category ? { category, note: '' } : null
-        if (entry) entry.main.review = review
-        await dict_db?.entries.update({ id: entry_id, review })
-      }
+      await apply_bulk_review({
+        writes,
+        entries: get(entries_data),
+        entry_ids: selected_ids,
+        review: category ? { category, note: '' } : null,
+      })
     })
   }
 </script>

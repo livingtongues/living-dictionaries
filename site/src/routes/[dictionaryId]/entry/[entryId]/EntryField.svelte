@@ -8,7 +8,8 @@
   import IconFa6SolidPencil from '~icons/fa6-solid/pencil'
 
   interface Props {
-    value: string
+    /** Raw column value — SQLite NULL for an empty field, so never assume a string. */
+    value: string | null
     field: EntryFieldValue
     bcp?: string
     display: string
@@ -68,7 +69,7 @@
       </div>
       {#if show}
         {#await import('$lib/components/entry/EditFieldModal.svelte') then { default: EditFieldModal }}
-          <EditFieldModal {on_update} {value} {field} {display} {bcp} on_close={toggle} />
+          <EditFieldModal {on_update} value={value ?? ''} {field} {display} {bcp} on_close={toggle} />
         {/await}
       {/if}
     {/snippet}

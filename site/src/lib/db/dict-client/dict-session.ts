@@ -4,6 +4,8 @@ import type { DictConnection } from './worker-connection'
 import type { DictLiveDb } from './dict-live-db.svelte'
 import type { TranslateFunction } from '$lib/i18n/types'
 import type { ReloadGuard } from '$lib/db/client/client-behind-recovery'
+import type { RejectionReason } from '$lib/db/sync/rejected-rows'
+import { REJECTION_REASON_I18N_KEYS } from '$lib/db/sync/rejected-rows'
 import { CLIENT_BEHIND_GUARD_KEY, decide_client_behind_recovery } from '$lib/db/client/client-behind-recovery'
 import { missing_build_artifact_reason } from '$lib/db/client/stale-build-artifact'
 import { recover_from_stale_bundle } from './stale-bundle-recovery'
@@ -357,6 +359,14 @@ function subscribe_sync_sentinels({ connection, dict_id, t, reload }: {
     if (broadcast.type === 'sync_halted' && !halt_toasted) {
       halt_toasted = true
       toast(t('misc.sync_paused_repeated_failure'), { action: { label: t('misc.reload'), callback: () => reload() }, dismiss_label: t('misc.close') })
+      return
+    }
+    if (broadcast.type === 'push_rejected') {
+      const reason_key = REJECTION_REASON_I18N_KEYS[broadcast.reason as RejectionReason | 'mixed'] ?? REJECTION_REASON_I18N_KEYS.mixed
+      toast(t('misc.push_rejected', { values: { count: String(broadcast.count), reason: t(reason_key) } }), {
+        theme: 'red',
+        dismiss_label: t('misc.close'),
+      })
     }
   })
 }

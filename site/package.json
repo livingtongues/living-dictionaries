@@ -16,6 +16,7 @@
     "test:db": "node e2e/db-ops-flow.mjs",
     "test:flow": "node e2e/dev-flow.mjs",
     "test:sync": "node e2e/dict-sync.mjs",
+    "test:boot": "node e2e/boot-error-reporter.mjs",
     "test:media": "node e2e/media-upload.mjs",
     "test:watch": "node e2e/dict-watch-2ctx.mjs",
     "test:delete-2tab": "node e2e/dict-delete-2tab.mjs",

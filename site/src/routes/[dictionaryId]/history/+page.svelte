@@ -1,5 +1,5 @@
 <script lang="ts">
-  import ChangeHistory from '$lib/components/history/ChangeHistory.svelte'
+  import ChangeHistory from '$lib/history/ChangeHistory.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { page } from '$app/state'
 

@@ -3,7 +3,7 @@
   import { page } from '$app/state'
   import Modal from '$lib/components/ui/Modal.svelte'
   import MapboxStatic from '$lib/components/maps/mapbox/static/MapboxStatic.svelte'
-  import WhereSpoken from '$lib/components/settings/WhereSpoken.svelte'
+  import WhereSpoken from '$lib/settings/WhereSpoken.svelte'
   import Map from '$lib/components/maps/mapbox/map/Map.svelte'
   import Marker from '$lib/components/maps/mapbox/map/Marker.svelte'
   import Region from '$lib/components/maps/mapbox/map/Region.svelte'

@@ -788,6 +788,33 @@ export function init_remote_logging({ ui_locale = null }: { ui_locale?: string |
 
   // Try a flush right away — picks up offline-buffered entries from a prior crash.
   void flush()
+
+  // LAST: hand the global channels over from the inline boot reporter. Order is
+  // the whole contract — see `disarm_boot_reporter`.
+  disarm_boot_reporter()
+}
+
+/**
+ * Silence the inline boot-error reporter in `app.html` (it files ONE
+ * `boot_error` row for a failure that stops the app from ever starting, when
+ * nothing else is listening).
+ *
+ * Placement is load-bearing, in both directions:
+ *  - NEVER before the real `error` / `unhandledrejection` listeners are
+ *    registered — that opens an instant where nobody is listening at all;
+ *  - NEVER from inside a handler — the inline listener was registered first, so
+ *    it would already have filed a duplicate row for that same fault.
+ *
+ * The flag name is a two-file contract with `app.html`, enforced by
+ * `boot-error-reporter.test.ts` (nothing imports the inline script, so a rename
+ * would otherwise silently restore the blind spot).
+ */
+function disarm_boot_reporter(): void {
+  try {
+    (window as Window & { __boot_reporter_off?: boolean }).__boot_reporter_off = true
+  } catch {
+    // A disarm failure must never break logging init.
+  }
 }
 
 /**

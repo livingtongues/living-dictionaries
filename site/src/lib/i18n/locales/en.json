@@ -591,7 +591,14 @@
     "dict_open_failed_explanation": "Your browser refused to open the offline copy of this dictionary. Downloading a fresh copy usually fixes it.",
     "dict_open_failed_editor_warning": "You can edit this dictionary. If this device is holding changes that never reached the server, re-downloading will discard them — we cannot check without opening the file. Contact us first if you may have unsaved work.",
     "dict_reset_and_redownload": "Reset and re-download",
-    "dict_reset_confirm": "Discard the copy on this device and download a fresh one?"
+    "dict_reset_confirm": "Discard the copy on this device and download a fresh one?",
+    "save_failed": "Your change could not be saved. Please try again — if this keeps happening, contact us.",
+    "push_rejected": "{count} of your changes couldn't be saved — {reason}",
+    "push_rejected_orphan": "the item they belong to was deleted by someone else.",
+    "push_rejected_duplicate": "someone else had already added the same thing.",
+    "push_rejected_tombstoned": "they were deleted by someone else while you were editing.",
+    "push_rejected_unauthorized": "you no longer have permission to edit here.",
+    "push_rejected_mixed": "the server refused them. Reload to see the current data."
   },
   "settings": {
     "community_permission": "Does the speech community allow this language to be online?",

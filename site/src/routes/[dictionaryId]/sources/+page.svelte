@@ -1,11 +1,11 @@
 <script lang="ts">
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
-  import SourceFiles from '$lib/components/sources/SourceFiles.svelte'
+  import SourceFiles from '$lib/sources/SourceFiles.svelte'
   import { page } from '$app/state'
   import type { Tables } from '$lib/types'
   import type { ImportFileForClient } from '$lib/import/types'
   import { completed_source_files_by_source } from '$lib/import/file-lifecycle'
-  import EditSource from '$lib/components/sources/EditSource.svelte'
+  import EditSource from '$lib/sources/EditSource.svelte'
   import { api_dict_files_list } from '$api/v1/dictionaries/[id]/files/_call'
   import { toast } from '$lib/state/toast.svelte'
   import IconFaSolidPlus from '~icons/fa-solid/plus'

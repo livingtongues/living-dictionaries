@@ -2,8 +2,8 @@
 
 How a dictionary's alternate writing systems are modeled, and the non-obvious decisions behind it.
 Code: `Orthography` in `shared.types.ts`, `$lib/orthography/orthographies.ts`, `$lib/db/server/orthographies.ts`,
-`$lib/components/settings/EditableOrthographies.svelte`, the `/api/v1/.../orthographies` routes, and the
-Keyman lookup in `$lib/components/keyboards/keyman/writing-systems.ts`.
+`$lib/settings/EditableOrthographies.svelte`, the `/api/v1/.../orthographies` routes, and the
+Keyman lookup in `$lib/keyboards/keyman/writing-systems.ts`.
 
 ## The core model
 

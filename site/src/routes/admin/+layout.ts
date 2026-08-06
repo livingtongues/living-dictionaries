@@ -6,6 +6,7 @@ import { browser, dev } from '$app/environment'
 import { get_admin_db } from '$lib/db/client/db'
 import { live_share } from '$lib/db/client/live-share.svelte'
 import { Sync } from '$lib/db/sync/engine.svelte.js'
+import { REJECTION_REASON_I18N_KEYS } from '$lib/db/sync/rejected-rows'
 import { toast } from '$lib/state/toast.svelte'
 import { error } from '@sveltejs/kit'
 
@@ -75,6 +76,13 @@ export const load: LayoutLoad = async ({ parent }) => {
           action: { label: translate('misc.reload'), callback: () => location.reload() },
           dismiss_label: translate('misc.close'),
         })
+      },
+      // Refused-write contract: the server took the round trip but dropped some
+      // pushed rows. Never silent — say how many and why.
+      on_push_rejected: ({ count, reason }) => {
+        toast(translate('misc.push_rejected', {
+          values: { count: String(count), reason: translate(REJECTION_REASON_I18N_KEYS[reason]) },
+        }), { theme: 'red', dismiss_label: translate('misc.close') })
       },
     })
     globals.__ld_admin_sync = sync

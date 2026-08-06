@@ -3,8 +3,11 @@
   import type { EntryFieldValue } from '$lib/types'
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import Form from '$lib/components/ui/Form.svelte'
-  import Keyman from '$lib/components/keyboards/keyman/Keyman.svelte'
+  import Keyman from '$lib/keyboards/keyman/Keyman.svelte'
   import MarkdownEditor from '$lib/markdown/MarkdownEditor.svelte'
+  import { save_field_value } from './edit-field-value'
+  import { toast } from '$lib/state/toast.svelte'
+  import { log_warning } from '$lib/debug/remote-log'
   import { page } from '$app/state'
   import IconFa6SolidChevronRight from '~icons/fa6-solid/chevron-right'
   import IconFa6SolidChevronDown from '~icons/fa6-solid/chevron-down'
@@ -34,15 +37,37 @@
 
   let inputEl: HTMLInputElement = $state()
 
-  async function save() {
-    value = inputEl?.value || value || '' // IpaKeyboard modifies input's value from outside this component so the bound value here doesn't update. This is hacky and the alternative is to emit events from the IpaKeyboard rather than bind to any neighboring element. This makes the adding and backspacing functions potentially needing to be applied in every context where the IPA keyboard is used. Until we know more how the IPA keyboard will be used, this line here is sufficient.
-    await on_update(value.trim())
-    on_close()
+  // `save_field_value` owns the null-proofing + failure routing (see
+  // edit-field-value.ts). IpaKeyboard modifies the input's value from outside
+  // this component so the bound value here doesn't update, which is why the
+  // element's value wins over the prop. This is hacky and the alternative is to
+  // emit events from the IpaKeyboard rather than bind to any neighboring
+  // element. This makes the adding and backspacing functions potentially
+  // needing to be applied in every context where the IPA keyboard is used.
+  // Until we know more how the IPA keyboard will be used, this is sufficient.
+  async function save(): Promise<boolean> {
+    const { saved, value: saved_value } = await save_field_value({
+      field,
+      input_value: inputEl?.value,
+      bound_value: value,
+      on_update,
+      on_close,
+      on_failure: ({ field: failed_field, error }) => {
+        log_warning({
+          message: 'write_blocked',
+          context: { reason: 'edit_field_save_failed', field: failed_field, error: (error as Error)?.message ?? String(error) },
+        })
+        console.error(error)
+        toast(page.data.t('misc.save_failed'), { theme: 'red' })
+      },
+    })
+    value = saved_value
+    return saved
   }
 
   async function save_and_next() {
-    await save()
-    on_save_next()
+    if (await save())
+      on_save_next()
   }
 
   function autofocus(node: HTMLInputElement) {
@@ -157,7 +182,7 @@
             class="keyboard-input" />
         </Keyman>
       {:else if field === 'phonetic'}
-        {#await import('$lib/components/keyboards/ipa/IpaKeyboard.svelte') then { default: IpaKeyboard }}
+        {#await import('$lib/keyboards/ipa/IpaKeyboard.svelte') then { default: IpaKeyboard }}
           <div style="margin-top: 0.5rem">
             <IpaKeyboard on_ipa_change={new_value => value = new_value}>
               <input
@@ -192,7 +217,7 @@
           class="btn-ghost btn-sm edit-helper-button"
 
           onclick={() => (value = italicizeSelection(inputEl))}><i>Italicize</i> selection</HeadlessButton>
-        {#if value.includes('<i>')}
+        {#if value?.includes('<i>')}
           <div class="tw-prose italic-preview">
             {@html sanitize(value)}
           </div>

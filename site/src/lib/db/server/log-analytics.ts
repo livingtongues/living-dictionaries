@@ -382,7 +382,7 @@ export interface LogAnalytics {
   boot_health: BootHealth
   /** Synthetic external uptime + latency (`uptime_probe`, hot window only). */
   uptime: UptimeSummary
-  /** Logins per day by method + the zero-day alarm — the "a subsystem stopped working" panel. */
+  /** Logins per day by method — who is getting in, and how. */
   sign_in: SignInHealth
   /**
    * Whole-box host resources (live snapshot + hot-window trend from `host_stats`).
@@ -393,33 +393,14 @@ export interface LogAnalytics {
 }
 
 /**
- * SIGN-IN HEALTH — the panel that counts something that STOPPED happening.
- *
- * Living Dictionaries' Google sign-in was dead from 2026-07-04 to 2026-08-02:
- * thirty days, and on the day it came back it carried 23 of the site's 23 logins
- * and created 7 new accounts. Nothing noticed, because a broken third-party
- * integration produces FEWER log rows, not more, and every other panel on these
- * dashboards counts things that happened. Eight consecutive nightly reviews
- * verified that the change which broke it had been APPLIED — never that signing
- * in still worked.
- *
- * So the acceptance test for an integration is its own success metric. This is
- * that metric. It needs no new telemetry: `auth_login` has carried
- * `{ method, created }` since June.
+ * SIGN-IN — logins per day by method, straight reporting. Needs no telemetry of
+ * its own: `auth_login` has carried `{ method, created }` since June.
  */
 export interface SignInMethodHealth {
   /** `google` | `email`. */
   method: string
   /** Logins on `SignInHealth.day` (the last COMPLETE day). */
   logins: number
-  /** Of the 7 days before that, how many had at least one login by this method. */
-  active_days_before: number
-  /** Mean logins/day over those 7 days. */
-  daily_average_before: number
-  /** Last moment this method logged anybody in, over the whole window. */
-  last_login_at: string | null
-  /** Was reliably live (≥`SIGN_IN_ACTIVE_DAYS_REQUIRED` of 7) and produced ZERO on `day`. */
-  flatlined: boolean
 }
 export interface SignInHealth {
   /** The last COMPLETE UTC day — today is deliberately excluded, it is always partial. */
@@ -430,8 +411,6 @@ export interface SignInHealth {
   methods: SignInMethodHealth[]
   /** Per-day logins by method across the window, oldest first (`methods` is method → count). */
   daily: { day: string, total: number, new_accounts: number, methods: Record<string, number> }[]
-  /** Methods matching the alarm rule. Empty is the healthy reading. */
-  flatlined: string[]
 }
 
 /** One day of synthetic-probe availability + latency (hot window). */
@@ -1350,50 +1329,26 @@ function populate_temp_set({ logs_db, table, column, values }: {
 }
 
 /**
- * Synthetic uptime + latency from the `uptime_probe` server-log family (hot window).
- * Server rows carry no user_agent, so this is audience-independent — always shown.
- * The mustang off-box prober POSTs `{ status, ok, ttfb_ms, total_ms, vantage }` to
- * `/api/log` (trusted `X-Log-Source-Secret` path → `source='server'`) every few min.
- */
-/** Days of the baseline week a method must have been live on before its silence counts as a fault. */
-export const SIGN_IN_ACTIVE_DAYS_REQUIRED = 5
-/** Length of that baseline, in days, immediately before the day being judged. */
-export const SIGN_IN_BASELINE_DAYS = 7
-
-/**
- * The alarm rule, pure so it is testable without a database: a method that
- * logged somebody in on at least 5 of the previous 7 days and NOBODY on the day
- * being judged has stopped working. Deliberately not "fewer than usual" — a
- * threshold on a small count is a false-alarm generator, whereas a live method
- * going to exactly zero for a whole day is unambiguous.
- */
-export function sign_in_flatlined({ logins, active_days_before }: { logins: number, active_days_before: number }): boolean {
-  return logins === 0 && active_days_before >= SIGN_IN_ACTIVE_DAYS_REQUIRED
-}
-
-/**
- * Logins per day by method (see `SignInHealth`). Judged on the last COMPLETE UTC
- * day: `now` is always a partial day, and "zero so far today" at 11:00 UTC is
- * normal on a site whose traffic is mostly American afternoons.
+ * Logins per day by method (see `SignInHealth`). Reported on the last COMPLETE
+ * UTC day: `now` is always a partial day, and "zero so far today" at 11:00 UTC
+ * is normal on a site whose traffic is mostly American afternoons.
  */
 function build_sign_in_health(ctx: AnalyticsContext): SignInHealth {
   const rows = ctx.logs_db.prepare(`
     SELECT substr(received_at, 1, 10)                                                          day,
            coalesce(json_extract(CASE WHEN json_valid(context) THEN context END, '$.method'), 'unknown') method,
            SUM(CASE WHEN json_extract(CASE WHEN json_valid(context) THEN context END, '$.created') IN (1, 'true') THEN 1 ELSE 0 END) new_accounts,
-           COUNT(*)                                                                            logins,
-           MAX(received_at)                                                                    last_login_at
+           COUNT(*)                                                                            logins
     FROM client_logs
     WHERE received_at >= ? AND source = 'server' AND message = 'auth_login'
     GROUP BY day, method
     ORDER BY day
-  `).all(ctx.window_start_iso) as { day: string, method: string, new_accounts: number, logins: number, last_login_at: string }[]
+  `).all(ctx.window_start_iso) as { day: string, method: string, new_accounts: number, logins: number }[]
 
   const judged_day = day_string(new Date(ctx.now.getTime() - 86_400_000))
-  const baseline_start = day_string(new Date(ctx.now.getTime() - (SIGN_IN_BASELINE_DAYS + 1) * 86_400_000))
 
   const daily = new Map<string, { day: string, total: number, new_accounts: number, methods: Record<string, number> }>()
-  const totals = new Map<string, { logins: number, active_days_before: number, last_login_at: string | null }>()
+  const totals = new Map<string, number>()
   for (const row of rows) {
     if (row.day > judged_day)
       continue // today, still in progress
@@ -1403,27 +1358,13 @@ function build_sign_in_health(ctx: AnalyticsContext): SignInHealth {
     point.methods[row.method] = (point.methods[row.method] ?? 0) + row.logins
     daily.set(row.day, point)
 
-    const method = totals.get(row.method) ?? { logins: 0, active_days_before: 0, last_login_at: null }
-    if (row.day === judged_day)
-      method.logins += row.logins
-    else if (row.day >= baseline_start && row.logins > 0)
-      method.active_days_before += 1
-    if (method.last_login_at === null || row.last_login_at > method.last_login_at)
-      method.last_login_at = row.last_login_at
-    totals.set(row.method, method)
+    totals.set(row.method, (totals.get(row.method) ?? 0) + (row.day === judged_day ? row.logins : 0))
   }
 
   const judged = daily.get(judged_day)
-  const methods: SignInMethodHealth[] = [...totals].map(([method, value]) => ({
-    method,
-    logins: value.logins,
-    active_days_before: value.active_days_before,
-    daily_average_before: Math.round((rows
-      .filter(row => row.method === method && row.day >= baseline_start && row.day < judged_day)
-      .reduce((sum, row) => sum + row.logins, 0) / SIGN_IN_BASELINE_DAYS) * 10) / 10,
-    last_login_at: value.last_login_at,
-    flatlined: sign_in_flatlined(value),
-  })).sort((first, second) => second.logins - first.logins || first.method.localeCompare(second.method))
+  const methods: SignInMethodHealth[] = [...totals]
+    .map(([method, logins]) => ({ method, logins }))
+    .sort((first, second) => second.logins - first.logins || first.method.localeCompare(second.method))
 
   return {
     day: judged_day,
@@ -1431,10 +1372,15 @@ function build_sign_in_health(ctx: AnalyticsContext): SignInHealth {
     new_accounts: judged?.new_accounts ?? 0,
     methods,
     daily: [...daily.values()].sort((first, second) => first.day.localeCompare(second.day)),
-    flatlined: methods.filter(method => method.flatlined).map(method => method.method),
   }
 }
 
+/**
+ * Synthetic uptime + latency from the `uptime_probe` server-log family (hot window).
+ * Server rows carry no user_agent, so this is audience-independent — always shown.
+ * The mustang off-box prober POSTs `{ status, ok, ttfb_ms, total_ms, vantage }` to
+ * `/api/log` (trusted `X-Log-Source-Secret` path → `source='server'`) every few min.
+ */
 function build_uptime(ctx: AnalyticsContext): UptimeSummary {
   const rows = ctx.logs_db.prepare(`
     SELECT substr(received_at, 1, 10)               day,

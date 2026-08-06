@@ -389,7 +389,7 @@ describe(get_log_analytics, () => {
     expect(analytics.top_routes[1]).toEqual({ route: 'dictionary:entries', count: 50, sessions: 1 })
   })
 
-  test('sign_in raises the flatline alarm for a method that was live all week and produced nothing yesterday', async () => {
+  test('sign_in counts logins per method on the last COMPLETE day, ignoring today', async () => {
     // Judged day is 06-29 (the last COMPLETE day; NOW is midday on the 30th).
     // Google logs in every day up to and including the 28th, then stops.
     for (let offset = 8; offset >= 2; offset--) {
@@ -407,23 +407,10 @@ describe(get_log_analytics, () => {
     expect(sign_in.day).toBe('2026-06-29')
     expect(sign_in.logins).toBe(2)
     expect(sign_in.new_accounts).toBe(1)
-    expect(sign_in.flatlined).toEqual(['google'])
-    const google = sign_in.methods.find(method => method.method === 'google')
-    expect(google).toMatchObject({ logins: 0, active_days_before: 7, daily_average_before: 1, flatlined: true })
-    expect(sign_in.methods.find(method => method.method === 'email')).toMatchObject({ logins: 2, flatlined: false })
+    expect(sign_in.methods.find(method => method.method === 'google')).toEqual({ method: 'google', logins: 0 })
+    expect(sign_in.methods.find(method => method.method === 'email')).toEqual({ method: 'email', logins: 2 })
     // The day series carries both methods, oldest first, today excluded.
     expect(sign_in.daily[sign_in.daily.length - 1]).toEqual({ day: '2026-06-29', total: 2, new_accounts: 1, methods: { email: 2 } })
-  })
-
-  test('sign_in stays quiet for a method that was never busy enough to judge', async () => {
-    // Two days of logins in the baseline week is not a reliable signal — a
-    // threshold on a small count is a false-alarm generator.
-    add_log({ day: '2026-06-26', source: 'server', message: 'auth_login', context: { method: 'google', created: false } })
-    add_log({ day: '2026-06-27', source: 'server', message: 'auth_login', context: { method: 'google', created: false } })
-
-    const { sign_in } = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
-    expect(sign_in.flatlined).toEqual([])
-    expect(sign_in.methods[0]).toMatchObject({ method: 'google', logins: 0, active_days_before: 2, flatlined: false })
   })
 
   test('api_v1 panel aggregates server v1_* events by day / event / dictionary / via with a failure split', async () => {
@@ -1924,7 +1911,6 @@ describe(get_log_analytics, () => {
           "sign_in": {
             "daily": [],
             "day": "2026-06-29",
-            "flatlined": [],
             "logins": 0,
             "methods": [],
             "new_accounts": 0,

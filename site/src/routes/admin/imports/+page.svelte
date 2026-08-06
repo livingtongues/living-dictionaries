@@ -2,11 +2,32 @@
   import type { AdminImportRow } from '$api/admin/imports/+server'
   import { api_admin_imports_list } from '$api/admin/imports/_call'
   import { api_conversation_brief } from '$api/v1/dictionaries/[id]/conversations/_call'
+  import { ADMINS } from '$lib/admins'
   import ImportsTable from '$lib/import/admin/ImportsTable.svelte'
   import { toast } from '$lib/state/toast.svelte'
+  import { onMount } from 'svelte'
 
+  let { data } = $props()
   let imports = $state<AdminImportRow[]>([])
   let loading = $state(true)
+
+  const admin_users_query = $derived.by(() => {
+    if (!data.db) return null
+    const placeholders = ADMINS.map(() => '?').join(',')
+    return data.db.users.query({
+      where: `email IN (${placeholders})`,
+      params: ADMINS.map(admin => admin.email),
+    })
+  })
+
+  const admin_user_id_by_email = $derived.by(() => {
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity
+    const map = new Map<string, string>()
+    for (const user of admin_users_query?.rows ?? []) {
+      if (user.email) map.set(user.email, user.id)
+    }
+    return map
+  })
 
   async function refresh() {
     const { data, error } = await api_admin_imports_list()
@@ -18,7 +39,7 @@
     imports = data?.imports ?? []
   }
 
-  $effect(() => { void refresh() })
+  onMount(() => { void refresh() })
 
   const open_count = $derived(imports.filter(row => !row.resolved_at).length)
   const question_count = $derived(imports.reduce((total, row) => total + row.open_questions, 0))
@@ -31,6 +52,13 @@
     }
     await navigator.clipboard.writeText(data.brief)
     toast.success('Job brief copied')
+  }
+
+  function set_assignee(row: AdminImportRow, next_user_id: string | null) {
+    const admin = ADMINS.find(item => admin_user_id_by_email.get(item.email) === next_user_id)
+    row.assigned_to_user_id = next_user_id
+    row.assignee_name = admin?.name ?? null
+    row.assignee_email = admin?.email ?? null
   }
 </script>
 
@@ -55,7 +83,7 @@
   {:else if !imports.length}
     <p class="muted">No import conversations yet.</p>
   {:else}
-    <ImportsTable {imports} on_copy_brief={copy_brief} />
+    <ImportsTable {imports} {admin_user_id_by_email} on_copy_brief={copy_brief} on_assigned={set_assignee} />
   {/if}
 </div>
 

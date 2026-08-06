@@ -125,17 +125,13 @@ function build_perf(days: number): LogAnalytics['performance'] {
   }
 }
 
-/**
- * Sign-in health. The default mock is the REAL 2026-07 shape: Google flatlined
- * on 07-05 and email carried the site alone — so the alarm state on the panel is
- * the one that actually happened, not a hypothetical.
- */
+/** Sign-in: logins per method per day, both methods live. */
 function build_sign_in(): LogAnalytics['sign_in'] {
   const end = new Date('2026-06-23T00:00:00.000Z')
   const daily: LogAnalytics['sign_in']['daily'] = []
   for (let offset = 13; offset >= 1; offset--) {
     const day = new Date(end.getTime() - offset * 86_400_000).toISOString().slice(0, 10)
-    const google = offset > 4 ? 8 + (offset % 5) : 0
+    const google = 8 + (offset % 5)
     const email = 4 + (offset % 4)
     daily.push({ day, total: google + email, new_accounts: offset % 3 === 0 ? 2 : 0, methods: { google, email } })
   }
@@ -145,11 +141,10 @@ function build_sign_in(): LogAnalytics['sign_in'] {
     logins: judged.total,
     new_accounts: judged.new_accounts,
     methods: [
-      { method: 'email', logins: judged.methods.email, active_days_before: 7, daily_average_before: 5.6, last_login_at: `${judged.day}T21:40:00.000Z`, flatlined: false },
-      { method: 'google', logins: 0, active_days_before: 5, daily_average_before: 9.7, last_login_at: `${daily[daily.length - 5].day}T18:02:00.000Z`, flatlined: true },
+      { method: 'google', logins: judged.methods.google },
+      { method: 'email', logins: judged.methods.email },
     ],
     daily,
-    flatlined: ['google'],
   }
 }
 
@@ -619,6 +614,6 @@ export const empty_analytics: LogAnalytics = {
     daily: [],
     user_observed: { failures: 0, affected_users: 0, affected_sessions: 0, worst_hour: null, worst_hour_failures: 0, daily: [] },
   },
-  sign_in: { day: '2026-06-22', logins: 0, new_accounts: 0, methods: [], daily: [], flatlined: [] },
+  sign_in: { day: '2026-06-22', logins: 0, new_accounts: 0, methods: [], daily: [] },
   host: { now: null, samples: 0, latest: null, hourly: [] },
 }

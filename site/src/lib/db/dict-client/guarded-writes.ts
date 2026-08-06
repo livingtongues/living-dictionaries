@@ -1,4 +1,5 @@
 import type { MultiString } from '$lib/types'
+import type { EntryReview } from '$lib/db/schemas/dictionary.types'
 import type { DictInsertType, DictLiveDb, DictUpdateType } from '$lib/db/dict-client/dict-live-db.svelte'
 import type { GlobalRelationshipType, TagKind } from '$lib/constants'
 import { key_between } from '$lib/api/v1/fractional-index'
@@ -114,6 +115,25 @@ export function create_guarded_writes({ dict_db, connection, dictionary, get_use
     delete_entry: guard(async (db, entry_id: string) => {
       await db.entries.delete(entry_id)
       track({ event: ENTRY_DELETED, props: { dictionary_id: dictionary.id, entry_id } })
+    }),
+
+    /**
+     * Replace an entry's source-slug array. A single-table scalar update, but it
+     * belongs here because the bulk-action bar drives it across a selection: the
+     * facade's readiness check, `write_blocked` telemetry, error toast and
+     * swallow-so-the-loop-continues semantics are exactly what a bulk loop needs.
+     * Returns the stored array so the caller only paints the row after the write
+     * actually landed (a `undefined` return means the write was refused).
+     */
+    set_sources: guard(async (db, { entry_id, sources }: { entry_id: string, sources: string[] | null }) => {
+      await db.entries.update({ id: entry_id, sources })
+      return { sources }
+    }),
+
+    /** Set/clear an entry's "needs review" flag. Same bulk rationale as `set_sources`. */
+    set_review: guard(async (db, { entry_id, review }: { entry_id: string, review: EntryReview | null }) => {
+      await db.entries.update({ id: entry_id, review })
+      return { review }
     }),
 
     insert_sense: guard(async (db, entry_id: string) => {

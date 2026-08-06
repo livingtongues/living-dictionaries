@@ -534,3 +534,107 @@ describe('DictSyncEngine repeat-failure circuit breaker', () => {
     expect(on_integrity_wedged).not.toHaveBeenCalled()
   })
 })
+
+/**
+ * The refused-write contract: the server took the round trip but dropped some
+ * of the pushed rows. Before this the only refusal on the wire
+ * (`skipped_orphans`) reached a `console.warn` inside the leader worker and
+ * evaporated — nothing countable, nothing the editor could see.
+ */
+describe('DictSyncEngine refused-push reporting', () => {
+  let db: BetterSqlite3.Database
+
+  beforeEach(() => {
+    vi.mocked(api_log).mockClear()
+    _reset_dict_failure_throttle_for_tests()
+    db = new BetterSqlite3(':memory:')
+    db.exec('CREATE TABLE db_metadata (key TEXT PRIMARY KEY, value TEXT);')
+    db.exec('CREATE TABLE deletes (table_name TEXT NOT NULL, id TEXT NOT NULL);')
+    for (const table of DICT_SYNCABLE_TABLES)
+      db.exec(`CREATE TABLE "${table}" (id TEXT PRIMARY KEY, dirty INTEGER, updated_at TEXT);`)
+  })
+
+  afterEach(() => {
+    db.close()
+  })
+
+  function engine_over(response: Record<string, unknown>, on_push_rejected?: (info: { count: number, reason: string }) => void) {
+    globalThis.fetch = vi.fn(() => Promise.resolve({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({ new_synced_up_to: 5, changes: {}, deletes: [], ...response }),
+    })) as never
+    return new DictSyncEngine({
+      dict_id: 'test-dict',
+      connection: {
+        query: <T>(sql: string, params: unknown[] = []) => Promise.resolve(db.prepare(sql).all(...(params as never[])) as T[]),
+        execute: (sql: string, params?: unknown[]) => {
+          if (params?.length)
+            db.prepare(sql).run(...(params as never[]))
+          else
+            db.exec(sql)
+          return Promise.resolve()
+        },
+      },
+      has_editor_role: true,
+      get_auth: () => ({}) as never,
+      on_push_rejected,
+    })
+  }
+
+  test('emits one error-level sync_push_rejected per (table, reason) and hands the tab a summary', async () => {
+    const on_push_rejected = vi.fn()
+    const engine = engine_over({
+      rejected_rows: [
+        { table_name: 'senses', id: 's1', reason: 'orphan' },
+        { table_name: 'senses', id: 's2', reason: 'orphan' },
+        { table_name: 'entry_tags', id: 'j1', reason: 'duplicate' },
+      ],
+    }, on_push_rejected)
+
+    await engine.sync_once()
+
+    const [[payload]] = vi.mocked(api_log).mock.calls
+    expect(payload.entries).toHaveLength(2)
+    expect(payload.entries[0].level).toBe('error')
+    expect(payload.entries[0].message).toBe('sync_push_rejected')
+    expect(payload.entries[0].context).toMatchObject({ engine: 'dict', sector: 'test-dict', reason: 'orphan', table_name: 'senses', count: 2, ids: ['s1', 's2'] })
+    expect(payload.entries[1].context).toMatchObject({ reason: 'duplicate', table_name: 'entry_tags', count: 1 })
+    expect(on_push_rejected).toHaveBeenCalledExactlyOnceWith({ count: 3, reason: 'mixed' })
+  })
+
+  test('a pre-contract server that only sends skipped_orphans still reports', async () => {
+    const on_push_rejected = vi.fn()
+    const engine = engine_over({
+      skipped_orphans: [{ table_name: 'senses', id: 's1', parent_table: 'entries' }],
+    }, on_push_rejected)
+
+    await engine.sync_once()
+
+    const [[payload]] = vi.mocked(api_log).mock.calls
+    expect(payload.entries[0].message).toBe('sync_push_rejected')
+    expect(payload.entries[0].context).toMatchObject({ reason: 'orphan', table_name: 'senses', count: 1, ids: ['s1'] })
+    expect(on_push_rejected).toHaveBeenCalledExactlyOnceWith({ count: 1, reason: 'orphan' })
+  })
+
+  test('the same refusal on the next round trip is suppressed (a wedged editor is told once)', async () => {
+    const on_push_rejected = vi.fn()
+    const engine = engine_over({
+      rejected_rows: [{ table_name: 'entries', id: 'e1', reason: 'unauthorized' }],
+    }, on_push_rejected)
+
+    await engine.sync_once()
+    await engine.sync_once()
+    await engine.sync_once()
+
+    expect(api_log).toHaveBeenCalledTimes(1)
+    expect(on_push_rejected).toHaveBeenCalledTimes(1)
+  })
+
+  test('a clean round trip reports nothing', async () => {
+    const on_push_rejected = vi.fn()
+    await engine_over({}, on_push_rejected).sync_once()
+    expect(api_log).not.toHaveBeenCalled()
+    expect(on_push_rejected).not.toHaveBeenCalled()
+  })
+})

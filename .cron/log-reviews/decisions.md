@@ -236,9 +236,12 @@ DELETE a line once its rule is obsolete. Keep it small — standing law, not a l
   fleet-wide).** Earned the hard way: Google sign-in was dead for THIRTY DAYS and 83% of all logins
   went with it, while this lane re-raised the same `crossorigin` item on EIGHT consecutive nights,
   each time verifying whether the change had been APPLIED and never whether the feature still
-  WORKED. Evidence and day-by-day counts: `.cron/log-reviews/2026-08-03.md`. Detector BUILT
-  2026-08-04 (uncommitted) — don't re-file it: `routes/admin/health/SignInPanel.svelte` +
-  `$lib/db/server/sign-in-alarm-cron.ts`, rationale in `.knowledge/admin/measuring-what-stopped.md`.
+  WORKED. Evidence and day-by-day counts: `.cron/log-reviews/2026-08-03.md`. The law is about how you
+  VERIFY a change, and it stands. **It is NOT a licence to build login alarms: Jacob removed the
+  zero-logins alarm on 2026-08-05 and does not want to be notified about sign-in — do not re-file or
+  rebuild it.** Its one and only firing was a substitution artifact (email read zero on 08-03 only
+  because the restored Google path absorbed every login; it was back the next day). The
+  `/admin/health` **Sign-in** panel stays as a plain logins-per-method chart you can go look at.
 - **2026-08-04 (Jacob, morning debrief):** Audio derivatives are converted **on upload** — that is the
   real path. The derivative sweep is a **backfill only**: once daily, outside the web process. Do not
   propose returning it to a short interval or running it in the request-serving process.
@@ -253,3 +256,42 @@ DELETE a line once its rule is obsolete. Keep it small — standing law, not a l
   measure something already known. (Earned on the audio-derivative sweep: the report recommended
   instrument-first for a stall whose two causes — an unindexable computed-key join and 160 sync
   DB-file opens per run — were both visible in the source.)
+- **2026-08-04 — a memo keyed by the FULL INPUT is a cache that can never hit (standing engineering
+  rule, broadcast fleet-wide).** If the key contains something unique per request, the structure is a
+  memory leak with a hit rate of zero, and it fails *loudly* only when the miss is expensive. Live
+  proof: the share-card font-subset cache keys on `script|entire headword`, so every word missed and
+  paid up to two 3 s Google Fonts round-trips against a 10 s render deadline — 13% of fresh cards
+  timed out and served the generic card, concentrated on the dictionaries with rare letters. Key by
+  the CLASS that recurs (here: the set of characters needing a fallback), never by the instance.
+- **2026-08-04 — the residual old-tab population needs a SERVER-side lever, and there is one: stop
+  deleting the previous build's `_app/immutable/` assets at deploy.** Follows the 07-31 law that a
+  client-side self-heal never reaches tabs that predate it (proved again tonight: an Android tab on a
+  07-24 bundle burned 92 minutes on a deleted worker chunk while the 07-31 reload-once fix sat in a
+  bundle it will never load). Asset names are content-hashed, so merging the last build or two forward
+  cannot collide; it costs disk and no client change, and it does NOT reopen the 07-09 no-forced-reload
+  ruling. Prefer this over any new client mechanism for this class.
+  **SHIPPED 2026-08-05** (`deploy.sh` → `/opt/hosting/immutable-archive`, Caddy archive-first). The
+  standing part is the PREFERENCE: for the tabs a client-side self-heal can never reach, reach for a
+  server-side lever an old client already obeys, not a new client mechanism.
+- **2026-08-05 — A BUILD VERSION MUST BE UNIQUE PER BUILD, NOT PER COMMIT (standing engineering rule,
+  broadcast fleet-wide).** Constancy *within* a build is only half the requirement; the other half is
+  distinctness *between* builds, and nothing enforced it. Any image build that bakes something
+  FETCHED AT BUILD TIME into the bundle (translations, homepage stats, remote config) makes two builds
+  of one commit produce different content-hashed files under one version name — so the framework's
+  update poll can never fire, the dashboard's current-vs-stale error split files stale errors as
+  CURRENT, and a deploy leaves no marker on the timeline. Live proof: LD rebuilt `b4b47e55` on
+  2026-08-05 and every asset hash changed while `app_version` did not. Fix shape: `${GIT_SHA}-${BUILD_ID}`
+  with the build id exported once by the deploy script. Never read "same `app_version`" as "same bundle".
+- **2026-08-05 — NEVER CLASSIFY AN OPAQUE LOAD FAILURE AS A CONTENT/BUILD FAULT WITHOUT RULING OUT THE
+  NETWORK (standing triage rule).** A dropped connection and a deleted file produce the SAME bare
+  browser event, and code that resolves the ambiguity "by construction" always resolves it toward the
+  cause that is common in Boston — so the misdiagnosis lands on the far-from-origin user every time.
+  Measured the same night in two subsystems: a Vietnam tab told "app update needed" for a worker chunk
+  that exists on both containers, and an India tab told a valid, reachable-from-here MP3 was an
+  unsupported format. The cure is one cheap probe on the failure path (URL + `navigator.onLine`, or a
+  `HEAD`), and its absence is a coverage gap, not a style preference.
+- **2026-08-05 — a probe that shares its failure path with the users cannot attribute the fault.**
+  Narrower companion to the 07-27 rule about probe intervals: LD's uptime probe goes through Cloudflare,
+  so when the edge↔origin link broke (42 user 520/522/525s while the box sat at 2–4% CPU) the probe
+  failed too and no instrument could say whose fault it was. Any probe meant to answer "is it us?"
+  needs a leg that bypasses the layer it is trying to exonerate.

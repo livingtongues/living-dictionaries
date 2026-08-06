@@ -27,6 +27,7 @@ export interface AdminImportRow {
   requester_user_id: string | null
   requester_name: string | null
   requester_email: string
+  assigned_to_user_id: string | null
   assignee_name: string | null
   assignee_email: string | null
   created_at: string
@@ -61,6 +62,7 @@ export const GET: RequestHandler = async (event) => {
       t.from_user_id AS requester_user_id,
       t.from_name AS requester_name,
       t.from_email AS requester_email,
+      t.assigned_to_user_id,
       assignee.name AS assignee_name,
       assignee.email AS assignee_email,
       t.created_at,

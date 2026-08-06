@@ -6,7 +6,8 @@
   import { column_run } from '../column-run.svelte'
 
   interface Props {
-    value: string
+    /** Raw column value — SQLite NULL for an empty field, so never assume a string. */
+    value: string | null
     htmlValue?: string
     field: EntryFieldValue
     bcp?: string

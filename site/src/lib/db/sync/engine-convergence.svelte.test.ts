@@ -6,10 +6,16 @@ import { open_test_shared_db } from '$lib/db/server/shared-db'
 import { process_sync } from '$lib/db/server/sync-helpers'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { Sync } from './engine.svelte'
+import { log_event } from '$lib/debug/remote-log'
 
 vi.mock('$api/log/_call', () => ({
   api_log: vi.fn(() => Promise.resolve({ data: null, error: null })),
 }))
+
+vi.mock('$lib/debug/remote-log', async (importOriginal) => {
+  const original = await importOriginal<typeof import('$lib/debug/remote-log')>()
+  return { ...original, log_event: vi.fn() }
+})
 
 /**
  * End-to-end convergence proof for the shared.db admin engine — the LD-shared
@@ -73,6 +79,7 @@ function insert_role({ db, id, dirty, updated_at }: { db: BetterSqlite3.Database
 }
 
 beforeEach(() => {
+  vi.mocked(log_event).mockClear()
   server_db = open_test_shared_db()
   client_db = open_test_shared_db()
   logs_db = open_logs_db(':memory:')
@@ -322,5 +329,62 @@ describe('Sync repeat-failure circuit breaker', () => {
     await engine.sync()
     await engine.sync()
     expect(engine.blocked_by_repeated_failure).toBeFalsy()
+  })
+})
+
+/**
+ * The refused-write contract, proven end to end on the REAL server helper: a
+ * pushed row the server drops must become a typed, countable telemetry event
+ * AND a message the admin can see. `skipped_orphans` — the only refusal the
+ * wire could express before — reached a dashboard log line that dies with the
+ * tab.
+ */
+describe('refused-push contract (server → engine)', () => {
+  test('a tombstoned push is reported as `tombstoned`, once, with a toast summary', async () => {
+    server_db.prepare(`INSERT INTO deletes (table_name, id, updated_at) VALUES ('dictionary_roles', 'role-stale', ?)`).run(T0)
+    insert_role({ db: client_db, id: 'role-stale', dirty: true, updated_at: T0 })
+
+    const on_push_rejected = vi.fn()
+    const post_fn: SyncPostFn = body => Promise.resolve({ data: process_sync({ db: server_db, request: body, user_id: 'admin-1', logs_db }), error: null })
+    const engine = new Sync({ connection: connection_for(client_db), post_fn, on_push_rejected })
+
+    const result = await engine.sync()
+
+    expect(result?.success).toBeTruthy()
+    expect(on_push_rejected).toHaveBeenCalledExactlyOnceWith({ count: 1, reason: 'tombstoned' })
+    expect(log_event).toHaveBeenCalledWith({
+      level: 'error',
+      message: 'sync_push_rejected',
+      context: { engine: 'admin', sector: 'shared', reason: 'tombstoned', table_name: 'dictionary_roles', count: 1, ids: ['role-stale'] },
+    })
+  })
+
+  test('a natural-key duplicate push is reported as `duplicate`', async () => {
+    insert_role({ db: server_db, id: 'role-canon', updated_at: T0 })
+    insert_role({ db: client_db, id: 'role-loser', dirty: true, updated_at: T1 })
+
+    const on_push_rejected = vi.fn()
+    const post_fn: SyncPostFn = body => Promise.resolve({ data: process_sync({ db: server_db, request: body, user_id: 'admin-1', logs_db }), error: null })
+    const engine = new Sync({ connection: connection_for(client_db), post_fn, on_push_rejected })
+
+    await engine.sync()
+
+    expect(on_push_rejected).toHaveBeenCalledExactlyOnceWith({ count: 1, reason: 'duplicate' })
+    expect(log_event).toHaveBeenCalledWith({
+      level: 'error',
+      message: 'sync_push_rejected',
+      context: { engine: 'admin', sector: 'shared', reason: 'duplicate', table_name: 'dictionary_roles', count: 1, ids: ['role-loser'] },
+    })
+  })
+
+  test('a clean push reports nothing', async () => {
+    insert_role({ db: client_db, id: 'role-new', dirty: true, updated_at: T1 })
+    const on_push_rejected = vi.fn()
+    const post_fn: SyncPostFn = body => Promise.resolve({ data: process_sync({ db: server_db, request: body, user_id: 'admin-1', logs_db }), error: null })
+
+    await new Sync({ connection: connection_for(client_db), post_fn, on_push_rejected }).sync()
+
+    expect(on_push_rejected).not.toHaveBeenCalled()
+    expect(log_event).not.toHaveBeenCalledWith(expect.objectContaining({ message: 'sync_push_rejected' }))
   })
 })

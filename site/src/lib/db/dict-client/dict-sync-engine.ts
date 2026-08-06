@@ -4,12 +4,14 @@ import type {
 } from '$lib/db/server/dictionary-sync-helpers'
 import type { DictSyncableTable } from '$lib/db/dict-syncable-tables'
 import type { AuthHeaders } from './worker/instance'
+import type { PushRejectionSummary } from '$lib/db/sync/rejected-rows'
 import { ResponseCodes } from '$lib/constants'
 import { parse_dict_row, stringify_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import { DICT_SYNCABLE_TABLES, MAX_DIRTY_PROBES } from '$lib/db/dict-syncable-tables'
 import { classify_sync_failure, is_storage_lost_error, RepeatFailureTracker } from '$lib/db/sync/sync-failure-classify'
+import { group_rejected_rows, rejection_signature, resolve_rejected_rows, should_report_rejections, summarize_rejections } from '$lib/db/sync/rejected-rows'
 import { LATEST_DICT_MIGRATION } from './dict-migrations-bundle'
-import { report_dict_dirty_reconciled, report_dict_stuck_dirty, report_dict_sync_failure } from './report-dict-sync-failure'
+import { report_dict_dirty_reconciled, report_dict_push_rejected, report_dict_stuck_dirty, report_dict_sync_failure } from './report-dict-sync-failure'
 
 /** The slice of the worker's connection the engine needs (reads + writes). */
 export interface EngineConnection {
@@ -100,6 +102,12 @@ export interface SyncEngineOptions {
    * snapshot (`rebuild()` in dict-instance).
    */
   on_integrity_wedged?: () => void
+  /**
+   * Fires on every round trip whose push the server partly refused — the
+   * "visible message to the person who wrote it" half of the refused-write
+   * contract. The instance broadcasts it so every tab can toast.
+   */
+  on_push_rejected?: (info: PushRejectionSummary) => void
 }
 
 export class DictSyncEngine {
@@ -115,7 +123,10 @@ export class DictSyncEngine {
   #on_version_blocked?: () => void
   #on_repeated_failure?: (info: { message: string, consecutive: number }) => void
   #on_integrity_wedged?: () => void
+  #on_push_rejected?: (info: PushRejectionSummary) => void
   #integrity_wedged_fired = false
+  /** Throttle state for the refused-write report (see `#report_rejected_push`). */
+  #last_rejection_reported: { key: string, at: number } | null = null
 
   #timer: ReturnType<typeof setInterval> | null = null
   #stuck_timer: ReturnType<typeof setInterval> | null = null
@@ -164,6 +175,7 @@ export class DictSyncEngine {
     this.#on_version_blocked = options.on_version_blocked
     this.#on_repeated_failure = options.on_repeated_failure
     this.#on_integrity_wedged = options.on_integrity_wedged
+    this.#on_push_rejected = options.on_push_rejected
   }
 
   /** True once a `schema_outdated` block has latched (see `#version_blocked`). */
@@ -297,6 +309,7 @@ export class DictSyncEngine {
     try {
       const request = await this.#build_request()
       const response = await this.#post(request)
+      this.#report_rejected_push(response)
       await this.#apply_response(response, request)
       this.#last_error = null
       this.#last_sync_at = new Date().toISOString()
@@ -348,6 +361,31 @@ export class DictSyncEngine {
       this.#in_flight = false
       this.#on_status?.({ is_syncing: false, last_error: this.#last_error, last_sync_at: this.#last_sync_at })
     }
+  }
+
+  /**
+   * Refused-write contract: the server took the round trip but dropped some of
+   * the pushed rows. Emit ONE typed `sync_push_rejected` per (table, reason)
+   * and hand the tab a summary to toast — a refusal that only reaches a worker
+   * `console.warn` is indistinguishable from a successful save.
+   * `resolve_rejected_rows` falls back to the legacy `skipped_orphans` so a
+   * bundle talking to a pre-contract server still reports.
+   */
+  #report_rejected_push(response: DictChangesResponse): void {
+    const rejected = resolve_rejected_rows(response)
+    if (!rejected.length)
+      return
+    const groups = group_rejected_rows(rejected)
+    // Nothing clears an `unauthorized` refusal, so the identical rejection
+    // returns on every 30s tick. Report the first, then suppress the same
+    // signature — one wedged editor must not toast twice a minute.
+    const signature = rejection_signature(groups)
+    const now = Date.now()
+    if (!should_report_rejections({ signature, last: this.#last_rejection_reported, now }))
+      return
+    this.#last_rejection_reported = { key: signature, at: now }
+    report_dict_push_rejected({ dict_id: this.#dict_id, groups })
+    this.#on_push_rejected?.(summarize_rejections(rejected))
   }
 
   async #build_request(): Promise<DictChangesRequest> {

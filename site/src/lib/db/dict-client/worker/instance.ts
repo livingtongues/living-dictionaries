@@ -48,6 +48,12 @@ export type DbEvent
    * "your changes aren't saving — reload / contact us" prompt.
    */
     | { type: 'sync_halted' }
+  /**
+   * The server refused part of a push (the refused-write contract). Tabs toast
+   * "N of your changes couldn't be saved — <why>"; `reason` is `mixed` when one
+   * round trip refused rows for more than one reason.
+   */
+    | { type: 'push_rejected', count: number, reason: string }
 
 /** Leader metadata announced to clients on `ready`. */
 export interface LeaderMeta {

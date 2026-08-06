@@ -6,7 +6,7 @@
   import { api_messages_assign } from '../../routes/api/messages/assign/_call'
 
   interface Props {
-    db: LiveDb | null | undefined
+    db?: LiveDb | null
     thread_id: string
     assigned_to_user_id: string | null | undefined
     /**
@@ -62,7 +62,9 @@
     saving = true
     error_msg = null
     try {
-      await api_messages_assign({ thread_id, assignee_user_id: next_user_id })
+      const { error } = await api_messages_assign({ thread_id, assignee_user_id: next_user_id })
+      if (error)
+        throw new Error(error.message)
       await onassigned?.(next_user_id)
     } catch (err) {
       error_msg = (err as Error).message
@@ -117,7 +119,7 @@
   .select-sm {
     font-size: 0.75rem;
     padding: 0.125rem 0.375rem;
-    background: transparent;
+    background-color: transparent;
     border: 1px solid transparent;
   }
   .select-sm:hover {
@@ -129,7 +131,7 @@
   .select-md {
     font-size: 0.875rem;
     padding: 0.25rem 0.5rem;
-    background: var(--surface);
+    background-color: var(--surface);
     border: 1px solid var(--border-color);
   }
   .select-md:hover,

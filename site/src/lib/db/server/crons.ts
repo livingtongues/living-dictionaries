@@ -7,7 +7,6 @@ import { run_monthly_metrics_announcement } from './monthly-metrics-announce'
 import { media_sweep_disabled_reason, run_media_sweep } from './media-sweep-cron'
 import { run_notification_digest_sweep } from './notification-digest-cron'
 import { r2_snapshot_disabled_reason, run_r2_snapshot_sweep } from './r2-snapshot-builder'
-import { run_sign_in_alarm_sweep } from './sign-in-alarm-cron'
 import { run_wal_checkpoint_sweep } from './wal-checkpoint-cron'
 import { run_audio_derivative_sweep } from './audio-derivative-sweep'
 
@@ -108,17 +107,6 @@ export const CRONS: CronDef[] = [
     every_ms: days(1),
     at: { hour: 8, minute: 5, tz: 'America/Los_Angeles' },
     run: run_chat_reping_sweep,
-  },
-  {
-    name: 'sign-in-alarm',
-    description: 'Alarm when a sign-in METHOD produces zero logins for a full day after a live week',
-    // 04:30 PT — after the 03:30 maintenance child has written the day's
-    // analytics checkpoint, which is this cron's only input (a readFileSync; it
-    // runs no queries). Google sign-in was dead for 30 DAYS and nothing noticed:
-    // a broken integration produces FEWER log rows, not more.
-    every_ms: days(1),
-    at: { hour: 4, minute: 30, tz: 'America/Los_Angeles' },
-    run: run_sign_in_alarm_sweep,
   },
   {
     name: 'cron-heartbeat',

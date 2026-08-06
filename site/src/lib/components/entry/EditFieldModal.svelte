@@ -5,7 +5,8 @@
 
   interface Props {
     display: string
-    value?: string
+    /** SQLite hands back NULL for an empty field — normalized below, never passed on raw. */
+    value?: string | null
     field: EntryFieldValue
     bcp?: string
     isSompeng?: boolean
@@ -36,5 +37,5 @@
   {#snippet heading()}
     <span>{display}</span>
   {/snippet}
-  <EditField {on_close} {on_update} {on_save_next} {value} {field} {bcp} {isSompeng} {addingLexeme} />
+  <EditField {on_close} {on_update} {on_save_next} value={value ?? ''} {field} {bcp} {isSompeng} {addingLexeme} />
 </Modal>

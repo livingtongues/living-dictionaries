@@ -2,6 +2,7 @@ import type { RequestHandler } from './$types'
 import { ADMINS, is_admin } from '$lib/admins'
 import { verify_auth } from '$lib/auth/verify'
 import { ResponseCodes } from '$lib/constants'
+import { ensure_participant } from '$lib/db/server/import-conversations'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { notify_admin } from '$lib/notifications/notify-admins'
 import { error, json } from '@sveltejs/kit'
@@ -34,6 +35,8 @@ interface ThreadRow {
   subject: string | null
   from_name: string | null
   from_email: string
+  url: string | null
+  thread_kind: string | null
   assigned_to_user_id: string | null
 }
 
@@ -55,7 +58,7 @@ export const POST: RequestHandler = async (event) => {
 
   const db = get_shared_db()
 
-  const thread = db.prepare('SELECT id, subject, from_name, from_email, assigned_to_user_id FROM message_threads WHERE id = ?')
+  const thread = db.prepare('SELECT id, subject, from_name, from_email, url, thread_kind, assigned_to_user_id FROM message_threads WHERE id = ?')
     .get(body.thread_id) as ThreadRow | undefined
   if (!thread)
     error(ResponseCodes.NOT_FOUND, 'thread not found')
@@ -75,11 +78,16 @@ export const POST: RequestHandler = async (event) => {
   const next_assigned_at = next_assignee ? now : null
   const next_assigned_by = next_assignee ? caller_user_id : null
 
-  db.prepare(`
-    UPDATE message_threads
-    SET assigned_to_user_id = ?, assigned_at = ?, assigned_by_user_id = ?, updated_at = ?
-    WHERE id = ?
-  `).run(next_assignee, next_assigned_at, next_assigned_by, now, body.thread_id)
+  const update_assignment = db.transaction(() => {
+    db.prepare(`
+      UPDATE message_threads
+      SET assigned_to_user_id = ?, assigned_at = ?, assigned_by_user_id = ?, updated_at = ?
+      WHERE id = ?
+    `).run(next_assignee, next_assigned_at, next_assigned_by, now, body.thread_id)
+    if (thread.thread_kind === 'import' && assignee)
+      ensure_participant({ db, thread_id: thread.id, user_id: assignee.id, side: 'team', now })
+  })
+  update_assignment()
 
   // Ping the assignee on their personal ntfy topic — unless they're the caller.
   // Only fire when the assignment actually CHANGED (avoid spamming on no-op saves).
@@ -89,7 +97,9 @@ export const POST: RequestHandler = async (event) => {
     const caller_name = caller_admin?.name ?? caller_email ?? 'an admin'
     const subject = `Assigned: ${thread.subject || '(no subject)'}`
     const body_text = `${caller_name} assigned a thread from ${thread.from_name || thread.from_email} to you.`
-    const link = `${url.origin}/admin/messages/${thread.id}`
+    const link = thread.thread_kind === 'import' && thread.url
+      ? `${thread.url.replace(/\/$/, '')}/${thread.id}`
+      : `${url.origin}/admin/messages/${thread.id}`
     void notify_admin({ email: assignee.email, subject, body: body_text, link })
   }
 

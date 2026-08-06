@@ -5,7 +5,7 @@
   import { page } from '$app/state'
   import MultiSelect from '$lib/components/ui/array/MultiSelect.svelte'
   import type { SelectOption } from '$lib/components/ui/array/select-options.interface'
-  import EditSource from '$lib/components/sources/EditSource.svelte'
+  import EditSource from '$lib/sources/EditSource.svelte'
   import IconFaSolidPlus from '~icons/fa-solid/plus'
 
   import type { SourceCitation } from '$lib/db/schemas/dictionary.types'

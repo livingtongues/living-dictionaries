@@ -93,7 +93,18 @@ async function main() {
     page_errors.push(error.message)
   })
   page.on('dialog', (d) => { console.log('  [dialog]', d.message().slice(0, 200)); d.dismiss().catch(() => {}) })
-  page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') console.log(`  [console.${m.type()}]`, m.text().slice(0, 200)) })
+  // `m.text()` renders an Error argument as the useless "JSHandle@error" — serialize
+  // the args so a failure in this test names its own cause.
+  page.on('console', async (m) => {
+    if (m.type() !== 'error' && m.type() !== 'warning') return
+    const parts = []
+    for (const handle of m.args()) {
+      try {
+        parts.push(await handle.evaluate(v => (v instanceof Error ? `${v.name}: ${v.message} :: ${(v.stack || '').split('\n').slice(0, 4).join(' | ')}` : typeof v === 'object' ? JSON.stringify(v) : String(v))))
+      } catch { parts.push(m.text()) }
+    }
+    console.log(`  [console.${m.type()}]`, (parts.join(' ') || m.text()).slice(0, 600))
+  })
   page.on('request', (r) => { if (r.url().includes('/api/dictionary/')) console.log(`  [request] ${r.method()} ${r.url().replace(base, '')}`) })
 
   await page.goto(`${base}/dev/entry/e_ja`, { waitUntil: 'domcontentloaded' })
@@ -101,26 +112,48 @@ async function main() {
   await login(page)
   await page.reload({ waitUntil: 'domcontentloaded' })
   await page.waitForFunction(() => document.body.innerText.includes('Add Audio'), { timeout: 25000 })
+  // …and wait for the dict DB itself: `Add Audio` ships in the SSR HTML, so it
+  // proves nothing about the leader worker being up. Editing before then races
+  // hydration (an inert click) and the write path (no connection).
+  await page.waitForFunction(() => Boolean(globalThis.__ld_dict_connections?.dev?.connection), { timeout: 30000 })
   console.log('✓ logged in as dev-manager; editor affordances present')
 
   // Edit phonetic → unique marker, capturing the sync POST that follows the write.
-  await page.evaluate(() => {
+  //
+  // Two races this loop exists for, both invisible from outside the browser:
+  //  1. `Add Audio` is in the SSR HTML, so the field can be on screen BEFORE
+  //     hydration attaches its click handler — one click lands on inert markup.
+  //  2. The guarded write facade REFUSES edits while the entries bundle is still
+  //     loading ("Wait until loading spinner stops to make edits.", a
+  //     `write_blocked` row + toast). Saving into that window closes the editor
+  //     with nothing written — a real product behaviour, not a bug, but the test
+  //     must wait it out rather than assert against it.
+  const open_field_editor = () => page.evaluate(() => {
     const field = [...document.querySelectorAll('div,span,button')].find(el => el.textContent.trim().startsWith('Phonetic') && el.textContent.trim().length < 30)
-    field.click()
+    field?.click()
   })
-  await page.waitForFunction(() => [...document.querySelectorAll('input[type=text]')].some(i => i.value === 'haʔ'))
-  await page.evaluate((new_value) => {
-    const input = [...document.querySelectorAll('input[type=text]')].find(i => i.value === 'haʔ')
+  const type_and_save = () => page.evaluate((new_value) => {
+    const input = [...document.querySelectorAll('input[type=text]')].find(i => i.value.startsWith('haʔ'))
+    if (!input) return false
     const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
     setter.call(input, new_value)
     input.dispatchEvent(new Event('input', { bubbles: true }))
     input.dispatchEvent(new Event('change', { bubbles: true }))
-  }, marker)
-  await page.evaluate(() => {
     const save = [...document.querySelectorAll('button')].find(b => b.offsetParent !== null && b.textContent.trim() === 'Save')
+    if (!save) return false
     save.click()
-  })
-  await page.waitForFunction(value => document.body.innerText.includes(value), {}, marker)
+    return true
+  }, marker)
+
+  let edited = false
+  for (let attempt = 0; attempt < 20 && !edited; attempt++) {
+    await open_field_editor()
+    const opened = await page.waitForFunction(() => [...document.querySelectorAll('input[type=text]')].some(i => i.value.startsWith('haʔ')), { timeout: 2000 }).then(() => true).catch(() => false)
+    if (!opened) continue
+    if (!(await type_and_save())) continue
+    edited = await page.waitForFunction(value => document.body.innerText.includes(value), { timeout: 2000 }, marker).then(() => true).catch(() => false)
+  }
+  if (!edited) throw new Error('phonetic edit never landed in the UI (editor never opened, or every save was refused)')
   console.log('✓ phonetic edited in UI — flushing sync…')
 
   // The write auto-schedules a sync; nudge it deterministically (same path) so the
@@ -160,4 +193,11 @@ main()
   .finally(async () => {
     if (browser) await browser.close().catch(() => {})
     if (server && !server.killed) server.kill('SIGTERM')
+    // The self-booted `node build` holds cron timers and open SQLite handles and
+    // does not die on SIGTERM, so its stdio pipes keep THIS process alive — a PASS
+    // would otherwise hang until the caller's timeout and report a killed exit
+    // code. Exit on our own terms. (`dev-flow.mjs` and `dict-delete-2tab.mjs`
+    // share this teardown and the same hang.)
+    server?.kill('SIGKILL')
+    process.exit(process.exitCode ?? 0)
   })

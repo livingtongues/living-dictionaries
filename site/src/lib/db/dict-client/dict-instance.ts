@@ -301,6 +301,10 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
         // the local DB is missing a parent row — flush any pending push, then
         // reset to a fresh snapshot. Fires before the breaker halts at 3.
         on_integrity_wedged: () => { void rebuild({ reason: 'fk_wedge' }) },
+        // Refused-write contract: the server dropped some pushed rows. The
+        // engine already shipped the telemetry; broadcast so the tab the editor
+        // is actually looking at tells them, instead of failing silently.
+        on_push_rejected: (info) => { context.emit_event({ type: 'push_rejected', ...info }) },
       })
 
       // NOTE: a pre-server_seq OPFS file (no `synced_seq` in db_metadata) needs

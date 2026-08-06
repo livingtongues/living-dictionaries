@@ -3,8 +3,8 @@
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
-  import PublicCheckbox from '$lib/components/settings/PublicCheckbox.svelte' // only used here - perhaps colocate
-  import PrintAccessCheckbox from '$lib/components/settings/PrintAccessCheckbox.svelte' // only used here - perhaps colocate
+  import PublicCheckbox from '$lib/settings/PublicCheckbox.svelte' // only used here - perhaps colocate
+  import PrintAccessCheckbox from '$lib/settings/PrintAccessCheckbox.svelte' // only used here - perhaps colocate
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import DialectsManager from './DialectsManager.svelte'
   import { goto } from '$app/navigation'

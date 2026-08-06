@@ -54,7 +54,7 @@ function make_analytics(overrides: Partial<LogAnalytics> = {}): LogAnalytics {
       daily: [],
       user_observed: { failures: 0, affected_users: 0, affected_sessions: 0, worst_hour: null, worst_hour_failures: 0, daily: [] },
     },
-    sign_in: { day: '2026-06-23', logins: 0, new_accounts: 0, methods: [], daily: [], flatlined: [] },
+    sign_in: { day: '2026-06-23', logins: 0, new_accounts: 0, methods: [], daily: [] },
     host: null,
     ...overrides,
   }

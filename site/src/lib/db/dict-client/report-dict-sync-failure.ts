@@ -13,6 +13,7 @@
  *
  * Never throws — telemetry must not spawn more errors.
  */
+import type { RejectionGroup } from '$lib/db/sync/rejected-rows'
 import { api_log } from '$api/log/_call'
 import { version } from '$app/environment'
 import { classify_sync_failure, should_ship_failure, sync_failure_level } from '$lib/db/sync/sync-failure-classify'
@@ -194,6 +195,35 @@ export function report_dict_sync_halted({ dict_id, message, consecutive }: {
         app_version: version ?? null,
         context: { worker: true, engine: 'dict', dict_id, error: message, consecutive, session_id: worker_session_id ?? undefined },
       }],
+    })
+  } catch {
+    // Never let telemetry break the sync path.
+  }
+}
+
+/**
+ * Ship the refused-write contract's client half: the server accepted the round
+ * trip but REFUSED some of the pushed rows (FK orphan, natural-key duplicate,
+ * or a caller whose editing role has lapsed). Error level and one row per
+ * (table, reason) per round trip — never one per row — so a whole-push refusal
+ * is one countable event. Before this the only refusal on the wire
+ * (`skipped_orphans`) reached a `console.warn` inside the worker and evaporated.
+ */
+export function report_dict_push_rejected({ dict_id, groups }: {
+  dict_id: string
+  groups: RejectionGroup[]
+}): void {
+  try {
+    void api_log({
+      entries: groups.map(group => ({
+        level: 'error' as const,
+        message: 'sync_push_rejected',
+        client_time: new Date().toISOString(),
+        user_agent: safe_user_agent(),
+        platform: 'web' as const,
+        app_version: version ?? null,
+        context: { worker: true, engine: 'dict', sector: dict_id, dict_id, reason: group.reason, table_name: group.table_name, count: group.count, ids: group.ids, session_id: worker_session_id ?? undefined },
+      })),
     })
   } catch {
     // Never let telemetry break the sync path.

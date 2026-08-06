@@ -10,7 +10,7 @@ the labels may still shift; do this once the surrounding UI settles.
 
 ## Strings to extract
 
-### `$lib/components/history/format.ts`
+### `$lib/history/format.ts`
 - `TABLE_LABELS` map (Entry, Sense, Sentence, Text, Sentence link, Speaker, Audio, Audio speaker,
   Video, Video speaker, Sense video, Sentence video, Photo, Sense photo, Sentence photo, Dialect, Tag).
 - `FIELD_LABELS` map (Lexeme, Phonetic, Interlinearization, Morphology, Notes, Linguistic history,
@@ -23,12 +23,12 @@ the labels may still shift; do this once the surrounding UI settles.
   function into the formatter helpers, or move label resolution into the Svelte components where `t`
   is available. Decide during implementation.
 
-### `$lib/components/history/ChangeTimeline.svelte`
+### `$lib/history/ChangeTimeline.svelte`
 - Op badge labels: `added` / `edited` / `removed`.
 - `empty_label` default: "No changes recorded yet."
 - "Load older changes", "Loading…".
 
-### `$lib/components/history/ChangeHistory.svelte`
+### `$lib/history/ChangeHistory.svelte`
 - "Could not load history: {error}".
 
 ### `src/routes/[dictionaryId]/history/+page.svelte`
