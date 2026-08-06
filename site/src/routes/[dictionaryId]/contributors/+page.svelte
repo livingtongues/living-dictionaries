@@ -6,7 +6,7 @@
   import Partners from './Partners.svelte'
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
-  import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte'
+  import ContributorInvitationStatus from '$lib/contributors/ContributorInvitationStatus.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import Skeleton from '$lib/components/ui/Skeleton.svelte'
   import { stream_resolve } from '$lib/state/stream-resolve.svelte'

@@ -139,7 +139,7 @@
       }} />
   {/await}
 {:else if source_slug === addSource}
-  {#await import('$lib/components/sources/EditSource.svelte') then { default: EditSource }}
+  {#await import('$lib/sources/EditSource.svelte') then { default: EditSource }}
     <EditSource
       on_close={() => { if (source_slug === addSource) source_slug = '' }}
       on_saved={({ slug }) => {

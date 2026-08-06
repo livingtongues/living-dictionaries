@@ -1,4 +1,4 @@
-import { glossing_languages } from '$lib/glosses/glossing-languages'
+import { glossing_languages } from '$lib/gloss/glossing-languages'
 import { page } from '$app/state'
 
 export function vernacular_name(bcp: string) {

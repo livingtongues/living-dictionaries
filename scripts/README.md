@@ -25,14 +25,17 @@ Everything below is written to be run **from the repo root** unless noted; only 
 |---|---|---|---|---|
 | `sqlite-query.sh` | local dev machine | the **browser's** wa-sqlite DBs via the Vite dev proxy | only if your SQL writes | n/a — you choose the SQL |
 | `import-report/artifact.py` | imported by an import's own builder | nothing — renders HTML | ❌ never | n/a |
+| `import-audit/audit.py` | local, before any import write | final entry payload + optional decision/relationship ledgers | ❌ never | n/a — audit only |
 | `bucket-classification/build-assignments.js` | local, node ESM | reads `/tmp/dict-stats.jsonl` → writes `bucket-classification/bucket-assignments.csv` | local file only | n/a |
 | `bucket-classification/apply-assignments.js` | **prod app container** (CJS via stdin) | `dictionaries.bucket` + `updated_at` in prod `shared.db` | ⚠️ **yes, production** | ❌ none — back up first |
 | `one-off/*.cjs` | **prod app container** (CJS via stdin) | prod `shared.db` / per-dict DBs | ⚠️ yes, when run | `DRY=1` |
 | `spreadsheet_helpers/bum_tones/integrate_tones.ts` | local, vitest / tsx | in-memory arrays → a local `.txt` | local file only | n/a |
 | `constants.ts` | imported | — | — | — |
 
-`import-report/` is the exception to "most of this folder is history": it is **maintained tooling**,
-the shared HTML shell every import-conversation report/preview artifact is built on (guide §2.8).
+`import-report/` and `import-audit/` are the exceptions to "most of this folder is history": they
+are **maintained tooling**. The former is the shared HTML shell every import-conversation
+report/preview artifact is built on (guide §2.8); the latter is the mandatory fail-loud gate over
+the final entry payload, after every promotion/expansion step.
 An import's own builder lives in its `~/import-work/<dict>/` folder and imports this — see
 `~/import-work/ponca/report.py` for a full worked example. Before this existed each import
 copy-pasted its own `artifact.py`, and the three copies drifted (two shipped a permanently
@@ -104,13 +107,15 @@ node scripts/bucket-classification/build-assignments.js /tmp/dict-stats.jsonl
 
 ## Verification
 
-Root `pnpm lint` **ignores `scripts/**`** and root `pnpm check` does not cover it, so the only
-automated checks are the two aliases in this package:
+Root `pnpm lint` **ignores `scripts/**`** and root `pnpm check` does not cover it. Run both the
+package checks and the Python payload-auditor suite:
 
 ```bash
 cd scripts
 pnpm test --run    # vitest — the bum_tones helper suite
 pnpm typecheck     # tsc --noEmit over the TS in this package
+cd ..
+python3 -m unittest discover -s scripts/import-audit -p 'test_*.py'
 ```
 
 For anything that touches production, the verification is a `DRY=1` (or plan-only) run first, then a

@@ -1,4 +1,4 @@
-import { glossing_languages } from '$lib/glosses/glossing-languages'
+import { glossing_languages } from '$lib/gloss/glossing-languages'
 import { english_translate } from '$lib/i18n'
 import { filter_items } from './filter-items'
 

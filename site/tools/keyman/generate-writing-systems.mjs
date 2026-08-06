@@ -12,7 +12,7 @@
 // indigenous scripts is exactly LD's audience, so it's the default source. Refresh
 // it periodically by saving a fuller catalog export over `keyman-catalog.json`.
 //
-// Output: src/lib/components/keyboards/keyman/keyman-writing-systems.json
+// Output: src/lib/keyboards/keyman/keyman-writing-systems.json
 //   { "<bcp-ish tag>": { "id": "<keyboard id>", "name": "<language name>", "font"?: "<family>" } }
 // The tag is the key an orthography's `bcp` matches; `id` is what KeymanWeb loads.
 import { readFileSync, writeFileSync } from 'node:fs'
@@ -21,7 +21,7 @@ import { fileURLToPath } from 'node:url'
 
 const API = 'https://api.keyman.com/cloud/4.0/keyboards'
 const here = dirname(fileURLToPath(import.meta.url))
-const OUT = join(here, '../../src/lib/components/keyboards/keyman/keyman-writing-systems.json')
+const OUT = join(here, '../../src/lib/keyboards/keyman/keyman-writing-systems.json')
 const DEFAULT_CATALOG = join(here, 'keyman-catalog.json')
 
 const arg = process.argv[2]

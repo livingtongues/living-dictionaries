@@ -1,6 +1,6 @@
 <script lang="ts">
-  import AgentPrompt from '$lib/components/settings/AgentPrompt.svelte'
-  import ApiKeys from '$lib/components/settings/ApiKeys.svelte'
+  import AgentPrompt from '$lib/settings/AgentPrompt.svelte'
+  import ApiKeys from '$lib/settings/ApiKeys.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { API_UNAVAILABLE_MESSAGE, is_api_unavailable_bucket } from '$lib/constants'
 

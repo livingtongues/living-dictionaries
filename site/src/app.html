@@ -16,6 +16,88 @@
 		}
 		catch (_) { }
 	</script>
+	<script>
+		// Boot-error reporter — the ONLY telemetry that exists before the app does.
+		// `init_remote_logging()` installs the real handlers from INSIDE +layout.svelte's
+		// onMount, i.e. after the framework has already started, so a failure that stops
+		// the app from STARTING files nothing. That is not hypothetical here: on
+		// 2026-08-04 a visitor sat 92 minutes on a dictionary that could never load
+		// (a 12-day-old bundle asking for a chunk a deploy had deleted) and the only
+		// reason we know is that her app got far enough to log — a shell-level failure
+		// would have been completely invisible. See .issues/boot-error-reporter.md.
+		//
+		// BOTH channels, deliberately. Tutor measured this against real production
+		// builds: a blocked entry chunk and a shell reading an undefined
+		// `__sveltekit_<hash>` global BOTH arrive only as `unhandledrejection`, because
+		// kit's shell boots inside `import().then()`. An error-only hook would catch
+		// neither of the outages this exists for.
+		//
+		// Rules this must keep: no imports and no bundle (it has to survive the bundle
+		// being the thing that failed), ES5-safe syntax, ONE row per page load across
+		// both listeners (shared `fired` flag) so it can never storm, and silence the
+		// moment the real reporter takes over (it sets `__boot_reporter_off`).
+		;(function () {
+			var fired = false
+			// The build this visitor is actually running. The page shell defines
+			// `globalThis.__sveltekit_<version_hash>`, so the hash is readable even when
+			// the bundle that reads it never loaded — which is exactly the stale-bundle
+			// class (`.knowledge` reload-once rule). `sw` and `dev` are FIXED names (the
+			// service-worker env endpoint and the dev payload), not build stamps — the
+			// same exclusion `scripts/check-build-version.mjs` makes.
+			function version_hash() {
+				try {
+					var keys = Object.keys(window)
+					for (var i = 0; i < keys.length; i++) {
+						if (keys[i].indexOf('__sveltekit_') !== 0)
+							continue
+						var name = keys[i].slice('__sveltekit_'.length)
+						if (name !== 'sw' && name !== 'dev')
+							return name
+					}
+				}
+				catch (_) { }
+				return null
+			}
+			function report(channel, message, filename, line, col) {
+				try {
+					if (fired || window.__boot_reporter_off)
+						return
+					if (!navigator.sendBeacon)
+						return
+					fired = true
+					var body = {
+						level: 'error',
+						message: 'boot_error',
+						client_time: new Date().toISOString(),
+						url: location.href,
+						user_agent: navigator.userAgent,
+						platform: 'web',
+						app_version: version_hash(),
+						context: {
+							channel: channel,
+							boot_message: message || 'Uncaught error',
+							filename: filename || null,
+							line: line,
+							col: col,
+						},
+					}
+					navigator.sendBeacon('/api/log', new Blob([JSON.stringify(body)], { type: 'application/json' }))
+				}
+				catch (_) { }
+			}
+			window.addEventListener('error', function (event) {
+				report('error', event && event.message, event && event.filename, event && event.lineno, event && event.colno)
+			})
+			window.addEventListener('unhandledrejection', function (event) {
+				var reason = event && event.reason
+				var message = reason && reason.message ? reason.message : String(reason)
+				// A rejection carries no filename/line; the first stack frame is the
+				// closest equivalent and is what names the failing chunk.
+				var frame = reason && reason.stack ? String(reason.stack).split('\n')[1] : null
+				report('unhandledrejection', message, frame && frame.replace(/^\s+/, ''), null, null)
+			})
+		})()
+	</script>
 	<link rel='icon' type='image/png' href='%sveltekit.assets%/icons/favicon-32x32_adjusted.png'>
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<!-- Browser-chrome color per scheme (matches theme.css --background; #101014 = hsl(240,11%,7%)).

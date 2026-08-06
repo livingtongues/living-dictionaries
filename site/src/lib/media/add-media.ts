@@ -88,7 +88,7 @@ export function add_audio({ writes, dictionary_id, entry_id, sentence_id, text_i
     return blocked_handle(not_ready)
   // Row uuid is minted BEFORE upload — the R2 object is keyed by it (`{dict}/audio/{id}.{ext}`).
   const media_id = crypto.randomUUID()
-  const handle = upload_media({ file, dictionary_id, kind: 'audio', media_id })
+  const handle = upload_media({ file, dictionary_id, kind: 'audio', media_id, trim_audio: Boolean(entry_id) })
   const done = handle.done.then(async ({ storage_path }) => {
     // ONE atomic dict_write: audio row + speaker junction commit together.
     const inserted = await writes.insert_audio({ id: media_id, storage_path, entry_id, sentence_id, text_id, speaker_id, source })

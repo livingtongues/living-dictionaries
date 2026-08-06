@@ -48,6 +48,12 @@ export type DbEvent
    * "your changes aren't saving — reload / contact us" prompt.
    */
     | { type: 'sync_halted' }
+  /**
+   * The server refused part of a push (the refused-write contract). Tabs toast
+   * "N of your changes couldn't be saved — <why>"; `reason` is `mixed` when one
+   * round trip refused rows for more than one reason.
+   */
+    | { type: 'push_rejected', count: number, reason: string }
 
 /** Leader metadata announced to clients on `ready`. */
 export interface LeaderMeta {
@@ -124,6 +130,16 @@ export interface BootFailure {
   attempt: number
   /** Whether the spawning tab will retry its own boot (vs. resign leadership). */
   will_retry: boolean
+  /**
+   * Whether the tab will re-enter the leader election after resigning. False on
+   * the LAST failure of a page session: the cross-election budget
+   * (`../boot-give-up.ts`) is spent, nothing further will be attempted, and the
+   * app owns the human-visible failure state from here. Always true while
+   * `will_retry` is.
+   */
+  will_reelect?: boolean
+  /** How many times this tab has already resigned + re-elected this page session. */
+  reelect_attempt?: number
   /**
    * Set when the app's injected policy proved retrying CANNOT help (currently
    * `missing_build_artifact` — a deploy deleted the chunk this bundle asks for).

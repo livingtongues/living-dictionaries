@@ -16,6 +16,8 @@
   import type { EntryMentionClick } from '$lib/entry-links/link-entry-mentions'
   import EntryMentionPopover from '$lib/entry-links/EntryMentionPopover.svelte'
   import type { LegendEntry } from '$lib/corpus/gloss-legend'
+  import type { SentenceTokens } from '$lib/db/schemas/dictionary.types'
+  import { gloss_for_language } from '$lib/corpus/gloss-legend'
   import type { GlossCodeClick } from '$lib/corpus/link-gloss-codes'
   import { build_gloss_catalog } from '$lib/corpus/gloss-catalog'
   import { set_gloss_code_context } from '$lib/corpus/gloss-code-context'
@@ -43,8 +45,45 @@
   const loading = $derived(dict_db?.grammar_sections.loading ?? true)
   const tree = $derived(build_section_tree(rows))
 
+  // Codes in the prose expand the same way they do in an interlinear gloss:
+  // the dictionary's own legend layered over the standard Leipzig catalog. Only
+  // for readers — while editing, the prose is a textarea.
+  const legend = $derived((dict_db?.glossing_abbreviations.rows ?? []) as unknown as LegendEntry[])
+  const gloss_catalog = $derived(edit_mode
+    ? null
+    : build_gloss_catalog({ legend, language: dictionary.gloss_languages?.[0] ?? null, t }))
+
+  // The standard Leipzig codes this page actually uses — the same content the
+  // splitters decorate (section prose + attached examples' gloss lines) — for
+  // the collapsed roll under the curated legend table.
+  const standard_codes_used = $derived.by(() => {
+    if (!gloss_catalog || !dict_db)
+      return []
+    const language = dictionary.gloss_languages?.[0] ?? null
+    const gloss_cells: string[] = []
+    for (const link of dict_db.section_sentences.rows) {
+      const sentence = dict_db.sentences.id(link.sentence_id)
+      const tokens_by_orthography = (sentence?.tokens ?? {}) as SentenceTokens
+      for (const tokens of Object.values(tokens_by_orthography)) {
+        for (const token of tokens) {
+          const cell = gloss_for_language(token.gloss, language)
+          if (cell) gloss_cells.push(cell)
+          for (const morpheme of token.morphemes ?? []) {
+            const morpheme_cell = gloss_for_language(morpheme.gloss, language)
+            if (morpheme_cell) gloss_cells.push(morpheme_cell)
+          }
+        }
+      }
+    }
+    const prose = rows.flatMap(section => [
+      ...Object.values(section.body ?? {}),
+      ...Object.values(section.usage_conditions ?? {}),
+    ]).filter(Boolean) as string[]
+    return gloss_catalog.standard_codes_used({ gloss_cells, prose })
+  })
+
   const has_clause_slots = $derived((dict_db?.clause_slots.rows.length ?? 0) > 0)
-  const has_legend = $derived((dict_db?.glossing_abbreviations.rows.length ?? 0) > 0)
+  const has_legend = $derived((dict_db?.glossing_abbreviations.rows.length ?? 0) > 0 || standard_codes_used.length > 0)
 
   const spy = new GrammarScrollSpy()
 
@@ -74,14 +113,6 @@
     : build_entry_link_index(Object.entries($entries_data).map(([id, entry]) => ({ id, lexeme: entry.main.lexeme }))))
 
   let open_mention = $state<EntryMentionClick | null>(null)
-
-  // Codes in the prose expand the same way they do in an interlinear gloss:
-  // the dictionary's own legend layered over the standard Leipzig catalog. Only
-  // for readers — while editing, the prose is a textarea.
-  const legend = $derived((dict_db?.glossing_abbreviations.rows ?? []) as unknown as LegendEntry[])
-  const gloss_catalog = $derived(edit_mode
-    ? null
-    : build_gloss_catalog({ legend, language: dictionary.gloss_languages?.[0] ?? null, t }))
 
   let open_gloss_code = $state<GlossCodeClick | null>(null)
 
@@ -155,7 +186,7 @@
       {/if}
       {#if has_legend}
         <div id={GLOSSING_LEGEND_ANCHOR} data-grammar-anchor={GLOSSING_LEGEND_ANCHOR} class="legend-anchor">
-          <GlossingLegend />
+          <GlossingLegend standard_codes={standard_codes_used} expand={gloss_catalog ? gloss_catalog.expand : null} />
         </div>
       {/if}
     </div>

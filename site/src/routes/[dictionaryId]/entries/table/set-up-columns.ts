@@ -13,7 +13,17 @@ export function set_up_columns(columns: IColumn[], dictionary: Tables<'dictionar
     columns_with_definition.splice(definition_index, 0, { field: 'definition', width: 300 })
   }
 
-  const cols = columns_with_definition.filter(column => !column.hidden)
+  // Pre-rename persisted prefs lack a variant column — inject so variant dictionaries keep it.
+  if (!columns_with_definition.some(column => column.field === 'variant'))
+    columns_with_definition.push({ field: 'variant', width: 150 })
+
+  const cols = columns_with_definition.filter((column) => {
+    // Variant defaults per-dictionary (shown where variant data is a known workflow); an
+    // explicit user toggle (true/false) always wins.
+    if (column.field === 'variant')
+      return !(column.hidden ?? !DICTIONARIES_WITH_VARIANTS.includes(dictionary.id))
+    return !column.hidden
+  })
 
   const gloss_index = cols.findIndex(col => col.field === 'gloss')
   if (browser && gloss_index >= 0) {
@@ -87,9 +97,6 @@ export function set_up_columns(columns: IColumn[], dictionary: Tables<'dictionar
     }
     cols.splice(orthography_index, 1, ...alternate_orthography_columns)
   }
-
-  if (DICTIONARIES_WITH_VARIANTS.includes(dictionary.id))
-    cols.push({ field: 'variant', width: 150 })
 
   return cols
 }

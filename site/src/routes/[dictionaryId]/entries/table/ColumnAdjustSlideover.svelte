@@ -1,29 +1,27 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import { flip } from 'svelte/animate'
-  import { fade } from 'svelte/transition'
   import type { IColumn } from '$lib/types'
   import ColumnTitle from './ColumnTitle.svelte'
   import Slideover from '$lib/components/ui/Slideover.svelte'
   import { page } from '$app/state'
-  import IconFa6SolidChevronUp from '~icons/fa6-solid/chevron-up'
-  import IconFa6SolidChevronDown from '~icons/fa6-solid/chevron-down'
+  import IconMdiDrag from '~icons/mdi/drag'
   import IconTeenyiconsThumbtackSolid from '~icons/teenyicons/thumbtack-solid'
   import IconTeenyiconsThumbtackOutline from '~icons/teenyicons/thumbtack-outline'
   import IconStreamlineEyeOff from '~icons/streamline/interface-edit-view-off-disable-eye-eyeball-hide-off-view'
   import IconStreamlineEye from '~icons/streamline/interface-edit-view-eye-eyeball-open-view'
 
   interface Props {
-    selectedColumn: IColumn
+    selectedColumn?: IColumn | null
     on_close: () => void
   }
 
-  const { selectedColumn, on_close }: Props = $props()
+  const { selectedColumn = null, on_close }: Props = $props()
   const { preferred_table_columns } = $derived(page.data)
 
   let selectedColumnElement: HTMLElement = $state()
-  let widthToDisplay: string = $state()
-  let widthDisplayTimeout
+  let list_element: HTMLElement = $state()
+  let drag_index: number | null = $state(null)
 
   onMount(() => {
     if (selectedColumnElement) {
@@ -34,18 +32,37 @@
     }
   })
 
-  function showWidth(e) {
-    const { target } = e
-    widthToDisplay = target.value
-    clearTimeout(widthDisplayTimeout)
-    widthDisplayTimeout = setTimeout(() => {
-      widthToDisplay = null
-    }, 2000)
-  }
-
-  function move(i: number, direction: 'up' | 'down') {
-    const columnBeingMoved = preferred_table_columns.value.splice(i, 1)
-    preferred_table_columns.value.splice(direction === 'up' ? i - 1 : i + 1, 0, ...columnBeingMoved)
+  // Pointer-based drag-sort (works for touch + mouse). The list mutates live so
+  // `animate:flip` shows the reorder as you drag; lexeme stays locked at 0.
+  function start_drag(event: PointerEvent, index: number) {
+    if (index === 0) return
+    event.preventDefault()
+    drag_index = index
+    const move = (move_event: PointerEvent) => {
+      if (drag_index === null || !list_element) return
+      const items = [...list_element.querySelectorAll('li')]
+      let target = drag_index
+      items.forEach((item, item_index) => {
+        if (item_index === drag_index) return
+        const rect = item.getBoundingClientRect()
+        const midpoint = rect.top + rect.height / 2
+        if (item_index < drag_index && move_event.clientY < midpoint) target = Math.min(target, item_index)
+        if (item_index > drag_index && move_event.clientY > midpoint) target = Math.max(target, item_index)
+      })
+      target = Math.max(1, target)
+      if (target !== drag_index) {
+        const columns = preferred_table_columns.value
+        const [moved] = columns.splice(drag_index, 1)
+        columns.splice(target, 0, moved)
+        drag_index = target
+      }
+    }
+    const up = () => {
+      window.removeEventListener('pointermove', move)
+      drag_index = null
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up, { once: true })
   }
 </script>
 
@@ -54,30 +71,24 @@
     <span>{page.data.t('column.adjust_columns')}</span>
   {/snippet}
 
-  <ul>
+  <ul bind:this={list_element}>
     {#each preferred_table_columns.value as column, i (column.field)}
       <li
-        animate:flip
-        class:selected={selectedColumn === column}>
+        animate:flip={{ duration: 150 }}
+        class:selected={selectedColumn === column}
+        class:dragging={drag_index === i}>
         <div class="row">
-          <div class="move-col">
-            {#if i > 1}
-              <button
-                type="button"
-                onclick={() => move(i, 'up')}
-                class="round-button">
-                <IconFa6SolidChevronUp />
-              </button>
-            {/if}
-            {#if i > 0 && i !== preferred_table_columns.value.length - 1}
-              <button
-                type="button"
-                onclick={() => move(i, 'down')}
-                class="round-button">
-                <IconFa6SolidChevronDown />
-              </button>
-            {/if}
-          </div>
+          {#if i > 0}
+            <button
+              type="button"
+              class="drag-handle"
+              aria-label={page.data.t('column.adjust_columns')}
+              onpointerdown={event => start_drag(event, i)}>
+              <IconMdiDrag />
+            </button>
+          {:else}
+            <div class="drag-handle-spacer"></div>
+          {/if}
 
           <div style="flex: 1 1 0%">
             <div class="title-row">
@@ -108,13 +119,15 @@
             </div>
             <!-- Source range input shouldn't be here because we need to show complete sources and they can be very long -->
             {#if column.field !== 'sources'}
-              <input
-                style="width: 100%"
-                type="range"
-                oninput={showWidth}
-                bind:value={column.width}
-                min="31"
-                max="400" />
+              <div class="width-row">
+                <input
+                  style="flex: 1 1 0%"
+                  type="range"
+                  bind:value={column.width}
+                  min="31"
+                  max="400" />
+                <span class="width-value">{column.width}px</span>
+              </div>
             {/if}
           </div>
         </div>
@@ -125,20 +138,6 @@
     {/each}
   </ul>
 </Slideover>
-
-{#if widthToDisplay}
-  <div
-    transition:fade
-    class="width-toast">
-    <div class="width-bubble">
-      {page.data.t('column.width')}:
-      {widthToDisplay}
-    </div>
-  </div>
-{/if}
-
-<!-- in:fly={{ delay: 0, duration: 300, x: 0, y: 50, opacity: 0.1, easing: backOut }}
-out:fade={{ duration: 500, opacity: 0 }} -->
 
 <style>
   li ~ li {
@@ -158,20 +157,57 @@ out:fade={{ duration: 500, opacity: 0 }} -->
     background-color: var(--surface); /* ≈ gray-100 */
   }
 
+  li.dragging {
+    background-color: color-mix(in srgb, var(--primary) 8%, var(--background));
+  }
+
   .row {
     display: flex;
     align-items: center;
   }
 
-  .move-col {
+  .drag-handle {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2.5rem;
+    margin-right: 0.5rem;
+    border: none;
+    background: transparent;
+    color: color-mix(in srgb, var(--color) 45%, var(--background));
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .drag-handle:active {
+    cursor: grabbing;
+    color: var(--color-secondary);
+  }
+
+  .drag-handle-spacer {
+    width: 2rem;
     margin-right: 0.5rem;
   }
 
   .title-row {
     display: flex;
     align-items: baseline;
+  }
+
+  .width-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .width-value {
+    flex-shrink: 0;
+    min-width: 3.25rem;
+    text-align: end;
+    font-size: 0.75rem;
+    color: var(--color-secondary);
+    font-variant-numeric: tabular-nums;
   }
 
   .round-button {
@@ -200,27 +236,5 @@ out:fade={{ duration: 500, opacity: 0 }} -->
 
   .no-shrink {
     flex-shrink: 0;
-  }
-
-  .width-toast {
-    position: fixed;
-    left: 0;
-    right: 0;
-    top: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 0.25rem;
-    pointer-events: none;
-    z-index: 60;
-  }
-
-  .width-bubble {
-    background-color: rgb(0 0 0 / 0.75);
-    color: #fff;
-    margin-top: 0.5rem;
-    padding: 0.75rem;
-    border-radius: 0.25rem;
-    max-width: 24rem;
   }
 </style>

@@ -11,8 +11,8 @@ export function polygon_feature_coordinates(
   const sorted = sort_points(
     points.map(({ latitude, longitude }) => ({ lng: longitude, lat: latitude })),
   )
-  const sortedLooped = [...sorted, sorted[0]]
-  return [sortedLooped.map(({ lng, lat }) => [lng, lat])]
+  const sorted_looped = [...sorted, sorted[0]]
+  return [sorted_looped.map(({ lng, lat }) => [lng, lat])]
 }
 
 export function sort_points(points: Point[]) {
@@ -20,24 +20,24 @@ export function sort_points(points: Point[]) {
   const p0: Point = { lng: 0, lat: 0 }
   p0.lat = Math.min(...points.map(p => p.lat))
   p0.lng = Math.max(...points.filter(p => p.lat == p0.lat).map(p => p.lng))
-  points.sort((a, b) => angleCompare(p0, a, b))
+  points.sort((a, b) => angle_compare(p0, a, b))
   return points
 }
 
-function angleCompare(p0: Point, a: Point, b: Point) {
-  const left = isLeft(p0, a, b)
-  if (left == 0) return distCompare(p0, a, b)
+function angle_compare(p0: Point, a: Point, b: Point) {
+  const left = is_left(p0, a, b)
+  if (left == 0) return dist_compare(p0, a, b)
   return left
 }
 
-function isLeft(p0: Point, a: Point, b: Point) {
+function is_left(p0: Point, a: Point, b: Point) {
   return (a.lng - p0.lng) * (b.lat - p0.lat) - (b.lng - p0.lng) * (a.lat - p0.lat)
 }
 
-function distCompare(p0: Point, a: Point, b: Point) {
-  const distA = (p0.lng - a.lng) * (p0.lng - a.lng) + (p0.lat - a.lat) * (p0.lat - a.lat)
-  const distB = (p0.lng - b.lng) * (p0.lng - b.lng) + (p0.lat - b.lat) * (p0.lat - b.lat)
-  return distA - distB
+function dist_compare(p0: Point, a: Point, b: Point) {
+  const dist_a = (p0.lng - a.lng) * (p0.lng - a.lng) + (p0.lat - a.lat) * (p0.lat - a.lat)
+  const dist_b = (p0.lng - b.lng) * (p0.lng - b.lng) + (p0.lat - b.lat) * (p0.lat - b.lat)
+  return dist_a - dist_b
 }
 
 if (import.meta.vitest) {

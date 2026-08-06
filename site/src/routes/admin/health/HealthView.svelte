@@ -10,6 +10,7 @@
   import { format_number, format_pct } from '$lib/constants'
   import { format_date_time, format_relative_time } from '$lib/utils/format-relative-time'
   import DeploysPanel from './DeploysPanel.svelte'
+  import SignInPanel from './SignInPanel.svelte'
 
   interface Props {
     data: Omit<PageData, 'checkpoint'> & {
@@ -36,10 +37,15 @@
       ? [{ label: 'From stale builds', color: 'var(--color-secondary)', points: daily.map(point => ({ date: point.day, value: point.stale_errors })) }]
       : []),
   ])
-  // Deploy markers for the error timeline (app_version = build epoch ms).
+  // Deploy markers for the error timeline. Historical builds were named with a
+  // clock; since 2026-08-04 the name is the commit sha and since 2026-08-06 the
+  // sha plus a per-build id (see svelte.config.js) — neither has a time in it,
+  // so show the short label and let the "first seen" row above carry the when.
+  // `short_version` knows both commit shapes; without that it would slice the
+  // compound name and the result would read as a commit.
   function deploy_build_time(version: string): string {
     const ms = Number(version)
-    return Number.isFinite(ms) && ms > 1e12 ? format_date_time(new Date(ms)) : version
+    return Number.isFinite(ms) && ms > 1e12 ? format_date_time(new Date(ms)) : short_version(version)
   }
   const deploy_events = $derived(analytics.deploys.map(d => ({
     date: d.day,
@@ -139,6 +145,7 @@
     { label: 'p95', color: USERS_COLOR, points: uptime_days.map(point => ({ date: point.day, value: point.ttfb_p95 as number })) },
   ])
   const observed_failures = $derived(uptime.user_observed)
+
   const observed_failure_series = $derived([
     {
       label: '5xx events',
@@ -899,6 +906,8 @@
       <p class="availability-detail observed-title">No HTTP 5xx responses reached signed-in dictionary-sync clients in this window.</p>
     {/if}
   </section>
+
+  <SignInPanel sign_in={analytics.sign_in} />
 
   <section class="panel">
     <h2>Latency by geography <span class="hint">TTFB · p50 / p95 · hot window · {format_number(geo.located_sessions)} located sessions</span></h2>

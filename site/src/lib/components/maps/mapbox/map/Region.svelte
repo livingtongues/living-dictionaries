@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { IRegion } from '$lib/types'
   import { getContext } from 'svelte'
-  import { mapKey } from '../context'
+  import { map_key } from '../context'
   import type { MapKeyContext } from '../context'
   import { polygon_feature_coordinates } from '../../utils/polygon-from-coordinates'
   import { center_of_coordinates } from '../../utils/center-of-coordinates'
@@ -10,8 +10,8 @@
   import Layer from './Layer.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
 
-  const { getMap } = getContext<MapKeyContext>(mapKey)
-  const map = getMap()
+  const { get_map } = getContext<MapKeyContext>(map_key)
+  const map = get_map()
 
   interface Props {
     region: IRegion

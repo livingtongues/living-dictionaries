@@ -16,9 +16,9 @@
   import Skeleton from '$lib/components/ui/Skeleton.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
   import ImageLightbox from '$lib/components/image/image-lightbox.svelte'
-  import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte'
-  import EditableOrthographies from '$lib/components/settings/EditableOrthographies.svelte'
-  import EditableAlternateNames from '$lib/components/settings/EditableAlternateNames.svelte'
+  import EditableGlossesField from '$lib/settings/EditableGlossesField.svelte'
+  import EditableOrthographies from '$lib/settings/EditableOrthographies.svelte'
+  import EditableAlternateNames from '$lib/settings/EditableAlternateNames.svelte'
   import { onMount } from 'svelte'
   import { stream_resolve } from '$lib/state/stream-resolve.svelte'
   import { page } from '$app/state'
@@ -26,13 +26,15 @@
   import { goto, preloadCode } from '$app/navigation'
   import { photo_src } from '$lib/utils/media-url'
   import { get_headword } from '$lib/orthography/orthographies'
-  import { glossing_languages } from '$lib/glosses/glossing-languages'
+  import { glossing_languages } from '$lib/gloss/glossing-languages'
   import { restore_spaces_periods_from_underscores } from '$lib/search/augment-entry-for-search'
   import { key_between } from '$lib/api/v1/fractional-index'
   import { build_citation } from './contributors/build-citation'
   import { text_snippet, top_glosses } from './home/home-helpers'
   import { get_local_orthographies } from '$lib/entry/get-local-orthographies'
   import { add_periods_and_comma_separate_parts_of_speech } from '$lib/entry/format-parts-of-speech'
+  import { from_entry_audios } from '$lib/entry/entry-audio/audio-option-labels'
+  import type { AudioOptionInput } from '$lib/entry/entry-audio/audio-option-labels'
   import { upload_cover_image } from './home/hero-image'
   import IconMdiMagnify from '~icons/mdi/magnify'
   import IconMdiStarOutline from '~icons/mdi/star-outline'
@@ -72,7 +74,7 @@
     glosses: string[]
     dialect: string | null
     photo_storage_path: string | null
-    audio_storage_path: string | null
+    audios: AudioOptionInput[]
   }
 
   function format_pos(parts_of_speech: string[] | null | undefined): string | null {
@@ -95,7 +97,7 @@
       glosses: top_glosses({ glosses: card.glosses, gloss_languages: dictionary.gloss_languages }),
       dialect: card.dialect,
       photo_storage_path: card.photo_storage_path,
-      audio_storage_path: card.audio_storage_path,
+      audios: card.audios,
     }
   }
 
@@ -113,7 +115,7 @@
       glosses: top_glosses({ glosses, gloss_languages: dictionary.gloss_languages }),
       dialect: entry.dialects?.[0]?.name?.default ?? null,
       photo_storage_path: photo?.storage_path ?? null,
-      audio_storage_path: entry.audios?.[0]?.storage_path ?? null,
+      audios: from_entry_audios(entry.audios),
     }
   }
 
@@ -489,7 +491,7 @@
               glosses={card.glosses}
               dialect={card.dialect}
               photo_storage_path={card.photo_storage_path}
-              audio_storage_path={card.audio_storage_path}
+              audios={card.audios}
               force_manage={manage_open}
               manage={can_manage
                 ? {
@@ -550,7 +552,7 @@
             glosses={card.glosses}
             dialect={card.dialect}
             photo_storage_path={card.photo_storage_path}
-            audio_storage_path={card.audio_storage_path} />
+            audios={card.audios} />
         {/each}
       </div>
     </section>

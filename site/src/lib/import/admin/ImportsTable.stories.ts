@@ -15,6 +15,7 @@ function row(overrides: Partial<AdminImportRow>): AdminImportRow {
     requester_user_id: 'user-1',
     requester_name: 'Ada Lovelace',
     requester_email: 'ada@example.com',
+    assigned_to_user_id: 'u-jacob',
     assignee_name: 'Jacob',
     assignee_email: 'jacob@livingtongues.org',
     created_at: '2026-07-20T10:00:00.000Z',
@@ -90,18 +91,44 @@ const imports: AdminImportRow[] = [
   }),
 ]
 
+const admin_user_id_by_email = new Map([
+  ['jwrunner7@gmail.com', 'u-jacob'],
+  ['diego@livingtongues.org', 'u-diego'],
+  ['livingtongues@gmail.com', 'u-greg'],
+  ['ck1105@georgetown.edu', 'u-cailie'],
+])
+
+const shared_props = {
+  admin_user_id_by_email,
+  on_copy_brief: () => {},
+  on_assigned: () => {},
+}
+
 export const Default: Story<typeof Component> = {
-  props: { imports, on_copy_brief: () => {} },
+  props: { ...shared_props, imports },
 }
 
 /** Nothing resolved yet — no "Past imports" group. */
 export const AllOpen: Story<typeof Component> = {
   viewports: [{ width: 1100, height: 260 }],
-  props: { imports: imports.filter(item => !item.resolved_at), on_copy_brief: () => {} },
+  props: { ...shared_props, imports: imports.filter(item => !item.resolved_at) },
+}
+
+export const AssignedToDiego: Story<typeof Component> = {
+  viewports: [{ width: 1100, height: 150 }],
+  props: {
+    ...shared_props,
+    imports: [row({
+      dictionary_name: 'Eastern Pomo',
+      assigned_to_user_id: 'u-diego',
+      assignee_name: 'Diego Córdova',
+      assignee_email: 'diego@livingtongues.org',
+    })],
+  },
 }
 
 /** Narrow admin viewport — assignee + updated columns drop out. */
 export const Narrow: Story<typeof Component> = {
   viewports: [{ width: 720, height: 460 }],
-  props: { imports, on_copy_brief: () => {} },
+  props: { ...shared_props, imports },
 }

@@ -3,7 +3,7 @@
   import { onMount } from 'svelte'
   import { fade } from 'svelte/transition'
   import { page } from '$app/state'
-  import { photo_src, url_from_storage_path } from '$lib/utils/media-url'
+  import { audio_element_from_storage_path, photo_src } from '$lib/utils/media-url'
   import { portal } from '$lib/utils/portal'
   import IconMdiClose from '~icons/mdi/close'
   import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'
@@ -48,7 +48,7 @@
   onMount(() => {
     document.body.style.overflow = 'hidden'
     // Opening the image is very likely followed by a play tap — warm the audio now.
-    audio_element = new Audio(url_from_storage_path(card.audio_storage_path))
+    audio_element = audio_element_from_storage_path(card.audio_storage_path)
     audio_element.preload = 'auto'
     audio_element.onended = () => playing = false
     audio_element.onerror = () => playing = false

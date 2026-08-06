@@ -1,8 +1,9 @@
 import type { RequestHandler } from './$types'
 import Database from 'better-sqlite3'
-import { gzipSync } from 'node:zlib'
-import { unlink } from 'node:fs/promises'
-import { existsSync, readFileSync } from 'node:fs'
+import { gzip } from 'node:zlib'
+import { promisify } from 'node:util'
+import { readFile, unlink } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { verify_auth_dict_role } from '$lib/auth/verify-dict-role'
@@ -26,6 +27,17 @@ import { error } from '@sveltejs/kit'
  * Uses `db.backup()` (page-by-page copy under a SHARED lock, safe under WAL),
  * gzips, streams back.
  */
+
+/**
+ * READ + GZIP ARE ASYNC ON PURPOSE (2026-08-02). This handler runs on the
+ * request thread, and `readFileSync` + `gzipSync` of the largest dictionary
+ * (54 MB) was measured freezing the whole process for 831 ms per editor boot —
+ * nothing else runs during that, not even the container health check.
+ * `promisify(gzip)` puts the compression on the libuv thread pool: worst stall
+ * 42 ms for the same file, same total wall clock. Never go back to `*Sync`.
+ */
+const gzip_async = promisify(gzip)
+
 export const GET: RequestHandler = async (event) => {
   const dict_id_or_url = event.params.id
   if (!dict_id_or_url)
@@ -72,8 +84,8 @@ export const GET: RequestHandler = async (event) => {
       temp_db.close()
     }
 
-    const bytes = readFileSync(temp_path)
-    const gzipped = new Uint8Array(gzipSync(bytes))
+    const bytes = await readFile(temp_path)
+    const gzipped = new Uint8Array(await gzip_async(bytes))
     return new Response(gzipped, {
       headers: {
         'content-type': 'application/octet-stream',

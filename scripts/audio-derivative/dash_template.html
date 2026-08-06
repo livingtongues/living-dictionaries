@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LD audio — before/after listening dashboard</title>
+<style>
+:root{--bg:#0f1115;--panel:#171a21;--line:#2a2f3a;--fg:#e6e9ef;--dim:#98a1b3;--accent:#6aa9ff;--good:#4ade80;--warn:#fbbf24;--orig:#f472b6}
+@media (prefers-color-scheme: light){:root{--bg:#f7f8fa;--panel:#fff;--line:#e2e5ea;--fg:#16181d;--dim:#5c6472;--accent:#2563eb;--orig:#be185d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{padding:20px 24px;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:10}
+h1{margin:0 0 4px;font-size:18px}
+.sub{color:var(--dim);font-size:13px}
+.wrap{padding:16px 24px 80px}
+.legend{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px;margin:14px 0 20px}
+.legend div{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.legend b{color:var(--accent)}
+.legend .o{color:var(--orig)}
+.row{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.lex{font-size:17px;font-weight:600}
+.gloss{color:var(--dim)}
+.dict{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--dim);border:1px solid var(--line);padding:1px 6px;border-radius:20px}
+.meta{margin-left:auto;color:var(--dim);font-size:12px;font-variant-numeric:tabular-nums}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+button.chip{display:flex;flex-direction:column;align-items:flex-start;gap:1px;min-width:104px;padding:6px 9px;border:1px solid var(--line);background:transparent;color:var(--fg);border-radius:8px;cursor:pointer;font:inherit;text-align:left}
+button.chip:hover{border-color:var(--accent)}
+button.chip.orig{border-color:var(--orig)}
+button.chip.playing{background:var(--accent);color:#fff;border-color:var(--accent)}
+button.chip.orig.playing{background:var(--orig);border-color:var(--orig)}
+.chip .n{font-size:12px;font-weight:600}
+.chip .s{font-size:11px;opacity:.75;font-variant-numeric:tabular-nums}
+.controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:10px 0 16px}
+select,input[type=text]{background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:5px 8px;font:inherit}
+label{color:var(--dim);font-size:13px}
+table{border-collapse:collapse;width:100%;margin:6px 0 18px;font-variant-numeric:tabular-nums}
+th,td{text-align:right;padding:5px 10px;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--dim);font-weight:600;font-size:12px}
+tr.hi td{color:var(--good);font-weight:600}
+.tip{color:var(--dim);font-size:12px;margin-top:-8px;margin-bottom:14px}
+kbd{background:var(--line);border-radius:4px;padding:1px 5px;font-size:11px}
+details{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:16px}
+summary{cursor:pointer;font-weight:600}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;min-width:60px}
+.bar i{display:block;height:100%;background:var(--accent)}
+</style></head><body>
+<header>
+  <h1>Living Dictionaries — audio playback derivative: listen before you decide</h1>
+  <div class="sub">60 real recordings pulled from production R2 across 16 dictionaries. <b class="o">ORIGINAL</b> streams live from <code>media.livingdictionaries.app</code> (exactly what a visitor gets today). Every other button is a candidate, embedded in this file. Nothing has been changed in production.</div>
+</header>
+<div class="wrap">
+
+<details open><summary>What each candidate is</summary>
+  <div class="legend" id="legend"></div>
+  <div class="tip">Two ladders. <b>p1 → p5</b> hold the codec fixed (Opus 32 kbps mono) and add one processing step at a time — that ladder answers “what should we <i>do</i> to the audio”. <b>c1 → c5</b> hold the processing fixed (mono + linear loudness + trim) and vary codec/bitrate — that ladder answers “how small can we go before it hurts”.</div>
+</details>
+
+<details><summary>Size and loudness summary over these 60 files</summary>
+  <div id="summary"></div>
+</details>
+
+<div class="controls">
+  <label>dictionary <select id="filter"><option value="">all</option></select></label>
+  <label>sort <select id="sort"><option value="dict">by dictionary</option><option value="loud">quietest original first</option><option value="size">biggest original first</option><option value="trim">most silence trimmed first</option></select></label>
+  <label><input type="checkbox" id="onlytwo"> A/B mode — show only 2 candidates</label>
+  <label id="abwrap" style="display:none">A <select id="a"></select> B <select id="b"></select></label>
+</div>
+<div class="tip">Click any chip to play. Playing one stops the other. <kbd>Space</kbd> replays the last chip; <kbd>←</kbd>/<kbd>→</kbd> steps through the chips of the last row you touched, so you can A/B without moving the mouse.</div>
+
+<div id="rows"></div>
+</div>
+<script id="payload" type="application/json">__PAYLOAD__</script>
+<script>
+const D = JSON.parse(document.getElementById('payload').textContent)
+const KB = b => b >= 1024*1024 ? (b/1048576).toFixed(2)+' MB' : Math.round(b/1024)+' KB'
+const audio = new Audio(); let current = null, lastRow = null, lastIdx = 0
+
+document.getElementById('legend').innerHTML =
+  `<div><b class="o">ORIGINAL</b> — the raw uploaded file, served from production R2 right now.</div>` +
+  D.inline.map(id => `<div><b>${D.labels[id][0]}</b><br><span style="color:var(--dim)">${D.labels[id][1]}</span></div>`).join('')
+
+// summary table
+;(function(){
+  const rows = D.rows
+  const totOrig = rows.reduce((a,r)=>a+r.orig.size,0)
+  const lines = [['ORIGINAL', totOrig, rows.map(r=>r.orig.I), rows.map(r=>r.orig.dur)]]
+  D.inline.forEach(id => {
+    const vs = rows.map(r => r.variants.find(v=>v.id===id)).filter(Boolean)
+    lines.push([D.labels[id][0], vs.reduce((a,v)=>a+v.size,0), vs.map(v=>v.I), vs.map(v=>v.dur)])
+  })
+  const med = a => { const s=[...a].map(Number).filter(n=>!isNaN(n)).sort((x,y)=>x-y); return s[Math.floor(s.length/2)] }
+  const html = ['<table><tr><th>candidate</th><th>total</th><th>shrink</th><th>avg / word</th><th>median LUFS</th><th>loudness spread</th><th>median length</th></tr>']
+  for (const [name,tot,Is,durs] of lines){
+    const s=[...Is].map(Number).filter(n=>!isNaN(n)).sort((a,b)=>a-b)
+    html.push(`<tr class="${name.startsWith('+ silence')?'hi':''}"><td>${name}</td><td>${KB(tot)}</td><td>${(totOrig/tot).toFixed(0)}×</td><td>${KB(tot/rows.length)}</td><td>${med(Is).toFixed(1)}</td><td>${(s[s.length-1]-s[0]).toFixed(1)} dB</td><td>${med(durs).toFixed(2)} s</td></tr>`)
+  }
+  html.push('</table>')
+  document.getElementById('summary').innerHTML = html.join('')
+})()
+
+function stop(){ if(current){ current.classList.remove('playing'); current=null } audio.pause() }
+function play(btn, src){
+  if (current === btn){ stop(); return }
+  stop(); current = btn; btn.classList.add('playing')
+  audio.src = src; audio.currentTime = 0; audio.play().catch(e=>{ btn.textContent='⚠ '+e.name })
+}
+audio.addEventListener('ended', stop)
+
+const rowsEl = document.getElementById('rows')
+function render(){
+  const f = document.getElementById('filter').value
+  const sortBy = document.getElementById('sort').value
+  const two = document.getElementById('onlytwo').checked
+  const a = document.getElementById('a').value, b = document.getElementById('b').value
+  let rows = D.rows.filter(r => !f || r.dict_id === f)
+  const num = v => { const n = Number(v); return isNaN(n) ? 0 : n }
+  if (sortBy==='loud') rows = [...rows].sort((x,y)=>num(x.orig.I)-num(y.orig.I))
+  if (sortBy==='size') rows = [...rows].sort((x,y)=>y.orig.size-x.orig.size)
+  if (sortBy==='trim') rows = [...rows].sort((x,y)=>{
+    const t=r=>{const v=r.variants.find(v=>v.id==='p3_norm_trim'); return v? v.dur/r.orig.dur : 1}
+    return t(x)-t(y)})
+  rowsEl.innerHTML = ''
+  for (const r of rows){
+    const el = document.createElement('div'); el.className='row'
+    const trimmed = r.variants.find(v=>v.id==='p3_norm_trim')
+    const cut = trimmed ? Math.max(0, Math.round(100*(1-trimmed.dur/r.orig.dur))) : 0
+    el.innerHTML = `<div class="head">
+      <span class="lex">${r.lexeme||'—'}</span>
+      <span class="gloss">${r.gloss?('‘'+r.gloss+'’'):''}</span>
+      <span class="dict">${r.dict_id}</span>
+      <span class="meta">${r.orig.dur}s · ${r.orig.I} LUFS · true peak ${r.orig.tp} dBTP · LRA ${r.orig.lra} · gain applied ${r.orig.gain>0?'+':''}${r.orig.gain} dB · silence cut ${cut}%</span>
+    </div><div class="chips"></div>`
+    const chips = el.querySelector('.chips')
+    const mk = (cls, name, sub, src) => {
+      const btn=document.createElement('button'); btn.className='chip '+cls
+      btn.innerHTML=`<span class="n">${name}</span><span class="s">${sub}</span>`
+      btn.onclick=()=>{ lastRow=chips; lastIdx=[...chips.children].indexOf(btn); play(btn, src) }
+      chips.appendChild(btn); return btn
+    }
+    mk('orig','ORIGINAL', `${KB(r.orig.size)} · ${r.orig.I} LUFS`, r.orig.src)
+    for (const v of r.variants){
+      if (two && v.id!==a && v.id!==b) continue
+      mk('', D.labels[v.id][0].replace('Opus','Opus').slice(0,26), `${KB(v.size)} · ${v.I} LUFS · ${v.dur}s`, v.src)
+    }
+    rowsEl.appendChild(el)
+  }
+}
+const dicts=[...new Set(D.rows.map(r=>r.dict_id))].sort()
+document.getElementById('filter').innerHTML='<option value="">all dictionaries</option>'+dicts.map(d=>`<option>${d}</option>`).join('')
+const opts = D.inline.map(id=>`<option value="${id}">${D.labels[id][0]}</option>`).join('')
+document.getElementById('a').innerHTML=opts; document.getElementById('b').innerHTML=opts
+document.getElementById('a').value='p3_norm_trim'; document.getElementById('b').value='c2_opus24'
+for (const id of ['filter','sort','a','b']) document.getElementById(id).onchange=render
+document.getElementById('onlytwo').onchange=e=>{ document.getElementById('abwrap').style.display = e.target.checked?'':'none'; render() }
+document.addEventListener('keydown', e=>{
+  if (!lastRow) return
+  if (e.key===' '){ e.preventDefault(); lastRow.children[lastIdx]?.click(); lastRow.children[lastIdx]?.click() }
+  if (e.key==='ArrowRight'){ e.preventDefault(); lastIdx=(lastIdx+1)%lastRow.children.length; lastRow.children[lastIdx].click() }
+  if (e.key==='ArrowLeft'){ e.preventDefault(); lastIdx=(lastIdx-1+lastRow.children.length)%lastRow.children.length; lastRow.children[lastIdx].click() }
+})
+render()
+</script></body></html>

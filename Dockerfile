@@ -19,6 +19,22 @@ COPY site/package.json site/
 # `install` hook (prebuild-install || node-gyp rebuild) compiles the native binary.
 RUN pnpm install --frozen-lockfile
 
+# The commit being built. `svelte.config.js` uses it as `kit.version.name` and
+# REFUSES TO BUILD without it (there is no `.git` dir in this stage, so git
+# can't answer): a clock-derived version name gives the page shell and the
+# client bundle different `__sveltekit_<hash>` globals and serves a blank page
+# on every route — the 2026-08-03 poly.education outage. `deploy.sh` exports
+# GIT_SHA before `docker compose build` and compose passes it through as
+# `${GIT_SHA:-}`, which is why the empty default here must never be accepted as
+# a value (see the comment in svelte.config.js).
+#
+# DELIBERATELY BELOW `pnpm install`: GIT_SHA changes on every deploy and Docker
+# invalidates every layer after a changed ENV, so declaring it above the install
+# would re-run `pnpm install --frozen-lockfile` (with a from-source
+# better-sqlite3 compile) on every single deploy.
+ARG GIT_SHA=""
+ENV GIT_SHA=$GIT_SHA
+
 # Source: site (self-contained; imports its own `$lib/types`).
 COPY site/ site/
 
@@ -36,7 +52,25 @@ RUN node site/scripts/fetch-baked-i18n.mjs
 # (fetch from the still-serving old container; never fails the build).
 RUN node site/scripts/fetch-homepage-baked.mjs
 
-RUN pnpm --filter=site build
+# The per-build half of `kit.version.name` (`<GIT_SHA>-<BUILD_ID>`, see
+# resolve_version_name in site/svelte.config.js). Two builds of ONE commit are
+# two different applications here — the two RUN steps above bake in answers
+# fetched from the still-running site — and until 2026-08-06 they shipped under
+# one name, which blinded the update poll, the stale-build error split and the
+# deploy timeline all at once (log review 2026-08-05 §1.1).
+#
+# Minted in the SAME shell as the build on purpose. `process.env` is inherited by
+# SvelteKit's postbuild worker threads while `globalThis` is not, so an env var
+# set once here is seen identically by all four config loads; a clock read INSIDE
+# the config would give each of them a different answer, which is the outage.
+#
+# The `date` runs only when this layer is not cached — and a cached layer means a
+# byte-identical build, which SHOULD keep its name. `ARG BUILD_ID` lets deploy.sh
+# supply its own id later without touching this file; empty is the normal case.
+ARG BUILD_ID=""
+RUN BUILD_ID="${BUILD_ID:-$(date -u +%Y%m%d%H%M%S)}" && export BUILD_ID && \
+    echo "Building with BUILD_ID=$BUILD_ID" && \
+    pnpm --filter=site build
 
 
 FROM node:24-alpine AS runner

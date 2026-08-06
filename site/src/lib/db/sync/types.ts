@@ -1,4 +1,5 @@
 import type { RowType } from '$lib/db/client/live/types'
+import type { RejectedRow } from './rejected-rows'
 
 /**
  * Tables in shared.db that admins can read (and most cases write) via the
@@ -106,6 +107,12 @@ export interface SyncResponse {
    * dict engine's recovery (see `process_dict_changes`). The client logs a warn.
    */
   skipped_orphans?: { table_name: string, id: string, parent_table: string }[]
+  /**
+   * EVERY pushed row the server refused, with a typed reason (the refused-write
+   * contract — see `rejected-rows.ts`). Additive: `skipped_orphans` above stays
+   * for pre-contract clients and carries the same FK-orphan subset.
+   */
+  rejected_rows?: RejectedRow[]
 }
 
 export interface SyncResult {

@@ -41,7 +41,16 @@ declare global {
       // Smart back-target persisted into history.state by admin detail pages (use_admin_back).
       admin_back?: { label: string, url: string }
     }
-    // interface Error {}
+    interface Error {
+      message: string
+      /**
+       * Stamped by `hooks.server.ts`'s `handleError` on a server-side 5xx only,
+       * and echoed into the browser's `crash` row by `+error.svelte`. Its ABSENCE
+       * on an error page is the signal that the fault happened in the browser
+       * (`hooks.client.ts` logs those) rather than during SSR.
+       */
+      error_id?: string
+    }
     // interface Platform {}
   }
 

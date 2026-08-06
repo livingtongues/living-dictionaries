@@ -27,4 +27,4 @@ site.
 A lazy loader that caches its in-flight promise (`if (!cache) cache = import(...)`) keeps a
 REJECTED promise forever — one failed chunk fetch poisons every later caller. Clear the cache on
 rejection so a retry is possible (see `load_keyman_writing_systems` in
-`$lib/components/keyboards/keyman/writing-systems.ts`).
+`$lib/keyboards/keyman/writing-systems.ts`).

@@ -97,8 +97,24 @@ The grammar surface is live and entry-linked:
 There is no separate grammar-intro endpoint — the introductory prose is simply the
 first top-level section.
 
-Fill in the **glossing abbreviations legend** whenever you import glossed material.
-Without it, `PFV` is noise to a reader; with it, it's a tappable definition.
+Fill in the **glossing abbreviations legend** whenever you import glossed material —
+but ONLY for what the standard Leipzig catalog can't cover. The site already expands
+every standard code (`1SG`, `PFV`, `PL` …) in every dictionary, localized into the
+reader's UI language; a curated row that just restates "first person singular" adds
+nothing and blocks that localization. Register a code when:
+
+- it's outside the standard set (`1SG>2SG`, `URG.FEM`, `Ø`), or
+- this language's usage genuinely differs from the standard meaning (a "dual" that
+  marks two *or more*).
+
+Wording rules for curated expansions:
+
+- **The dictionary stands alone.** Never write "the book's X" or reference the source
+  PDF — readers who never saw the source will just wonder "what book?". Source
+  attribution belongs in the import report, not in gloss tooltips.
+- Anchor a code to its morpheme when that identification is the point
+  (`negative — the suffix -aží 'not'`), but don't echo the morpheme the reader just
+  tapped on.
 
 ## The word→entry matching queue
 

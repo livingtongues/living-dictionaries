@@ -80,11 +80,9 @@
   })
 </script>
 
-<svelte:head>
-  {#if can_google_authenticate}
-    <script src="https://accounts.google.com/gsi/client" async></script>
-  {/if}
-</svelte:head>
+<!-- The GSI script is loaded by `display_one_tap_button` above (one idempotent
+     loader). A second <svelte:head> tag for the same URL used to race it and
+     execute the SDK twice. -->
 
 <Modal on_close={on_close}>
   {#snippet heading()}

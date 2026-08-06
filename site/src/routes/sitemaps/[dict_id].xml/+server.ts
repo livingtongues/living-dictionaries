@@ -31,7 +31,7 @@ export const GET: RequestHandler = ({ params, url: request_url }) => {
 
   if (params.dict_id === 'site') {
     return xml_response(urlset({
-      urls: ['/', '/about', '/dictionaries', '/tutorials'].map(path => ({ loc: `${origin}${path}` })),
+      urls: ['/', '/about', '/create-dictionary', '/dictionaries', '/tutorials', '/terms', '/privacy-policy'].map(path => ({ loc: `${origin}${path}` })),
     }))
   }
 

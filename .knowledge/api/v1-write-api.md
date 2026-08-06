@@ -287,7 +287,7 @@ Two things an agent bulk-using the media endpoints hit, both non-obvious from on
 
 - Keys: `$lib/api-keys/api-key.ts` + `shared-migrations/20260629_api_keys.sql` +
   `routes/api/dictionaries/[id]/api-keys/*` (manager-gated CRUD) + the Agents-page
-  panel `$lib/components/settings/ApiKeys.svelte` (+ `AgentPrompt.svelte`, a
+  panel `$lib/settings/ApiKeys.svelte` (+ `AgentPrompt.svelte`, a
   copyable "hand this to your agent" prompt).
 - Auth gate: `$lib/auth/verify-dict-api-access.ts`.
 - Write engine: `$lib/db/server/v1-entry-write.ts` (`apply_entry_writes` /

@@ -1,34 +1,29 @@
 # Standing decisions — living-dictionaries log-review
 
 Durable Jacob decisions this lane must honor. **Read this FIRST, before the dated digests.**
-Maintenance: dated one-liners; add on a durable debrief decision (declines, kill-list items,
-standing baselines); DELETE once shipped or obsolete. Keep it small — standing law, not a log.
 
-- **2026-07-31 — THE RELOAD-ONCE RULE, approved portfolio-wide and SHIPPED in LD.** *When the missing
-  thing is a build artifact the server has DELETED, retrying is provably useless — reload ONCE onto
-  the current build instead of retrying N times.* `/_app/immutable/*` is content-hashed, so a 404
-  there is permanent for that bundle. Earned on 07-29: a signed-in contributor was locked out of the
-  private `algonquin` dictionary for SIX MINUTES while the app chased a deleted worker chunk 39
-  times. Code: `$lib/db/client/stale-build-artifact.ts` (classifier, injected into `db-client.ts`)
-  + `$lib/db/dict-client/stale-bundle-recovery.ts` (one reload, foreground-only, then a toast).
-  Triage: `stale_bundle_reload` / `_deferred` / `_gave_up` are the terminal rows — **`_gave_up` is a
-  real user stuck on a stale bundle, always escalate it**; a rising `stale_bundle_reload` count is
-  just deploys working as intended. Apply the same shape to any NEW retry loop over a build artifact.
+**Admission rule — the orphan test: a line belongs here ONLY if no other file could own it.**
+A ruling of Jacob's, a standing policy, a known-noise classification, a triage rule — nothing else
+owns those. A fact about code is owned by the code: cite the file, never copy the fact, because a
+copy rots silently and nothing ever turns red. A measurement from one night is owned by that
+night's dated digest. An open bug with an `.issues/` file is owned by that file. Write the reason
+at the level of the CLASS, not the incident — a verdict closes one case, a rule closes all of them.
+DELETE a line once its rule is obsolete. Keep it small — standing law, not a log.
+
+- **2026-07-05 — `api/email/html/new-user-welcome.ts`: KEEP** even though it's orphaned — Jacob
+  is handling welcome emails separately. Not a dead-file candidate.
+- **2026-07-07 — the conlang fork is fenced off from mission reporting.** Don't count it or
+  report on it.
 - **2026-07-09 — stale-client `sync_failed` storms: IGNORE.** Greg's stuck tab is a forgotten old
   laptop (he's been nudged); **no forced-reload mechanism will be built.** Stale-tab/stale-build
   retry noise is KNOWN-NOISE — filter it from triage, stop re-raising it, drop the carried
   "stale-client recovery" coverage item.
-  **NARROWED 2026-07-31** by the rule above, and only there: this still governs forgotten BACKGROUND
-  tabs belonging to nobody's active work (a hidden tab is never reloaded behind the user — it waits
-  for `visibilitychange`). The one carve-out is a FOREGROUND tab whose load can provably never
-  succeed. Do not read the 07-09 decline as forbidding that.
-- **2026-07-07 — the conlang fork is fenced off from mission reporting.** Don't count it or
-  report on it.
-- **2026-07-05 — `api/email/html/new-user-welcome.ts`: KEEP** even though it's orphaned — Jacob
-  is handling welcome emails separately. Not a dead-file candidate.
-- **2026-07-09 — `logs.db` VACUUM-after-prune: approved & dispatched** (worker `4a4593e3`).
-  Crawl-driven log growth during the SEO crawl is expected — only escalate if growth stays steep
-  after the crawl settles.
+  **NARROWED 2026-07-31** by the reload-once rule below, and only there: this still governs
+  forgotten BACKGROUND tabs belonging to nobody's active work (a hidden tab is never reloaded
+  behind the user — it waits for `visibilitychange`). The one carve-out is a FOREGROUND tab whose
+  load can provably never succeed. Do not read the 07-09 decline as forbidding that.
+  Do not re-triage individual stale-tab clients by name (Greg, Marlene, Evelyn, `river`, evelyn/
+  solari) — they are all instances of this one class.
 - **2026-07-09 — crawler noise:** `live_query_failed` proved 98.5% Googlebot; treat crawler
   misuse / bot boot-cascade rows as known-noise pending the fleet noise-floor artifact
   (worker `74d5d94a`). Same known-noise family: `[orama-watcher] delta scan failed`,
@@ -37,52 +32,10 @@ standing baselines); DELETE once shipped or obsolete. Keep it small — standing
   (confirmed 2026-07-10 run 2):** `leader_boot_failed` (mostly anon/Googlebot, `will_retry:true`,
   "module script canceled" mid-boot + "disk image malformed" on bot OPFS) and `Failed to read dict
   bundle from wa-sqlite` (`sqlite_code:21 MISUSE`, `retried:true`) — both self-heal; don't re-triage.
-- **2026-07-10 — entry-page `effect_update_depth_exceeded`: essentially CLOSED.** Collapsed 57→1 on
-  build `1783663107615` after `daed5d93`/`24b080b1`/`42f737d7`. Watch the residual 1; don't
-  re-propose the fix (documented in-code at `entry/[entryId]/+page.svelte` L62–71).
-- **2026-07-10 — dashboard route/nav/homepage perf split ALREADY SHIPPED** (`RoutePerf` per-route
-  page_load p95, navigation-by-destination split, LCP-by-distance, CWV, boot-health). Don't
-  re-propose per-route or homepage-vs-entry perf panels. The open gap is a `dict_boot` cold/warm
-  timing (needs a new client `track_timing` first).
-- **2026-07-11 — featured-entry ⭐ `UNIQUE` error: CLOSED.** 0 occurrences (was 12 on 07-10); the
-  residual-race fix held. Don't re-raise.
-- **2026-07-11 — new zombie tab in the `sync_failed` storm is a non-admin (Marlene, ~4.6k/day
-  null-session).** Same known-noise family as Greg's stale tab (2026-07-09 ruling); no forced-reload
-  will be built. Don't re-triage individual stale-tab clients.
-- **2026-07-12 — waveform ▶ play-before-init bug: CLOSED.** Commit `56a40b63` replaced wavesurfer.js
-  with a static canvas `Waveform.svelte` (plays via a plain `<audio>` element) — the async-import race
-  is gone entirely. 0 occurrences (was 7). Don't re-raise; the proposed null-guard is moot.
-- **2026-07-12 — search `RangeError: Maximum call stack size exceeded` on `/opata/entries?q="Flores"`:**
-  new low-freq 🟡 P3 WATCH. iPhone/Chrome-iOS, MX-Sinaloa, 2 rows/1 user/1 session, retired build.
-  Minified `Sk@/Qk@` recursion — NO confident fix, do not guess. Only act if it recurs on the current
-  build or from a 2nd user (then drill + repro with sourcemaps). Opata & Guaycura are REAL dictionaries,
-  not the conlang fork.
-- **2026-07-12 — LD dashboard is AHEAD of siblings on: thin-data perf guard (`THIN_SAMPLE_N=15`) + the
-  At-a-Glance strip.** Both are being ported FROM LD by house/tutor — don't accept them as inbound Phase D
-  ports; they're LD-originals. **Also LD-ahead: the Sync-health stuck-(user,dict) panel** (`build_sync_health`,
-  `/admin/health`) — house's proposed "wedged clients" indicator is the same idea; don't accept it as an
-  inbound port.
-- **2026-07-13 — SEO/bot crawl SETTLED.** Volume dropped 184k→33k (−82%), host CPU avg back to ~2%,
-  `logs.db` growth 300MB/day → 66MB/day. New baseline: treat a return to 100k+/day as a *new* crawl to
-  investigate, not the old one. The 07-12 "watch logs.db growth" item is effectively resolved.
 - **2026-07-13 — `sync_failed` `kind:client_behind`/`schema_outdated` 409 on a live-session (non-null)
   tab is the SAME known-noise stale-build family** as the null-session zombies — a migration shipped and
   the old tab can't sync until reload. Already surfaced by `build_sync_health.stuck[]`. Don't re-triage
-  individual stuck tabs (e.g. evelyn/solari 07-13); no forced-reload (07-09).
-- **2026-07-13 — Phase D: tutor + house have SHIPPED LD's two open error-cluster items** (bot-share % +
-  `max_per_session` ⟳-loop marker; tutor's `build_error_clusters` has both live). Next time these come up,
-  port tutor's implementation rather than re-designing — the design is proven in two apps.
-- **2026-07-14 — error-cluster bot-share % + ⟳-loop marker SHIPPED in LD** (`build_error_clusters` now has
-  `bot_pct` + `max_per_session`). Don't re-propose. **`dict_boot` cold/warm dashboard timing also SHIPPED**
-  (`build_dict_boot`, avg ~2.3s live) — the 07-10 "dict_boot coverage gap needs a client track_timing"
-  item is CLOSED; don't re-raise it.
-- **2026-07-14 — Greg's "river" zombie tab is the SAME forgotten-laptop stale-tab family** (07-09): null
-  session, dict slug `river` 404 `dictionary not found`, ~1,528/day, inflates his event count. Known-noise,
-  no forced-reload. Don't re-triage; just subtract it from his real activity.
-- **2026-07-14 — `Unable to decode audio for waveform` (`Waveform.svelte:80`): NEW 🟡 P3, cosmetic.**
-  Freshly-recorded audio; waveform peaks fail to decode; playback (plain `<audio>`) unaffected. 2 real
-  users (Android-Chrome + Mac-Safari). The logged `error` serializes to `{}` — **first fix is to enrich
-  the log** (name/message/mime/bytes/source), THEN diagnose. Don't guess a fix blind. Watch for recurrence.
+  individual stuck tabs; no forced-reload (07-09).
 - **2026-07-14 — i18n missing-key warns (~800/day, mostly EN `ps.*`/`sd.*`) are non-canonical hand-typed
   POS/semantic-domain labels, NOT catalog bugs** — already surfaced on `/admin/analytics` missing-i18n
   panel (working as designed). Don't treat as an error or propose a panel. Only `gl.default`/he-type single
@@ -90,132 +43,55 @@ standing baselines); DELETE once shipped or obsolete. Keep it small — standing
 - **2026-07-14 — NO wedged-client dashboard panels.** Jacob: "wedges are your job to find and fix, not
   mine to watch and observe in a dashboard." Stop proposing sync-halt / wedged-client indicator panels.
   Surface wedges as ACTIONABLE nightly-digest items (fix or human-nudge), not a dashboard to watch.
-  (Applied 07-15: the carried "sync-halt terminal-wedge panel" backlog item is DROPPED per this ruling.)
-- **2026-07-16 — grammar `props_invalid_value` P3: CORRECTED — NOT admin-3/preview-only; real
-  shared-editor bug, fix pending.** The 07-15 "admin-3 preview only, only Jacob" framing is WRONG:
-  `GrammarSection.svelte` (`can_prose_edit`, L32-35) opens `SectionEditor` in `prose_only` mode for any
-  dictionary **manager** editing grammar intro prose. 07-16 it fired for 2 NON-admin users. Zero *mission*
-  impact only because they were on `bucket:"conlang"` dicts (cormani/lunvot/rhenic — fenced, 07-07); it
-  WILL hit a real-dict manager once they edit grammar. Root cause (still pinned): `SectionEditor.svelte:146/159`
-  binds `draft_body[bcp]`/`draft_usage[bcp]` (undefined) into `MarkdownEditor` `value = $bindable('')`
-  (`:32`). Fix = drop the `''` fallback or pre-seed the key. Keep as a REAL P3, not preview-only.
-- **2026-07-16 — waveform-decode P3: ENRICHMENT SHIPPED, diagnosed, CLOSED.** `Waveform.svelte:83` now
-  logs `{name,message,mime,bytes,source}`; the rows reveal root cause = transient `NetworkError` fetching
-  the audio URL (`source:"url"`), NOT a codec issue. Cosmetic (playback via `<audio>` unaffected). Don't
-  re-raise the enrich item or a codec fix; only revisit if it recurs at volume (→ R2/CDN audio delivery,
-  not the decoder).
-- **2026-07-16 — `real_errors` rollup is ~100× inflated by known-noise the classifier doesn't catch.**
-  The forever metric reads ~1,600–2,000/day but genuine user-facing errors are a handful; the bulk is the
-  null-session `sync_failed` zombie storm (~1,384/day, one tab) + anon/bot `leader_boot_failed` + bot
-  `Internal Error` 500s — none in `KNOWN_NOISE_PATTERNS`. Two backlog fixes filed (fold null-session
-  `sync_failed`/`leader_boot_failed` out of `real_errors`; add the cross-browser stale-bundle strings).
-  Don't re-derive this each run; it's a metric-honesty backlog item, not a new error to triage.
-- **2026-07-16 — Phase D inbound port ACCEPTED from tutor: persist `/admin/analytics` compute cost.**
-  LD has the identical ephemeral `[profile]` `console.log` pattern (`log-analytics.ts:750`); adopt tutor's
-  `admin_analytics_computed` server-event-per-uncached-compute so dashboard load-perf becomes a trend.
-  Filed to backlog (LOW). Don't re-propose the design; port tutor's.
-- **2026-07-15 — `nyishi` dict-worker `Maximum call stack size exceeded` halt: WATCH.** 1 anon worker
-  `sync_halted_repeated_failure` today; echoes the 07-12 Opata search recursion. Only drill nyishi's data
-  if a REAL contributor reports a broken boot; a single null-user worker instance is not actionable.
-- **2026-07-18 — CSV export `friendly-name.ts` glosses crash: CLOSED, verified fixed in prod.** The
-  `entry.senses?.[0]?.glosses` optional-chain fix (all 3 refs) shipped in build `1784341957685`; **0
-  `glosses` errors in 24h**, the only 6 rows in 48h are all on the pre-fix build `1784294143202` (last
-  07-17 13:56 UTC). Close `.issues/export-friendlyname-glosses-crash.md`. Don't re-raise.
-- **2026-07-17 — Phase D: LD ALREADY ships the malformed-`context` 500 guard on BOTH sides.** Read:
-  `log-analytics.ts` has 56 `json_valid(context)` guards / 0 unguarded `json_extract(context)`. Write:
-  `insert-client-log.ts` `stringify_context_capped` never persists invalid JSON (tests for oversize + circular).
-  house's 07-16 "LD has NOT" flag is STALE — DECLINE the inbound port, broadcast back. Don't accept this port
-  next run; don't re-verify unless the code changes.
-- **2026-07-15 — LD is AHEAD on known-noise classification.** The command's standing Phase-D note that
-  "LD's raw recent_errors lacks error-cluster + known-noise classification" is STALE — LD has
-  `is_noise_msg` UDF + `real_errors` rollup + cluster `is_noise` (`log-analytics.ts` / `classify-error.ts`).
-  Don't accept it as an inbound port. Open cross-browser gap: add `Importing a module script failed.` +
-  `Unable to preload CSS` to `KNOWN_NOISE_PATTERNS` (build-next, backlog).
-
+- **2026-07-16 — grammar `props_invalid_value` P3: NOT admin-3/preview-only; a real
+  shared-editor bug, fix pending.** `GrammarSection.svelte` (`can_prose_edit`) opens `SectionEditor`
+  in `prose_only` mode for any dictionary **manager** editing grammar intro prose, so it WILL hit a
+  real-dict manager once they edit grammar; the only reason there is zero *mission* impact so far is
+  that the observed users were on `bucket:"conlang"` dicts (fenced, 07-07). Root cause pinned:
+  `SectionEditor.svelte` binds `draft_body[bcp]`/`draft_usage[bcp]` (undefined) into `MarkdownEditor`
+  `value = $bindable('')`. Fix = drop the `''` fallback or pre-seed the key. Keep as a REAL P3, not
+  preview-only. *(No `.issues/` file owns this yet — it stays here until one does.)*
 - 2026-07-17 — **Free-form user-entered i18n values are DATA, not UI strings — render raw, no warn, no translation, no catalog promotion** (Jacob). Applies to custom semantic domains (`sd.*`, e.g. wenshanhua's 706 warns) AND free-form parts of speech (`ps.*`/`psAbbrev.*`, e.g. Italian `ps.v-è`/`psAbbrev.v-isce`/`psAbbrev.expr` on `1p-emanuscript`). These are NOT fill-translations gaps — the write path passes unknown values through verbatim by design. Code fix dispatched (living-dictionaries/f9fb21c3) to gate free-form values out of the missing-key i18n warn path entirely. STOP re-flagging these warns as actionable; do NOT propose promoting them into the en.json catalog (Jacob declined).
 - **2026-07-22 — Dashboards favor interpretation and speed over raw inventories.** Minimize lists and contextless totals; maximize useful charts, trends, thresholds, comparisons, and action items. Treat fast initial load as product quality and defer low-value computation.
 - **2026-07-22 — Svelte state must be de-proxied at structured-clone boundaries.** Any `$state` value sent to a worker or other structured-clone boundary must first become plain data with `$state.snapshot`.
-- **2026-07-21 — entry-filter structured-clone P1 is CLOSED.** Commit `f4c3d8bc` snapshots the Svelte proxy array before Comlink; all residual rows ended on retired builds by 00:21 UTC and the current build has zero. New distinct watch: persistent per-dictionary OPFS recovery, filed in `.issues/dict-boot-persistent-opfs-recovery.md` after a partially applied Ngemba client migration.
-- **2026-07-22 — three top backlog items SHIPPED in one commit `d6871c60` (06:08 UTC):** (1) `real_errors` null-session zombie exclusion (`log-analytics.ts:1218` `AND NOT (session_id IS NULL AND message IN ('sync_failed','leader_boot_failed'))`), (2) cross-browser stale-bundle strings in `KNOWN_NOISE_PATTERNS` (`classify-error.ts:24-26`: `Importing a module script failed.` / `Unable to preload CSS`), (3) OPFS dict-boot recovery hardening + telemetry. Import/media upload enrichment (`import_upload_failed`/`media_upload_failed`) also landed. Don't re-raise ANY of these four — they're DONE and deployed in build `1784714151639`. Next run: confirm `real_errors` headline dropped to ~30-50/day on finalized rollups.
-- **2026-07-22 — OPFS dict-boot recovery: telemetry works, HEALING does not yet.** New `dict_boot_recovery_exhausted`/`dict_boot_recovered` events fire correctly and BOUND the re-election loop (was the point), but 24h showed **7 exhausted / 0 recovered**. The genuine open case: signed-in iOS `alclaveria`/`boienen` `sqlite3_open_v2` at `opfs_open` — reset-from-snapshot refuses because it can't open the file to prove dirty-state. Anon/webdriver `kalinago`/`ngabere` were stale-bundle worker-chunk fetch failures (reset can't help, correct). This is the still-open iOS/Android checkbox in `.issues/dict-boot-persistent-opfs-recovery.md`, NOT a new bug. Surface as digest action item, not a dashboard panel (07-14 no-wedged-panel ruling). `dict_boot_recovery_exhausted` on anon/webdriver/stale-bundle sessions = known-noise; only the current-build signed-in ones are real.
-- **2026-07-22 — the crawl is the SAME re-intensified Googlebot-mobile (Nexus 5X) SEO indexing, sustained 120-172k rows/day since 07-19** (roughly flat, not growing). Benign, host CPU 3.8% avg. US-SC "human" sessions (~122) are residual datacenter/crawler leakage my rough UA filter misses — NOT real audience; the prod dashboard's `is_bot_ua`+webdriver filter is stricter. Don't re-investigate as a new crawl per the 07-13 baseline; just watch `logs.db` size (2.33GB, ~230MB/day, fine at 18% disk).
-- **2026-07-26 — `dirty_rows_stuck` is DOMINATED by inherited server-side flags, not real wedges.**
-  5,437 stale `dirty=1` rows across **33 dictionaries**, all in `entry_dialects`/`entry_tags` — the
-  unpatched 07-21 Yokoim root cause, now quantified in `.issues/yokoim-dirty-rows-stuck-2026-07-20.md`.
-  Pull-only clients inherit them via the snapshot and warn forever. Don't re-triage individual
-  `dirty_rows_stuck` rows on affected dicts, and don't treat them as lost user work; the fix is the
-  server-merge normalization + a one-off cleanup. A row only deserves triage if the reporting user
-  HOLDS a role on that dictionary.
-- **2026-07-26 — satori (`/og`) cannot decode WebP; the 07-23 photo→R2 migration broke every share
-  card's photo.** 111 failed renders/day, degrading to text-only cards. Filed
-  `.issues/og-share-image-webp-regression.md`. Once fixed, `og_render_failed reason:"image_fetch"`
-  should be ~0 — the residual `reason:"font"` handful stays known-noise. Standing rule: any future
-  media-format migration must check the share-card path.
-- **2026-07-26 — `/admin/analytics` cold compute BLOCKS the whole site (11–80 s) and caused real
-  HTTP 502s.** Accepted inbound Phase D port from house (already built there): breathe/stage yielding,
-  disk-persisted cache, single-flight cold miss, index jump-scan for distinct user agents. Tracked in
-  `.issues/analytics-compute-blocks-server.md`. Don't re-derive the diagnosis; don't propose new
-  dashboard panels until this ships.
-- **2026-07-26 — the newest day on any daily chart is systematically OVERSTATED (~18%).** Live-tail
-  session counts finalize downward when the rollup reclassifies crawler sessions (07-25: 651 live →
-  536 finalized). Always label the last point partial in reports; a backlog item exists to do it on the
-  dashboard.
-- **2026-07-26 — audio `play()` rejections (`Failed to load because no supported source was found`)
-  are UNDIAGNOSABLE until enriched.** Rising 1→19/day across real anonymous visitors, but all
-  referenced R2 audio objects verified 200/correct content-type. `Audio.svelte` calls `play()` with no
-  catch, so rows carry no url/error name/readyState. ENRICH FIRST (`audio_play_failed`), then diagnose
-  — same rule as the 07-14 waveform-decode case. Don't guess a fix.
-- **2026-07-22 21:04 — viewer OPFS replacement HEALS but is not session-bounded.** Current build `1784732741243` produced the first real recoveries (iPhone `iipay-aa`; Android `poqomchi`), closing the "0 recovered" watch. But the iPhone emitted 36 `dict_boot_file_replaced` rows over 9 minutes because the once-only budget resets with each worker re-election; all replacement rows also lost `session_id` during the root-onMount/child-boot race. Keep the existing OPFS issue open for a cross-worker session bound + correlation; editor recovery remains separately deferred.
-  **↑ 2026-07-26: the session-bound watch is CLOSED** — 161 `dict_boot_file_replaced` rows across 161
-  sessions, `max_per_session = 1`, with `session_id` present. Only the signed-in-editor recovery case
-  (1 exhausted row, iPhone/`boienen` `sqlite3_open_v2`) remains open in the issue.
+- **2026-07-22 — `dict_boot_recovery_exhausted` on anon / webdriver / stale-bundle sessions is
+  KNOWN-NOISE; only current-build SIGNED-IN rows are real.** Don't re-triage individual devices.
+  (The open recovery work is owned by `.issues/dict-boot-persistent-opfs-recovery.md`.)
+- **2026-07-26 — a `dirty_rows_stuck` row only deserves triage if the reporting user HOLDS a role on
+  that dictionary.** Inherited server-side flags reach pull-only clients through the snapshot and warn
+  forever; they are not lost user work. (The server-side population was cleaned up 07-27; the residue
+  is client-local on stale tabs.)
+- **2026-07-26 — when an error row cannot name what failed, ENRICH FIRST, then diagnose — never
+  guess a fix blind.** Earned twice (waveform decode 07-14, `audio_play_failed` 07-26): both looked
+  like codec bugs and both turned out to be something else once the row carried url / error name /
+  mime / bytes / source. A rewrite of the log line is a legitimate first deliverable.
 - **2026-07-27 — ANALYTICS AND TELEMETRY MUST NEVER BLOCK A REQUEST PATH (Jacob, standing law).**
   "Analytics are supposed to help me and speed me up, not slow me down… it shouldn't be blocking."
   Any admin/analytics/telemetry computation that is expensive is **precomputed, warmed off-request, or
-  deferred** — never run synchronously in front of a user. Concretely, as shipped this night:
-  `get_log_analytics` is async + stage-chunked (`breathe()` between every blocking stage), single-flighted
-  on the cold miss, persisted to `DATA_DIR/analytics-cache/*.json` so a deploy never hands the next
-  admin a cold compute, and **warmed** from the retention cron's `after_sweep` hook (the moment the
-  watermark advances) plus 30 s after boot. When adding an analytics query, the question is not "is it
-  fast enough" but "whose request pays for it" — the answer must be "nobody's".
-- **2026-07-27 — an image-format migration silently breaks satori-based share rendering; CHECK THE
-  SHARE-CARD PATH WHENEVER MEDIA FORMATS CHANGE (standing outbound rule, adopted fleet-wide).**
-  Verified this night rather than assumed: **upgrading satori does not help.** satori ≥ 0.26 parses
-  WebP, but satori only emits `<image href>` into an SVG — the rasterizer is `@resvg/resvg-js`, and
-  2.6.2 (the newest release) still decodes only PNG/JPEG/GIF/SVG. A bump would merely convert a loud
-  `og_render_failed` into a silently photo-less card. The durable fix is to make `/og` format-agnostic:
-  `routes/og/card-image.ts` transcodes anything undecodable to a JPEG data URI before rendering. Two
-  traps it cost to find: satori **cannot measure a data URI** (needs explicit `<img width height>` or it
-  throws "Image size cannot be determined"), and satori resolves a percentage width against the parent's
-  CONTENT box (the card photo had always stopped 96×72 px short of the edges).
-- **2026-07-27 — the `/og` share-image endpoint is the new top production risk: it took the WHOLE SITE
-  down five times in one evening.** Caddy logged **1,553 `no upstreams available`** (both blue AND green
-  unhealthy at once) and 21 signed-in users hit HTTP 502. Every non-deploy outage minute (17:35,
-  18:44–45, 19:00–04, 19:50, 20:19–21) coincides with an `/og` render burst on a ~5-min crawler cycle.
-  Reproduced on demand in prod: 8 concurrent card renders push trivial `/healthz` to **3,251 ms** vs
-  Caddy's 2 s health timeout. Cost is satori+resvg (~700–840 ms/card, synchronous), NOT sharp (56–88 ms).
-  Three unbounded properties: unbounded PNG `Map` cache (serving container 2.87 GiB vs idle standby
-  1.17 GiB after 7 h ⇒ ~1,000 renders/hour), unbounded concurrency, unbounded outbound fetches (Google
-  Fonts fetch has NO timeout). Tracked in `.issues/og-endpoint-load-outages.md`. Don't re-derive.
-- **2026-07-27 — the 07-26 WebP share-card fix WORKED and must NOT be reverted.** Photo verified back on
-  a live card; `og_render_failed reason:"image_fetch"` 280/day → **0** since 05:11 UTC. Two follow-ons
-  are NOT new bugs: (a) `og_image_transcode_failed` (84/day) is transient R2 fetch timeout *caused by*
-  the load above, not a codec fault; (b) `reason:"font"` 3→127/day is the pre-existing opentype
-  `lookupType: 5 - substFormat: 3` failure **unmasked** now that the image no longer throws first — the
-  card still renders via `static_fonts_only`, cost is tofu boxes for unbundled scripts (Manchu confirmed
-  visually). Don't re-triage either as a regression.
-- **2026-07-27 — the 5,437 phantom `dirty` flags are GONE.** Full scan of all 1,284 dictionary DBs:
-  **0 stale flags, 0 dictionaries**. The 07-26 fleet-wide finding is closed server-side; the only residue
-  is client-local on stale tabs (`boienen-old-buhi-langua`, 2 rows, anon, build 1784893994761) — the
-  known `.issues/client-side-phantom-dirty-residue.md` case. Stop re-raising the server-side cleanup.
+  deferred** — never run synchronously in front of a user. When adding an analytics query, the question
+  is not "is it fast enough" but "whose request pays for it" — the answer must be "nobody's".
+- **2026-07-27 — CHECK THE SHARE-CARD PATH WHENEVER MEDIA FORMATS CHANGE (standing outbound rule,
+  adopted fleet-wide).** An image-format migration silently breaks satori-based share rendering, and
+  upgrading satori does not save you — satori only emits `<image href>`, and the rasterizer decodes a
+  narrower set of formats than the app does. The durable shape is a format-agnostic `/og` that
+  transcodes anything undecodable before rendering. Mechanism + the traps:
+  `.knowledge/server/satori-fonts.md`.
+- **2026-07-31 — never close a font finding on the absence of error rows: RENDER IT AND LOOK AT IT.**
+  The 07-29 reading that Arabic cards "ship tofu" was wrong in the worst direction — they were
+  serving the GENERIC card, because satori caches its FontLoader by the IDENTITY of `options.fonts`,
+  so a `static_fonts_only` retry that reuses one array re-renders against the loader that just threw
+  and fails identically. A subsystem can look quiet in the logs while every card is degraded.
+  (Font-map mechanism and the verification method: `.knowledge/server/satori-fonts.md`.)
 - **2026-07-27 — a 5-minute synthetic uptime probe CANNOT see a 1–3 minute outage** (LD reported 99.3%
   availability on a day with five total outages). Standing instrument rule: percentile/latency panels and
   5-min probes are the wrong tools for short total outages — user-observed 5xx (`sync_failed` `status`)
   is the honest availability signal. Broadcast to house + tutor; all three share the blind spot.
-- **2026-07-27 — `dict_boot_recovery_exhausted` is NOT session-bounded** (the successful-replacement path
-  is). One anon iPhone on `tuscarora` emitted 38 rows in one session / 77 across three. Known iOS
-  `sqlite3_open_v2`@`opfs_open` case in `.issues/dict-boot-persistent-opfs-recovery.md` — bound the
-  give-up path so one device can't dominate error counts; don't re-triage the device.
+  **Proven twice** (again 08-01: the probe read 100% while signed-in users took 502s).
+- **2026-07-30 — `/api/log` returns 200 for a supplied-but-INVALID server secret, so a remote prober
+  cannot tell ingestion from silent rejection.** That is how 3,903 Mustang `uptime_probe` rows sat
+  misattributed as `source='client'` for two weeks while every dashboard read empty and nothing
+  warned. Standing instrument rule: an ingest endpoint that accepts a bad credential with a 200 makes
+  its own feed unfalsifiable — when a panel is blank, check ATTRIBUTION before concluding "no data".
 - **2026-07-27 (Jacob, OVERRIDES two prior standing decisions — now law) — robot classification is ONE
   canonical copy, adopted VERBATIM, guarded by a drift test.** The file is
   `site/src/lib/utils/bot-user-agent.ts` (byte-identical in house/LD/tutor; LD adopted house's copy
@@ -225,160 +101,197 @@ standing baselines); DELETE once shipped or obsolete. Keep it small — standing
   — anything gating a whole app surface must use `is_bot_user_agent` (missing UA = human).** LD's
   dictionary boot gate hands a robot a null session, so failing closed there = a blank application.
   Don't re-propose per-repo matchers; don't "simplify" the two exports into one.
-- **2026-07-28 — `/og` shape repaired: render once + persist, time-budget the renders.** Approved four
-  repairs landed (disk store under `<DATA_DIR>/og-cache`, bounded renders, capped in-process caches,
-  timed-out font fetch). Measurement changed the plan twice and the lessons are now standing:
-  **a concurrency limit alone is nearly a no-op on a single thread** (a burst arrives as a backlog, not
-  as concurrent handlers — every render logged `wait_ms: 0`), and **a microtask slot-handoff makes
-  starvation WORSE** (18.3 s `/healthz`; hand off with `setImmediate`). Writeup:
-  `.knowledge/server/synchronous-work-on-the-request-thread.md`. Residual: worst case is still ~1–2
-  render durations; the real cure (render off the main thread) is NOT done.
-- **2026-07-28 — `/og` worker isolation fixed the AVAILABILITY fault but failed its first production
-  quality check.** Commit `2561a72c` ended user-observed HTTP 502 sync failures (last at 05:30 UTC,
-  before deployment), so never move satori/resvg back onto the request thread. Open residual in
-  `.issues/og-render-off-main-thread.md`: 72 twenty-second worker timeouts plus a post-12:15 storm of
-  failed text-only fallback renders; degraded generic cards are P2 share quality, not P1 site outage.
-- **2026-07-28 — `audio_play_failed` now separates expected control flow from a real object fault.**
-  `AbortError` saying `play()` was interrupted by `pause()` is expected tap/close behavior and should
-  not warn. `NotSupportedError` + media error code 4 remains actionable; tonight's concrete object is
-  `norsii/audio/92d2d861-9ee1-4993-9969-c2823aa3dcfa/1763654313463.wav`. Inspect bytes/headers/codec
-  before proposing a player fix.
-- **2026-07-28 run 2 — the worker isolation DID fix availability; stop re-checking it.** Only ONE
-  `sync_failed` HTTP 502 (20:51 UTC, Greg/iquito) in the 15 h after the 05:47 deploy, vs 20–44/hour
-  before. Never move satori/resvg back onto the request thread.
-- **2026-07-28 run 2 — `audio_play_failed` "no supported source" is CLIENT-SIDE STALE PATHS, proven,
-  not lost media.** All failing URLs 404; server dict DBs hold 0 legacy paths (tutelo-saponi 0/1,540,
-  iipay-aa 0/4,663, norsii 0/216); the `media_objects` ledger has 0 `audio/dict_%` keys of 234,497 and
-  0 orphaned; canonical URLs 200. The 07-23 migration rewrote paths without marking rows changed, so
-  existing browsers never pull the correction — hence the client-side repair migration
-  (`20260728_repair_legacy_audio_paths.sql`, also uncommitted). Don't re-investigate R2 or the sweep
-  cron for this family. **2026-07-29: the migration SHIPPED** (`site/src/lib/db/schemas/dictionary-migrations/20260728_repair_legacy_audio_paths.sql`, committed) and `audio_play_failed` fell to 2 rows/day. Closed.
-- **2026-07-28 run 2 — `admin_analytics_computed` fires ONLY on the request path
-  (`routes/api/admin/analytics/+server.ts:44`), so moving compute to the warm path made dashboard
-  cost UNMEASURABLE** (caches rewritten 17:26 UTC today; newest event 07-25). Generalized lesson,
-  broadcast to house + tutor: when work moves off the request path, its cost telemetry must move with
-  it (add a `trigger` field). Don't read "no events" as "no computes".
-- **2026-07-29 — the 07-28 Resvg `unwrap exclusive reference` storm is CLOSED, verified in prod.**
-  8,184 `og_render_failed reason:"render"` rows, ALL before 01:30 UTC; `og_card_rendered` has run
-  continuously since 02:00. The serialization fix deployed (commits `1a169a89` / `a81734e2`). Don't
-  re-raise; don't re-derive.
-- **2026-07-29 — the `/og` disk store THRASHES: `MAX_ENTRIES = 1000` against an unbounded card space.**
-  Cards average 173 KB so the ENTRY cap binds first (store: 1,015 files / 176 MB of a 250 MB byte
-  budget), and the store is permanently full and evicting. Measured cost: **18,174 renders/day for
-  1,000 slots** (~18 re-renders per stored card per day), **36,346 shed requests = 55% of all `/og`
-  traffic answered with the generic card**, ~7.8 core-hours/day. Render cost itself is FINE (p50 452 ms,
-  p90 1.6 s) — the fault is volume, not speed. Fix is a budget (≈20,000 entries / 3.5–4 GB on a 75 GB-free
-  disk), not an architecture change. **house has the byte-identical cap** (`site/src/lib/server/satori/
-  card-store.ts:44`) and shipped its store on 07-29 — broadcast outbound.
+- **2026-07-28 — never move satori/resvg back onto the request thread.** Worker isolation is what
+  ended user-observed HTTP 502 sync failures; stop re-verifying that it worked.
+- **2026-07-28 — two standing lessons about synchronous work on a single thread**, both measured
+  here and both counter-intuitive: **a concurrency limit alone is nearly a no-op** (a burst arrives
+  as a backlog, not as concurrent handlers), and **a microtask slot-handoff makes starvation WORSE**
+  (hand off with `setImmediate`). Full writeup, with the numbers:
+  `.knowledge/server/synchronous-work-on-the-request-thread.md`.
+- **2026-07-28 — `audio_play_failed` separates expected control flow from a real object fault.**
+  An `AbortError` saying `play()` was interrupted by `pause()` is expected tap/close behavior and
+  should NOT warn. `NotSupportedError` + media error code 4 remains actionable — inspect the object's
+  bytes / headers / codec before proposing a player fix.
+- **2026-07-28 — when work moves OFF the request path, its cost telemetry must move with it
+  (generalized lesson, broadcast to house + tutor).** An event emitted only from the request handler
+  makes the warm path invisible; add a `trigger` field rather than a second event. **Never read
+  "no events" as "no computes".**
 - **2026-07-29 — a card store with NO hit-rate telemetry looks healthy while thrashing (standing
-  instrument rule, fleet-wide).** `routes/og/+server.ts:113` returns a stored card with zero telemetry,
-  so the endpoint's denominator is unknowable and the filed health-line panel's "success rate as % of
-  attempts" would have read 96% on a night when 55% of shares served the generic card. Backlog item
-  CORRECTED in place — don't build it against the render-only denominator.
-- **2026-07-29 — `dict_boot_recovery_exhausted` unbounded-loop is now PROVEN to distort the error
-  headline, on DESKTOP CHROME.** One anonymous Windows/Chrome-150 tab on `bahasa-lani` (public,
-  369 entries, healthy 1.35 MB server snapshot; every other session opened it fine) emitted 839
-  `leader_boot_failed` + 421 exhausted rows over 5 h — **74% of all client error rows**, pushing
-  `real_errors` 117 → 312. `dict-session.ts:91` logs on every callback with no cap. Third and worst
-  instance of the 07-27 "bound the give-up path" item. Also: nothing consumes `recovery_exhausted`, so
-  the visitor watched `DictBootProgress` spin for five hours — a user-facing failure surface is needed.
-  Don't re-triage the device; fix the bound.
-- **2026-07-29 — `og_render_failed reason:"font"` is effectively ONE dictionary.** 1,486 of 1,536 daily
-  font failures are "Torwali English Urdu Dictionary" (tail: Judeo-Kashani, Hazaragi, Kholosi — all
-  Arabic-script). Pre-existing opentype `lookupType: 5 - substFormat: 3`, unmasked (not caused) by the
-  07-26 WebP fix per the 07-27 ruling. Each costs a DOUBLED render (`static_fonts_only` retry) and still
-  ships tofu. Bundling a working Arabic-script face fixes appearance AND removes ~1,500 renders/day.
-- **2026-07-31 — SUPERSEDES the line above: those Arabic cards were serving the GENERIC card, not a
-  tofu one, and the `static_fonts_only` retry never worked.** satori caches its FontLoader in a
-  WeakMap keyed by the IDENTITY of `options.fonts`; `render-worker.js` reused one array, so the
-  retry re-rendered against the loader that had just been handed the font that threw — identical
-  failure, identical stack (measured). So the render failed outright and the route fell back to the
-  generic card; "ships tofu" understated it. Fixed with a fresh fonts array per satori call, plus
-  the satori 0.0.44 → 0.29 upgrade and a font map pinned to the installed library by a test
-  (`.issues/satori-upgrade-and-font-map-safety-net.md`). Arabic now maps to **Cairo** — NO Noto
-  Arabic face is parseable by satori's opentype fork, so "bundle a working Arabic face" was the
-  right instinct with the wrong family. Emoji headwords were tofu too and now render. Mechanism +
-  verification method in `.knowledge/server/satori-fonts.md`; **never close a font finding on the
-  absence of error rows — render it and look at it.**
-- **2026-07-29 — the `db_tier` mix is now 100% `opfs-worker`** (904 of 904 sessions, zero `idb-worker` /
-  `idb-main` / below-capability). The leader-elected OPFS worker is simply THE runtime; stop treating
-  fallback tiers as a live concern unless the distribution moves.
-- **2026-07-29 — LD's biggest log family is now LD's OWN share-card telemetry, not crawler noise**
-  (16,800 server warn rows/day = 48% of all rows). When house's ingest-suppression port comes up again,
-  LD's correct first cut is coalescing `og_render_shed` into a periodic counter — not crawler filtering.
-- **2026-07-29 — the server logs NO boot event.** No `server_started` anywhere in `hooks.server.ts` or
-  `$lib/server/`, so deploy↔error correlation is reverse-guessed from client `app_version` first-seen.
-  This also blocks the long-parked "deploy-settling error band" backlog item. Emit
-  `{ app_version, commit, container: blue|green, is_standby }` once at boot.
-- **2026-07-30 — the `/og` store is now disk → R2 → render, and there are THREE new things to read.**
-  Deployed 09:12 UTC. (1) `og_card_served { source: 'disk' | 'r2' | 'render' }` is the own-card
-  NUMERATOR the endpoint never had, but `degraded_response()` still emits no terminal
-  `source:'generic'` outcome — the all-request denominator remains incomplete. Never compute the
-  health line from render failures (one request can emit several through the fallback ladder).
-  (2) `og_remote_card_fault { operation, elapsed_ms }` means
-  the R2 tier faulted; it is ALWAYS fail-open (the card just renders), so treat a low rate as noise and
-  a sustained rate as "the tier is doing nothing". R2 itself answers in 36–231 ms from the box, so a
-  fault with `elapsed_ms` near the 2,000 ms deadline means the PROCESS was busy, not R2. (3) The disk
-  caps went 1,000 → 5,000 entries / 250 MB → 1 GB, so `og_render_shed` should fall a long way even
-  before the bucket exists. ⛔ **`livingdictionaries-og-cache` does not exist yet — Jacob must create
-  it** (the app's R2 token is object-scoped: 403 on CreateBucket, verified). Until then every R2 GET is
-  a clean 404 miss and `source:'r2'` will never appear.
-- **2026-07-30 — the render-pool timeout was 20 s measuring the WRONG THING; it is now 10 s measuring
-  the right one.** The pool used to post every job at once and start each job's clock at POST time, so
-  concurrent callers timed each other out — a queue length reported as a wedged renderer. It now
-  dispatches one job at a time with the clock starting at hand-over. **Watch `og_render_worker_timeout`
-  on the next review**: baseline was 2 events in a 45-minute window at 20 s (i.e. real wedges existed
-  before this change). If the daily count rises materially, raise LD's bound toward 15 s rather than
-  reverting the dispatch change — LD's worker fetches Google Fonts INSIDE the render (up to 2 × 3 s),
-  which house's does not.
-- **2026-07-30 — `og_render_failed` now carries `script` / `family` / `timed_out`.** The 07-29 "1,536
-  font failures = one Arabic dictionary" finding had to be reached by hand; it is now a group-by. Use it
-  to size `.issues/bundle-render-fonts.md` (filed in LD and house) before choosing which faces to bundle.
-- **2026-07-30 — the six-hour retention/analytics stall is CLOSED in current code.** The old
-  retention cron + in-process cache warm made Caddy lose `/healthz` for minutes at the exact
-  six-hour cadence and produced 101 signed-in sync 5xx rows in this review window. Commits
-  `3ee98475` (retention daily at 03:30 Pacific) + `de9652f0` (`get_log_analytics` only in a nice-19
-  child; dashboards read JSON) remove both causes. Current build `1785413707704` has no genuine
-  errors. Do not re-propose request-path cache mitigation; verify the daily child/checkpoint instead.
-- **2026-07-30 — a blank Synthetic uptime panel means MISATTRIBUTED probes, not no prober.**
-  All 3,903 Mustang `uptime_probe` rows since 07-16 are `source='client'` because Living production
-  lacks `UPTIME_PROBE_SECRET`; `build_uptime` correctly reads only trusted `source='server'`.
-  `/api/log` silently returns 200 for a supplied-but-invalid server secret, so Mustang never warns.
-  Open repair: `.issues/restore-synthetic-uptime-feed.md`.
-- **2026-07-30 run 2 — the `/og` bucket EXISTS and the share-card subsystem is FIXED; the fix was
-  bigger than a hit-rate improvement.** `livingdictionaries-og-cache` holds 152 cards / 35.1 MB
-  (first object 11:23:56 UTC), so the ⛔ "Jacob must create the bucket" blocker is CLOSED. Total
-  `/og` request volume fell ~100× at the 09:12 deploy (≈2,900/h → ≈25/h); shed went 22,058 →
-  **5**. Mechanism worth remembering fleet-wide: **a shedding card store FEEDS ITSELF** — a shed
-  response carries `max-age=60` while a real card is immutable-for-a-year, so while most responses
-  were sheds the edge cached nothing and the same scrapers returned every minute. `og_card_served
-  source:'r2'` reading zero is CORRECT, not a bug: the disk tier (1,307 files / 243.5 MB against
-  5,000 / 1 GB caps) never evicts at ~15 cards/h, so R2 is never consulted. Broadcast outbound to
-  house (byte-identical card-store constants).
-- **2026-07-30 run 2 — `og_render_worker_timeout` watch is CLOSED: keep the 10 s bound.** 142
-  (07-28, at 20 s) → 219 (07-29, at 20 s) → 106 (07-30), and only 12 in the 12 h after the deploy
-  (~1/h). The count did not rise when the bound halved; do NOT raise toward 15 s.
-- **2026-07-30 run 2 — the `script` / `family` enrichment on `og_render_failed` DOES NOT POPULATE**
-  (2 of 2,313 events). It only exists on the worker retry path and only after a web font resolved.
-  The working group-by is `context.dict`, and it confirms the 07-29 finding unchanged: **Torwali
-  English Urdu Dictionary = 838 of 880 font events (95%)**, tail Judeo-Kashani 20 / Kholosi 6. Size
-  `.issues/bundle-render-fonts.md` from `dict`, not `script`. Broadcast to house (same fields added).
-- **2026-07-30 run 2 — the post-fix AVAILABILITY BASELINE: every 5xx today was deploy-shaped.** Zero
-  Caddy `no upstreams available`; all 273 failed health checks and all 86 client-observed 502/520/
-  522/525 rows fall inside 06:29–12:33 UTC, which contains four deploys plus the LAST run of the old
-  six-hourly retention schedule (06:27 UTC). Nine clean hours after 12:33. Treat any 5xx OUTSIDE a
-  deploy window as a new incident.
-- **2026-07-30 run 2 — a stale worker-chunk 404 can lock a SIGNED-IN EDITOR out of a private
-  dictionary, and that is NOT the 07-09 zombie-tab family.** A contributor on private `algonquin`
-  spent 6 minutes in an unbounded retry loop (39 `leader_boot_failed` + 14
-  `dict_boot_recovery_exhausted`) on a deleted `/_app/immutable/workers/chunks/*.js`. Foreground tab,
-  real user, her own dictionary, a load that can never succeed. `schema_outdated_reload` is the
-  existing in-code precedent (it fired for the same person that morning and worked). The 07-09 "no
-  forced-reload" ruling stands for background zombie tabs only.
-- **2026-07-30 run 2 — the 64 `idb-worker` sessions are ALL Applebot.** Humans remain 100%
-  `opfs-worker`; the 07-29 "stop watching the tier mix" ruling stands. Bot-filter before reading the
-  `db_tier` distribution as a capability regression.
-- **2026-07-30 run 2 — the daily analytics checkpoint's ONLY silent failure mode is "it stopped
-  being written".** Assert every run: an `analytics_snapshot_computed` < 26 h old, `failed: []`, and
-  `reason` = the cron rather than `boot-catchup`. (Tonight's pair were boot-catchup at 11:31 fail /
-  11:45 success, 122.5 s, 1,193 MB peak — the first pinned 03:30 Pacific run is 07-31.)
+  instrument rule, fleet-wide).** If the endpoint returns a stored card without telemetry, its
+  denominator is unknowable and a "success rate as % of attempts" panel reads ~96% on a night when
+  most shares served the generic card. **Never compute a health line from failures alone** — one
+  request can emit several through a fallback ladder. Build the numerator AND the denominator.
+- **2026-07-29 — the `db_tier` mix is THE runtime, not a live concern.** Humans are 100%
+  `opfs-worker`; the `idb-worker` residue is Applebot. **Bot-filter before reading the `db_tier`
+  distribution as a capability regression**, and stop watching fallback tiers unless the human
+  distribution moves.
+- **2026-07-30 — the daily analytics checkpoint's ONLY silent failure mode is "it stopped being
+  written". Assert every run:** an `analytics_snapshot_computed` less than 26 h old, `failed: []`,
+  and `reason` = the cron rather than `boot-catchup`. Only re-report on failure.
+- **2026-07-30 — a shedding cache FEEDS ITSELF (mechanism worth remembering fleet-wide).** A shed
+  response carries a short `max-age` while a real one is immutable-for-a-year, so while most
+  responses are sheds the edge caches nothing and the same scrapers return every minute. Fixing the
+  store's capacity cut total `/og` request volume ~100×, not just the miss rate. Read a shed rate as
+  a *demand amplifier*, not only as a quality loss. Corollary: once the store is big enough,
+  `og_card_served source:'r2'` reading ZERO is CORRECT, not a bug — the disk tier never evicts at
+  that volume, so R2 is never consulted. Don't re-report it as a broken tier.
+- **2026-07-30 — treat any 5xx OUTSIDE a deploy window as a new incident.** The post-fix baseline is
+  that every 5xx is deploy-shaped; that is what makes an off-window one meaningful.
+- **2026-07-31 — THE RELOAD-ONCE RULE, approved portfolio-wide and SHIPPED in LD.** *When the missing
+  thing is a build artifact the server has DELETED, retrying is provably useless — reload ONCE onto
+  the current build instead of retrying N times.* `/_app/immutable/*` is content-hashed, so a 404
+  there is permanent for that bundle. Earned on 07-29: a signed-in contributor was locked out of the
+  private `algonquin` dictionary for SIX MINUTES while the app chased a deleted worker chunk 39
+  times. Triage: `stale_bundle_reload` / `_deferred` / `_gave_up` are the terminal rows — **`_gave_up`
+  is a real user stuck on a stale bundle, always escalate it**; a rising `stale_bundle_reload` count is
+  just deploys working as intended. Apply the same shape to any NEW retry loop over a build artifact.
+  The classifier correctly DECLINES storage faults it cannot fix — that boundary is deliberate.
+- **2026-07-31 — A CLIENT-SIDE SELF-HEAL CAN NEVER REACH THE TABS THAT PREDATE IT (standing law,
+  fleet-wide).** Every recovery mechanism ships INSIDE the bundle, so a tab open since before it
+  shipped is running a version that contains none of it and will never heal — healing requires the
+  one action it cannot take alone. **Corollary:** the residual population is never zero, IS
+  enumerable, and belongs in the nightly digest as a human-nudge item (per the 07-14 no-wedged-panel
+  ruling), never a dashboard. Regenerate it SERVER-side with: sessions having ≥10 `sync_failed` /
+  `leader_boot_failed` / `dict_boot_recovery_exhausted` rows whose `app_version` predates the
+  relevant fix. Don't propose a client-side fix for this population — nudge them, or add a
+  server-side lever an OLD client already obeys.
+- **2026-07-31 — `malformed_query_param` on key `q` is OUR bug, not user input** (the entries view
+  registers `q` as a JSON object, so the guessable `?q=birthday` is silently replaced with `{}`).
+  Don't re-triage the warning; the diagnosis and the `$effect.root` leak that duplicates it are owned
+  by `.issues/entries-q-param-and-leaked-query-param-state.md`.
+- **2026-07-31 — volume threshold: treat a return above ~50,000 log rows/day as a NEW event to
+  investigate.** (Supersedes the 07-13 "100k+" threshold — the instrument now measures people, not
+  robots, so the floor moved by an order of magnitude.)
+- **2026-07-31 — with a once-daily checkpoint, the dashboards' newest day is ALWAYS frozen at
+  ~03:30 Pacific.** Never read today's bar on `/admin/analytics` as a live number, and label it
+  before anything else on that page.
+- **2026-08-01 — every "Internal Error" LD serves is a STALE-BUNDLE NAVIGATION, not an SSR crash**
+  (`origin:"client"` with a `Failed to fetch dynamically imported module` cause; zero server-origin
+  rows). LD does not have an SSR-crash problem; it has a stale-tab-navigation problem. Don't
+  re-triage individual `Internal Error` rows. The only open piece is COPY on `+error.svelte` (tell
+  the tab to reload) — deliberately NOT a second auto-reload mechanism.
+- **2026-08-01 — a checkpoint file whose payload says `reason:"verify-deploy"` is a HUMAN running
+  the child by hand** (`docker exec -e ANALYTICS_SNAPSHOT_CHILD=1 …`), not a code path and not a
+  silent recompute. Read `generated_at` + `reason` INSIDE the JSON before treating a fresh mtime as
+  a telemetry gap.
+- **2026-08-02 — MOVING A JOB OFF THE REQUEST THREAD IS NOT THE SAME AS STOPPING IT FROM BLOCKING THE
+  REQUEST THREAD (standing law, fleet-wide).** Forking the work removes the in-process stall but the
+  residual is CROSS-PROCESS: a child that writes a whole day in ONE transaction still blocks the
+  serving process, which waits SYNCHRONOUSLY on the same database file. **The fix is chunked
+  transactions in the child, NOT a smaller busy timeout** — unlike a droppable telemetry database,
+  the shared database carries real request-path writes, so a short timeout converts waits into
+  user-visible errors. Use `ionice -c 3` as well: `nice` is CPU-only and the longest steps are pure
+  disk. house + tutor run the ported cron — broadcast when fixed.
+  (Current status and measurements: `.issues/retention-sweep-blocks-request-thread.md`.)
+- **2026-08-02 — an event-loop stall meter needs BOTH statistics: p99 AND max.** `loop_lag_p99_ms`
+  never exceeded 13 ms on a day when `loop_lag_max_ms` hit 8,321 ms — a p99-only panel reads
+  "perfectly healthy" during the exact minute a user is dropped. Never ship the percentile alone.
+- **2026-08-02 — iOS/iPadOS OPFS boot failure is LD's top USER-FACING fault.** Two distinct gaps,
+  both owned by `.issues/dict-boot-persistent-opfs-recovery.md`: nothing consumes
+  `dict_boot_recovery_exhausted` (so the boot progress bar spins forever), and the give-up ladder is
+  bounded WITHIN a worker but a re-election restarts it at zero. The reload-once rule correctly
+  declines these — they are storage faults, not deleted build artifacts — so a human-readable failure
+  state is the ONLY remaining lever. Don't re-triage individual devices; fix the two gaps.
+- **2026-08-02 — a guard-log without its de-dupe is half a fix.** Shipping the telemetry that PROVES
+  a caught `<svelte:boundary>` rendered nothing, without the one-line fix that stops it, means the
+  next person still gets a blank results area — you just get to watch. Owned by
+  `.issues/entries-list-duplicate-key-blank-results.md`; **08-03: the guard fired 3 more times and
+  the duplicate is one level DOWN, in a nested keyed `each` inside `ListEntry.svelte` (prime suspect
+  `{#each first_sense.semantic_domains as domain (domain)}`, keyed by the domain STRING). Don't
+  re-verify the top-level de-dupe.**
+- **2026-08-03 — `crossorigin="anonymous"` is a PER-ORIGIN decision, never a blanket one.** The
+  attribute only de-opaques `Script error.` on an origin that actually returns a permissive
+  `Access-Control-Allow-Origin`; on an origin that does not, it turns the load into a CORS request
+  the origin refuses and **the script never loads at all**. Live proof: it was on
+  `accounts.google.com/gsi/client`, which returns NO ACAO — so the Sign In dialog rendered an orphan
+  "OR" divider with no Google button, and every Google user lost that path. REMOVED 2026-08-03
+  (`$lib/auth/load-script-once.ts`, now `{ cors }` opt-in, default off). The standing "de-opaque the
+  external scripts" item survives but is now **one origin at a time, each verified against
+  that origin's real response headers first** (`curl -sI -H 'Origin: https://livingdictionaries.app'
+  <url>`) — "add it everywhere" is the wrong reading and breaks more than it fixes.
+- **2026-08-03 — `docker compose build` FREEZES THE SERVING CONTAINER**, up to 23.7 s measured, with
+  the stall preceding `server_started` — it is the OLD container being starved by the build.
+  `deploy.sh` runs a bare `docker compose build` with no CPU limit and no compose CPU reservation.
+  **`nice` on the command is a no-op — the Docker daemon does the work, not the shell.** Levers:
+  compose CPU weight for the serving containers, or a CPU-constrained buildx builder. Offer to
+  house + tutor as a HYPOTHESIS to check on their own boxes (core count and build time differ), not
+  as a port. *(No `.issues/` file owns this yet — it stays here until one does.)*
+- **2026-08-03 — a boot-time job can hide inside a periodic one.** The "mystery freeze" was the
+  snapshot builder's `reconcile_once_per_process()`: 18 of 21 sweeps block 19–130 ms, and the three
+  that block 7–12 s are each the FIRST sweep after a container boot, 100% `step_ms.reconcile`. Fix =
+  move it to the niced child or yield between the ~1,284 dictionaries. Don't re-derive.
+  *(No `.issues/` file owns this yet — it stays here until one does.)*
+- **2026-08-03 — the `20260728_repair_legacy_audio_paths.sql` client migration CANNOT MATCH the
+  paths that are actually failing**, so the 07-29 "closed" verdict on `audio_play_failed` was wrong.
+  Its filter `WHERE storage_path LIKE '%/audio/%/%'` requires a second slash after `/audio/`; the
+  failing shape is `{dict}/audio/{entry_id}_{timestamp}.ext` (no second slash) — verified 0 vs 1 in
+  SQLite. Its extension CASE also lacks `.mpeg` (would rewrite to `.wav`). Server DBs are clean and
+  canonical URLs 200; the population is RETURNING anonymous visitors holding a pre-07-23
+  browser-local copy — **the 07-23 migration rewrote the paths without marking the rows changed, so
+  an existing browser never pulls the correction**, which is why only a client-side repair can reach
+  them. *(No `.issues/` file owns this yet — it stays here until one does.)*
+- **2026-08-03 — when a review changes how a THIRD-PARTY INTEGRATION loads, the acceptance test is
+  that integration's own success metric (are people still signing in with Google?), never the
+  absence of new error rows — a broken integration produces FEWER log rows, not more (standing law,
+  fleet-wide).** Earned the hard way: Google sign-in was dead for THIRTY DAYS and 83% of all logins
+  went with it, while this lane re-raised the same `crossorigin` item on EIGHT consecutive nights,
+  each time verifying whether the change had been APPLIED and never whether the feature still
+  WORKED. Evidence and day-by-day counts: `.cron/log-reviews/2026-08-03.md`. The law is about how you
+  VERIFY a change, and it stands. **It is NOT a licence to build login alarms: Jacob removed the
+  zero-logins alarm on 2026-08-05 and does not want to be notified about sign-in — do not re-file or
+  rebuild it.** Its one and only firing was a substitution artifact (email read zero on 08-03 only
+  because the restored Google path absorbed every login; it was back the next day). The
+  `/admin/health` **Sign-in** panel stays as a plain logins-per-method chart you can go look at.
+- **2026-08-04 (Jacob, morning debrief):** Audio derivatives are converted **on upload** — that is the
+  real path. The derivative sweep is a **backfill only**: once daily, outside the web process. Do not
+  propose returning it to a short interval or running it in the request-serving process.
+- **2026-08-04 (Jacob, morning debrief):** iPhone **HEIC uploads are supported via a browser wasm
+  decoder**, and the decoder must be **dynamic-imported only after a chosen file sniffs as HEIC** —
+  a person uploading a JPEG must not download any of its ~1.5-2.5 MB. Server-side HEVC decoding was
+  considered and declined.
+- **2026-08-04 (Jacob, morning debrief) — "instrument first, THEN fix" is not a law; it applies only
+  when the cause is unknown.** The 07-26 enrich-first rule above is scoped to *an error row that
+  cannot name what failed*. When the mechanism is already established by READING THE CODE, ship the
+  fix and the instrument in the SAME pass — sequencing them costs a day of degraded service to
+  measure something already known. (Earned on the audio-derivative sweep: the report recommended
+  instrument-first for a stall whose two causes — an unindexable computed-key join and 160 sync
+  DB-file opens per run — were both visible in the source.)
+- **2026-08-04 — a memo keyed by the FULL INPUT is a cache that can never hit (standing engineering
+  rule, broadcast fleet-wide).** If the key contains something unique per request, the structure is a
+  memory leak with a hit rate of zero, and it fails *loudly* only when the miss is expensive. Live
+  proof: the share-card font-subset cache keys on `script|entire headword`, so every word missed and
+  paid up to two 3 s Google Fonts round-trips against a 10 s render deadline — 13% of fresh cards
+  timed out and served the generic card, concentrated on the dictionaries with rare letters. Key by
+  the CLASS that recurs (here: the set of characters needing a fallback), never by the instance.
+- **2026-08-04 — the residual old-tab population needs a SERVER-side lever, and there is one: stop
+  deleting the previous build's `_app/immutable/` assets at deploy.** Follows the 07-31 law that a
+  client-side self-heal never reaches tabs that predate it (proved again tonight: an Android tab on a
+  07-24 bundle burned 92 minutes on a deleted worker chunk while the 07-31 reload-once fix sat in a
+  bundle it will never load). Asset names are content-hashed, so merging the last build or two forward
+  cannot collide; it costs disk and no client change, and it does NOT reopen the 07-09 no-forced-reload
+  ruling. Prefer this over any new client mechanism for this class.
+  **SHIPPED 2026-08-05** (`deploy.sh` → `/opt/hosting/immutable-archive`, Caddy archive-first). The
+  standing part is the PREFERENCE: for the tabs a client-side self-heal can never reach, reach for a
+  server-side lever an old client already obeys, not a new client mechanism.
+- **2026-08-05 — A BUILD VERSION MUST BE UNIQUE PER BUILD, NOT PER COMMIT (standing engineering rule,
+  broadcast fleet-wide).** Constancy *within* a build is only half the requirement; the other half is
+  distinctness *between* builds, and nothing enforced it. Any image build that bakes something
+  FETCHED AT BUILD TIME into the bundle (translations, homepage stats, remote config) makes two builds
+  of one commit produce different content-hashed files under one version name — so the framework's
+  update poll can never fire, the dashboard's current-vs-stale error split files stale errors as
+  CURRENT, and a deploy leaves no marker on the timeline. Live proof: LD rebuilt `b4b47e55` on
+  2026-08-05 and every asset hash changed while `app_version` did not. Fix shape: `${GIT_SHA}-${BUILD_ID}`
+  with the build id exported once by the deploy script. Never read "same `app_version`" as "same bundle".
+- **2026-08-05 — NEVER CLASSIFY AN OPAQUE LOAD FAILURE AS A CONTENT/BUILD FAULT WITHOUT RULING OUT THE
+  NETWORK (standing triage rule).** A dropped connection and a deleted file produce the SAME bare
+  browser event, and code that resolves the ambiguity "by construction" always resolves it toward the
+  cause that is common in Boston — so the misdiagnosis lands on the far-from-origin user every time.
+  Measured the same night in two subsystems: a Vietnam tab told "app update needed" for a worker chunk
+  that exists on both containers, and an India tab told a valid, reachable-from-here MP3 was an
+  unsupported format. The cure is one cheap probe on the failure path (URL + `navigator.onLine`, or a
+  `HEAD`), and its absence is a coverage gap, not a style preference.
+- **2026-08-05 — a probe that shares its failure path with the users cannot attribute the fault.**
+  Narrower companion to the 07-27 rule about probe intervals: LD's uptime probe goes through Cloudflare,
+  so when the edge↔origin link broke (42 user 520/522/525s while the box sat at 2–4% CPU) the probe
+  failed too and no instrument could say whose fault it was. Any probe meant to answer "is it us?"
+  needs a leg that bypasses the layer it is trying to exonerate.

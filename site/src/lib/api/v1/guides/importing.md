@@ -189,6 +189,31 @@ collisions that didn't exist in the source (stripping a POS tail can turn two
 distinct rows into the same `(lexeme, homograph)` pair). Finalize homograph
 numbering as the LAST step, after all headword cleanup, and keep the ids stable.
 
+**Audit the ACTUAL final entry payload, after every expansion step.** A primary-row
+audit does not cover forms that a later transform promotes into entries. Run the
+maintained fail-loud gate from the repository root before the preview and again
+before the first write:
+
+```bash
+python3 scripts/import-audit/audit.py ~/import-work/<dict>/final-entries.jsonl
+```
+
+It groups the primary (`default`) spelling by trimmed NFC + casefold, so
+capitalization or composed/decomposed Unicode cannot hide a collision. Pronunciation
+is deliberately excluded — repeated pronunciations are homophones, not duplicate
+entries. Opt additional identity-bearing lexical orthographies in with repeated
+`--orthography` flags. Every repeated natural key must either have unique, non-empty
+`homograph` values or an exact, reasoned waiver chosen with the manager (for example,
+a recording-per-entry dictionary). A `merge` decision is not a waiver: rebuild until
+the duplicate is absent. See `scripts/import-audit/README.md` for the decision-file
+format.
+
+If the pipeline resolves relationships by spelling, emit a relationship-lookup
+ledger too. A lookup with multiple candidates must record the exact selected entry
+id and why its meaning matches; never let a map's first insertion silently choose a
+homograph. Pass that ledger with `--relationship-lookups` (and any pre-existing
+target rows with `--relationship-candidates`).
+
 ### 1.4 Pore over the data — by eye, in large amounts
 
 This is the longest step and the reason phase 1 exists. Do not sample five records
@@ -501,6 +526,9 @@ manager's curation is the record; you may add to it, never overwrite it.**
    review category — so verification is a comparison, not a vibe. Note that an
    entry sent without `senses` is created with one default empty sense, so expected
    DB senses = data-bearing senses + entries with no senses.
+5. Run `scripts/import-audit/audit.py` on the byte-identical final entry payload
+   the runner will send. A nonzero exit blocks every API write; do not replace it
+   with a pre-expansion source-row count or a hand-written duplicate query.
 
 ### 2.2 Writing the data
 
@@ -645,6 +673,10 @@ prints "n. suffix") instead of flagging the disagreement.
 
 - Compare against the numbers you wrote down in §2.1 — entries, senses, and the
   per-category review counts.
+- Re-run the final-payload auditor and include its PASS summary in the technical
+  record. Then group the live rows by the same NFC/casefold natural key and confirm
+  the only remaining collisions are the numbered/explicitly-waived groups it
+  approved.
 - **Live counts / full sweeps**: paginate `GET …/entries` (`updated_at` ASC).
   `limit` is silently capped at 500 — advance `offset` by the number of entries
   RETURNED while `has_more` is true, never by your requested limit (a
@@ -715,7 +747,7 @@ A published work is more than its headwords, and most of what surrounds them has
 |---|---|
 | Preface, acknowledgements, contributor/elder biographies, bibliography | `about` — `PATCH …/dictionaries/{id}` with markdown |
 | Grammar sketch / "notes on pronunciation and grammar" | the grammar section tree (`…/grammar/sections`), one section per heading, nested; see the `corpus` guide |
-| Abbreviation/gloss legend | `…/grammar/glossing-abbreviations`, so every code in a gloss line becomes tappable |
+| Abbreviation/gloss legend | `…/grammar/glossing-abbreviations` — but ONLY codes the standard Leipzig catalog can't cover; standard codes (`1SG`, `PFV`…) already expand localized in every dictionary. Wording must stand alone: never "the book's X" (see the `corpus` guide) |
 | A photograph of the community or its place | `POST …/cover-image` (multipart `file` or `{ url }`) |
 | How the work asks to be cited | `citation` |
 

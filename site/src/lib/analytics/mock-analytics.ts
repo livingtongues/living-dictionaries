@@ -125,6 +125,29 @@ function build_perf(days: number): LogAnalytics['performance'] {
   }
 }
 
+/** Sign-in: logins per method per day, both methods live. */
+function build_sign_in(): LogAnalytics['sign_in'] {
+  const end = new Date('2026-06-23T00:00:00.000Z')
+  const daily: LogAnalytics['sign_in']['daily'] = []
+  for (let offset = 13; offset >= 1; offset--) {
+    const day = new Date(end.getTime() - offset * 86_400_000).toISOString().slice(0, 10)
+    const google = 8 + (offset % 5)
+    const email = 4 + (offset % 4)
+    daily.push({ day, total: google + email, new_accounts: offset % 3 === 0 ? 2 : 0, methods: { google, email } })
+  }
+  const judged = daily[daily.length - 1]
+  return {
+    day: judged.day,
+    logins: judged.total,
+    new_accounts: judged.new_accounts,
+    methods: [
+      { method: 'google', logins: judged.methods.google },
+      { method: 'email', logins: judged.methods.email },
+    ],
+    daily,
+  }
+}
+
 function build_uptime(): LogAnalytics['uptime'] {
   const end = new Date('2026-06-23T00:00:00.000Z')
   const daily: LogAnalytics['uptime']['daily'] = []
@@ -196,6 +219,8 @@ function build_host(): NonNullable<LogAnalytics['host']> {
     disk_used_gb: 39.6,
     disk_total_gb: 96.2,
     data_dir_mb: 12_680,
+    loop_lag_max_ms: 14,
+    loop_lag_p99_ms: 11,
   }
   return { now, samples: 4032, latest: { ...now, at: '2026-06-23T13:00:00.000Z' }, hourly }
 }
@@ -388,11 +413,17 @@ export const mock_analytics: LogAnalytics = {
     stuck: [
       { user_id: 'greg', dict_id: 'apatani', app_version: '1783096241136', count: 2405, first_seen: new Date(Date.now() - 36 * 3600_000).toISOString(), last_seen: new Date(Date.now() - 4 * 60_000).toISOString() },
       { user_id: null, dict_id: 'river', app_version: '1783053248757', count: 1746, first_seen: new Date(Date.now() - 30 * 3600_000).toISOString(), last_seen: new Date(Date.now() - 9 * 60_000).toISOString() },
-      { user_id: 'marlene', dict_id: 'zapoteco-de-analco', app_version: '1783172350007', count: 1158, first_seen: new Date(Date.now() - 20 * 3600_000).toISOString(), last_seen: new Date(Date.now() - 15 * 60_000).toISOString() },
+      { user_id: 'marlene', dict_id: 'zapoteco-de-analco', app_version: '776f945a83c1d0e4f27a5b6c8d9e0f1a2b3c4d5e', count: 1158, first_seen: new Date(Date.now() - 20 * 3600_000).toISOString(), last_seen: new Date(Date.now() - 15 * 60_000).toISOString() },
     ],
   },
   // The 07-08 shape: most sessions on the fresh build, a couple riding yesterday's,
   // and a few tabs stranded on a 5-day-old build (incl. named users to nudge).
+  //
+  // Build NAMES span all three live shapes on purpose, so a story exercises every
+  // label `short_version` has to render: the current build is compound
+  // (`<sha>-<build id>`, since 2026-08-06), one is a bare commit sha (2026-08-04),
+  // and the two oldest keep the clock names every build carried before that — they
+  // stay in the 30-day window for a month after the scheme changed.
   build_adoption: {
     total: 212,
     current: 187,
@@ -403,8 +434,8 @@ export const mock_analytics: LogAnalytics = {
     builds: [
       { app_version: '1783096241136', age_days: 5.1, sessions: 3, users: ['greg', 'marlene'], last_seen: new Date(Date.now() - 4 * 60_000).toISOString(), is_current: false },
       { app_version: '1783053248757', age_days: 5.0, sessions: 1, users: [], last_seen: new Date(Date.now() - 42 * 60_000).toISOString(), is_current: false },
-      { app_version: '1783431428497', age_days: 1.2, sessions: 19, users: ['diego'], last_seen: new Date(Date.now() - 11 * 60_000).toISOString(), is_current: false },
-      { app_version: '1783526000580', age_days: 0.2, sessions: 187, users: ['jacob', 'anna'], last_seen: new Date(Date.now() - 60_000).toISOString(), is_current: true },
+      { app_version: 'b4b47e55ac6c866e5c9bcb91d7ea18234d5642e2', age_days: 1.2, sessions: 19, users: ['diego'], last_seen: new Date(Date.now() - 11 * 60_000).toISOString(), is_current: false },
+      { app_version: 'ec9d8d9c1f0a3b6d9e2c4a70f1b83d5c6e7a9012-20260806152200', age_days: 0.2, sessions: 187, users: ['jacob', 'anna'], last_seen: new Date(Date.now() - 60_000).toISOString(), is_current: true },
     ],
   },
   // logs.db carrying the raw-log bulk (healthy WAL); shared.db small; the ~1,300
@@ -520,6 +551,7 @@ export const mock_analytics: LogAnalytics = {
     ],
   },
   uptime: build_uptime(),
+  sign_in: build_sign_in(),
   host: build_host(),
 }
 
@@ -588,5 +620,6 @@ export const empty_analytics: LogAnalytics = {
     daily: [],
     user_observed: { failures: 0, affected_users: 0, affected_sessions: 0, worst_hour: null, worst_hour_failures: 0, daily: [] },
   },
+  sign_in: { day: '2026-06-22', logins: 0, new_accounts: 0, methods: [], daily: [] },
   host: { now: null, samples: 0, latest: null, hourly: [] },
 }

@@ -50,7 +50,7 @@
     {:else}
       <HeadlessButton
         class="btn-ghost btn-sm badge-item"
-        style="color: var(--warning)"
+        style="color: var(--warning); gap: 0.3rem"
         onclick={addItem}>
         <IconFaSolidPlus />
         {addMessage}

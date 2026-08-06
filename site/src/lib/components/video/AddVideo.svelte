@@ -26,10 +26,13 @@
     /** A file dropped onto a row before the modal opened — staged for upload once attribution is chosen. */
     initial_file?: File
     context?: MediaUploadContext
+    /** Attach to this sense (defaults to the entry's first sense). */
+    sense_id?: string
   }
 
-  const { on_close, entry, initial_file = undefined, context = 'entry' }: Props = $props()
+  const { on_close, entry, initial_file = undefined, context = 'entry', sense_id = undefined }: Props = $props()
   const staged_file: File | undefined = initial_file
+  const target_sense_id = $derived(sense_id ?? entry.senses[0].id)
 
   let hosted_video: HostedVideo = $state()
   let hosted_metadata: HostedMetadata = $state()
@@ -37,13 +40,13 @@
   const headword = $derived(get_headword({ lexeme: entry.main.lexeme, orthographies: page.data.dictionary?.orthographies }))
 
   function start_upload({ file, speaker_id, source_slug }: { file: File | Blob, speaker_id?: string, source_slug?: string }): MediaUploadHandle {
-    const handle = add_video({ writes, dictionary_id: page.data.dictionary.id, file, sense_id: entry.senses[0].id, speaker_id, source: source_slug, context })
+    const handle = add_video({ writes, dictionary_id: page.data.dictionary.id, file, sense_id: target_sense_id, speaker_id, source: source_slug, context })
     handle.done.then(() => upload_triggered = true).catch(() => undefined) // error renders in the progress pill
     return handle
   }
 
   async function save_hosted({ speaker_id, source_slug }: { speaker_id?: string, source_slug?: string }) {
-    const data = await writes.insert_video({ sense_id: entry.senses[0].id, video: { hosted_elsewhere: hosted_video, ...(hosted_metadata ? { hosted_metadata } : {}), ...(source_slug ? { source: source_slug } : {}) } })
+    const data = await writes.insert_video({ sense_id: target_sense_id, video: { hosted_elsewhere: hosted_video, ...(hosted_metadata ? { hosted_metadata } : {}), ...(source_slug ? { source: source_slug } : {}) } })
     if (speaker_id)
       await writes.assign_speaker({ speaker_id, media: 'video', media_id: data.id })
     track_media_uploaded({ dictionary_id: page.data.dictionary.id, media: 'video', context })

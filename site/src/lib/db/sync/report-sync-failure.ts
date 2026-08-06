@@ -8,6 +8,7 @@
  * engine has its own direct shipper: `../dict-client/report-dict-sync-failure.ts`.
  */
 import type { SyncLogEntry, SyncResult } from './types'
+import type { RejectionGroup } from './rejected-rows'
 import { log_event } from '$lib/debug/remote-log'
 import { classify_sync_failure, should_ship_failure, sync_failure_level } from './sync-failure-classify'
 
@@ -65,6 +66,32 @@ export function report_sync_halted({ message, consecutive }: { message: string, 
       message: 'sync_halted_repeated_failure',
       context: { engine: 'admin', error: message, consecutive },
     })
+  } catch {
+    // Never let telemetry break the sync path.
+  }
+}
+
+/**
+ * Ship the refused-write contract's client half: the server accepted the round
+ * trip but REFUSED some of the pushed rows. Error level and one row per (table,
+ * reason) per round trip — never one per row — so a 400-row refusal is one
+ * countable event, not 400. Before this the only refusal on the wire
+ * (`skipped_orphans`) reached a `log_tail` string nothing queries.
+ */
+export function report_sync_push_rejected({ engine, sector, groups }: {
+  engine: string
+  /** LD runs ONE sector per engine — `shared` for admin.db, the dict id for a dictionary. */
+  sector: string
+  groups: RejectionGroup[]
+}): void {
+  try {
+    for (const group of groups) {
+      log_event({
+        level: 'error',
+        message: 'sync_push_rejected',
+        context: { engine, sector, reason: group.reason, table_name: group.table_name, count: group.count, ids: group.ids },
+      })
+    }
   } catch {
     // Never let telemetry break the sync path.
   }

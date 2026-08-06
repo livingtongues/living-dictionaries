@@ -37,3 +37,38 @@ export const NotesMinimal: Story<typeof Component> = {
 export const Empty: Story<typeof Component> = {
   props: { value: '', placeholder: 'Write about this dictionary…' },
 }
+
+export const WithSimpleTable: Story<typeof Component> = {
+  props: {
+    value: `## Pronoun prefixes
+
+| Person | Singular | Plural |
+| --- | --- | --- |
+| First | ni- | ti- |
+| Second | ti- | an- |`,
+  },
+  interactions: async (page) => {
+    await page.click('td')
+  },
+}
+
+export const WithParadigmTable: Story<typeof Component> = {
+  props: {
+    value: `## Subject prefixes
+
+<table><tbody><tr><th colspan="2"><p>Independent</p></th><th><p>Dependent</p></th></tr><tr><th><p>Person</p></th><th><p>Singular</p></th><th><p>Plural</p></th></tr><tr><th><p>First</p></th><td><p>ni-</p></td><td><p>ti-</p></td></tr><tr><th><p>Second</p></th><td><p>ti-</p></td><td><p>an-</p></td></tr></tbody></table>`,
+  },
+  interactions: async (page) => {
+    await page.click('td')
+  },
+}
+
+export const WithMinimalLegacyTable: Story<typeof Component> = {
+  props: {
+    preset: 'minimal',
+    value: '<table><tbody><tr><td><p>Legacy note</p></td><td><p>Editable value</p></td></tr></tbody></table>',
+  },
+  interactions: async (page) => {
+    await page.click('td')
+  },
+}

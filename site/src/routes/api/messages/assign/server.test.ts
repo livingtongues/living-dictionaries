@@ -7,6 +7,7 @@ import { POST } from './+server'
 process.env.NTFY_DISABLED = '1'
 
 let db: ReturnType<typeof open_test_shared_db>
+const { notify_admin } = vi.hoisted(() => ({ notify_admin: vi.fn() }))
 
 vi.mock('$lib/db/server/shared-db', async () => {
   const actual = await vi.importActual<typeof import('$lib/db/server/shared-db')>('$lib/db/server/shared-db')
@@ -16,8 +17,12 @@ vi.mock('$lib/db/server/shared-db', async () => {
   }
 })
 
+vi.mock('$lib/notifications/notify-admins', () => ({ notify_admin }))
+
 const ADMIN_EMAIL = 'jwrunner7@gmail.com'
 const ADMIN_USER_ID = 'admin-user-id'
+const DIEGO_EMAIL = 'diego@livingtongues.org'
+const DIEGO_USER_ID = 'diego-user-id'
 const NON_ADMIN_USER_ID = 'regular-user-id'
 
 beforeAll(() => {
@@ -25,12 +30,15 @@ beforeAll(() => {
 })
 
 beforeEach(() => {
+  notify_admin.mockClear()
   db = open_test_shared_db()
   const now = new Date().toISOString()
   db.prepare(`INSERT INTO users (id, email, name, providers, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
     .run(ADMIN_USER_ID, ADMIN_EMAIL, 'Jacob', '[]', now, now)
   db.prepare(`INSERT INTO users (id, email, name, providers, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
     .run(NON_ADMIN_USER_ID, 'alice@example.com', 'Alice', '[]', now, now)
+  db.prepare(`INSERT INTO users (id, email, name, providers, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
+    .run(DIEGO_USER_ID, DIEGO_EMAIL, 'Diego', '[]', now, now)
   db.prepare(`INSERT INTO message_threads (id, source, from_email, last_message_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
     .run('thread-1', 'contact_form', 'customer@example.com', now, now, now)
 })
@@ -104,5 +112,44 @@ describe(POST, () => {
 
     const row = db.prepare('SELECT assigned_to_user_id FROM message_threads WHERE id = ?').get('thread-1') as { assigned_to_user_id: string | null }
     expect(row.assigned_to_user_id).toBeNull()
+  })
+
+  test('assigns an import to Diego and links the notification to its conversation', async () => {
+    const now = new Date().toISOString()
+    db.prepare(`
+      INSERT INTO message_threads (
+        id, subject, source, thread_kind, from_email, from_name, url,
+        last_message_at, created_at, updated_at
+      ) VALUES (?, ?, 'contact_form', 'import', ?, ?, ?, ?, ?, ?)
+    `).run(
+      'import-thread',
+      'Import request: Demo',
+      'manager@example.com',
+      'Manager',
+      'http://localhost/demo/import',
+      now,
+      now,
+      now,
+    )
+
+    const token = await admin_token()
+    await call({ token, body: { thread_id: 'import-thread', assignee_user_id: DIEGO_USER_ID } })
+
+    const row = db.prepare('SELECT assigned_to_user_id FROM message_threads WHERE id = ?').get('import-thread') as { assigned_to_user_id: string | null }
+    expect(row.assigned_to_user_id).toBe(DIEGO_USER_ID)
+    expect(db.prepare('SELECT side FROM thread_participants WHERE thread_id = ? AND user_id = ?').get('import-thread', DIEGO_USER_ID)).toEqual({ side: 'team' })
+    expect(notify_admin).toHaveBeenCalledWith(expect.objectContaining({
+      email: DIEGO_EMAIL,
+      link: 'http://localhost/demo/import/import-thread',
+    }))
+  })
+
+  test('lets Diego reassign an import to another admin', async () => {
+    const token = await sign_jwt({ sub: DIEGO_USER_ID, email: DIEGO_EMAIL, name: 'Diego' })
+    const response = await call({ token, body: { thread_id: 'thread-1', assignee_user_id: ADMIN_USER_ID } })
+
+    expect(response.status).toBe(200)
+    const row = db.prepare('SELECT assigned_to_user_id FROM message_threads WHERE id = ?').get('thread-1') as { assigned_to_user_id: string | null }
+    expect(row.assigned_to_user_id).toBe(ADMIN_USER_ID)
   })
 })

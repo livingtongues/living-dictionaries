@@ -1,5 +1,6 @@
 import type { SqliteConnection } from '$lib/db/client/connection'
 import type { SyncableTableName, SyncLogEntry, SyncRequest, SyncResponse, SyncResult, SyncRow } from './types'
+import type { PushRejectionSummary } from './rejected-rows'
 import { api_admin_sync } from '$api/admin-sync/_call.js'
 import { ResponseCodes } from '$lib/constants'
 import { latest_client_migration_name } from '$lib/db/client/db'
@@ -7,7 +8,8 @@ import { JSON_COLUMNS, parse_row, stringify_row } from '$lib/db/schemas/json-col
 import { online } from 'svelte/reactivity/window'
 import { ClientBehindError, ServerBehindError } from './errors'
 import { SyncHistory } from './history.svelte.js'
-import { report_sync_failure, report_sync_halted, report_sync_self_healed } from './report-sync-failure'
+import { group_rejected_rows, rejection_signature, resolve_rejected_rows, should_report_rejections, summarize_rejections } from './rejected-rows'
+import { report_sync_failure, report_sync_halted, report_sync_push_rejected, report_sync_self_healed } from './report-sync-failure'
 import { classify_sync_failure, RepeatFailureTracker } from './sync-failure-classify'
 import { is_readonly_table, SYNCABLE_TABLE_NAMES } from './types'
 
@@ -73,20 +75,30 @@ export class Sync {
   #on_tables_changed?: (tables: Set<NotifiableTable>) => void
   #on_client_behind?: () => void
   #on_repeated_failure?: () => void
+  #on_push_rejected?: (info: PushRejectionSummary) => void
+  /** Throttle state for the refused-write report. */
+  #last_rejection_reported: { key: string, at: number } | null = null
 
-  constructor({ connection, post_fn, on_tables_changed, on_client_behind, on_repeated_failure }: {
+  constructor({ connection, post_fn, on_tables_changed, on_client_behind, on_repeated_failure, on_push_rejected }: {
     connection: SqliteConnection
     post_fn?: SyncPostFn
     on_tables_changed?: (tables: Set<NotifiableTable>) => void
     on_client_behind?: () => void
     /** Fires ONCE when the repeat-fatal circuit breaker trips (see `blocked_by_repeated_failure`). */
     on_repeated_failure?: () => void
+    /**
+     * Fires on every round trip whose push the server partly refused — the
+     * "visible message to the person who wrote it" half of the refused-write
+     * contract. Wired to a toast.
+     */
+    on_push_rejected?: (info: PushRejectionSummary) => void
   }) {
     this.#connection = connection
     this.#post_fn = post_fn ?? api_admin_sync
     this.#on_tables_changed = on_tables_changed
     this.#on_client_behind = on_client_behind
     this.#on_repeated_failure = on_repeated_failure
+    this.#on_push_rejected = on_push_rejected
     this.#load_watermark()
   }
 
@@ -308,6 +320,25 @@ export class Sync {
       // The server refused (skipped) pushed rows whose parent no longer exists —
       // they'd have rolled back the whole push otherwise. Surface loudly.
       this.#log({ level: 'warn', phase: 'upload', message: `Server skipped ${response.skipped_orphans.length} orphaned pushed row(s): ${response.skipped_orphans.map(orphan => `${orphan.table_name}/${orphan.id} (missing ${orphan.parent_table})`).join(', ')}` })
+    }
+
+    // Refused-write contract: a rejected push becomes a typed, countable event
+    // AND a message to the person who wrote it — the dashboard log line above
+    // is neither (it dies with the tab). `resolve_rejected_rows` falls back to
+    // `skipped_orphans` so a bundle talking to a pre-contract server still reports.
+    const rejected = resolve_rejected_rows(response)
+    if (rejected.length) {
+      const groups = group_rejected_rows(rejected)
+      // Nothing clears some refusals (a permanently orphaned row re-pushes on
+      // every flush), so suppress an identical signature for a window rather
+      // than repeating the same event and toast forever.
+      const signature = rejection_signature(groups)
+      const now = Date.now()
+      if (should_report_rejections({ signature, last: this.#last_rejection_reported, now })) {
+        this.#last_rejection_reported = { key: signature, at: now }
+        report_sync_push_rejected({ engine: 'admin', sector: 'shared', groups })
+        this.#on_push_rejected?.(summarize_rejections(rejected))
+      }
     }
 
     await this.#connection.execute('PRAGMA defer_foreign_keys = ON')

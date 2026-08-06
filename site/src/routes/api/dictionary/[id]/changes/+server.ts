@@ -7,7 +7,8 @@ import { ResponseCodes } from '$lib/constants'
 import { get_dictionary_by_url_or_id } from '$lib/db/server/get-dictionary'
 import { get_dictionary_db, LATEST_DICT_MIGRATION, read_last_modified_at } from '$lib/db/server/dictionary-db'
 import { get_dictionary_history_db } from '$lib/db/server/dictionary-history-db'
-import { process_dict_changes, read_server_seq_counter, strip_sql_ext } from '$lib/db/server/dictionary-sync-helpers'
+import { collect_unauthorized_push_rejections, process_dict_changes, read_server_seq_counter, strip_sql_ext } from '$lib/db/server/dictionary-sync-helpers'
+import { group_rejected_rows } from '$lib/db/sync/rejected-rows'
 import { mirror_dictionary_cursor } from '$lib/db/server/v1-route-context'
 import { log_server_event } from '$lib/server/log-server-event'
 import { error, json } from '@sveltejs/kit'
@@ -92,6 +93,16 @@ export const POST: RequestHandler = async (event) => {
       changes: {},
       deletes: [],
     }
+    // A non-editor's push is dropped by `has_push` before it ever reaches
+    // `process_dict_changes`, so the refusal has to be named right here — this
+    // is where a lapsed-role contributor's edits would otherwise vanish.
+    if (!is_editor) {
+      const rejected_rows = collect_unauthorized_push_rejections(body)
+      if (rejected_rows.length) {
+        fast_bail.rejected_rows = rejected_rows
+        log_server_event({ level: 'warn', message: 'dict_changes_push_refused', user_id: user_id || null, context: { dictionary_id: dict_id, reason: 'unauthorized', rows: rejected_rows.length } })
+      }
+    }
     return json(fast_bail)
   }
 
@@ -132,6 +143,14 @@ export const POST: RequestHandler = async (event) => {
   // poison-pill is diagnosable instead of an opaque `FOREIGN KEY constraint failed`.
   if (response.skipped_orphans?.length) {
     log_server_event({ level: 'warn', message: 'dict_changes_orphans_skipped', user_id: user_id || null, context: { dictionary_id: dict_id, orphans: response.skipped_orphans } })
+  }
+
+  // The refused-write contract's server half: one queryable row per (table,
+  // reason), counting rows the push lost. The client emits its own
+  // `sync_push_rejected` — this is the side that survives a closed browser.
+  if (response.rejected_rows?.length) {
+    for (const group of group_rejected_rows(response.rejected_rows))
+      log_server_event({ level: 'warn', message: 'dict_changes_push_refused', user_id: user_id || null, context: { dictionary_id: dict_id, reason: group.reason, table_name: group.table_name, rows: group.count, ids: group.ids } })
   }
 
   // Mirror to shared.db.dictionaries.updated_at + refresh entry_count +

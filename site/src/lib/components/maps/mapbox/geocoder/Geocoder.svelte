@@ -3,14 +3,14 @@
   import { getContext, onDestroy, onMount } from 'svelte'
 
   import type { GeocoderOptions, Result, Results } from '@mapbox/mapbox-gl-geocoder'
-  import { mapKey } from '../context'
+  import { map_key } from '../context'
   import type { MapKeyContext } from '../context'
   import { bind_events } from '../event-bindings'
   import { load_script_once, load_styles_once } from '$lib/utils/load-once'
 
-  const { getMap, getMapbox } = getContext<MapKeyContext>(mapKey)
-  const map = getMap()
-  const mapbox = getMapbox()
+  const { get_map, get_mapbox } = getContext<MapKeyContext>(map_key)
+  const map = get_map()
+  const mapbox = get_mapbox()
 
   type ResultOrUserCoordinates = Result | { user_coordinates: [number, number] }
 
@@ -21,7 +21,7 @@
     types?: any // https://docs.mapbox.com/api/search/#data-types
     placeholder?: string
     value?: any
-    customStylesheetUrl?: string
+    custom_stylesheet_url?: string
     on_clear?: () => void
     on_loading?: (query: string) => void
     on_result?: (result: ResultOrUserCoordinates) => void
@@ -48,7 +48,7 @@
     ],
     placeholder = 'Search',
     value = null,
-    customStylesheetUrl = undefined,
+    custom_stylesheet_url = undefined,
     on_clear,
     on_loading,
     on_result,
@@ -58,7 +58,7 @@
     children,
   }: Props = $props()
 
-  function handleGeocoderResult(result: ResultOrUserCoordinates): { longitude: number, latitude: number } {
+  function handle_geocoder_result(result: ResultOrUserCoordinates): { longitude: number, latitude: number } {
     if ('user_coordinates' in result)
       return { longitude: result.user_coordinates[0], latitude: result.user_coordinates[1] }
 
@@ -70,7 +70,7 @@
     loading: ({ query }: { query: string }) => on_loading?.(query),
     result: ({ result }: { result: ResultOrUserCoordinates }) => {
       on_result?.(result)
-      if (result) on_result_coordinates?.(handleGeocoderResult(result))
+      if (result) on_result_coordinates?.(handle_geocoder_result(result))
     },
     results: (e: Results) => on_results?.(e),
     error: ({ error }) => on_error?.(error),
@@ -86,7 +86,7 @@
     await load_styles_once(
       `//api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/${version}/mapbox-gl-geocoder.css`,
     )
-    customStylesheetUrl && (await load_styles_once(customStylesheetUrl))
+    custom_stylesheet_url && (await load_styles_once(custom_stylesheet_url))
     geocoder = new window.MapboxGeocoder({
       ...options,
       // @ts-expect-error - types are not yet updated to 5.0.0 so they don't have enableGeolocation

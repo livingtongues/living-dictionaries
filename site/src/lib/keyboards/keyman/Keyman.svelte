@@ -1,0 +1,261 @@
+<script lang="ts" module>
+  // https://help.keyman.com/DEVELOPER/engine/web/15.0/reference/
+  import type { KeymanWeb } from './Keyman.interface'
+
+  declare const keyman: KeymanWeb
+</script>
+
+<script lang="ts">
+  import IconPhGlobe from '~icons/ph/globe'
+  import IconMdiKeyboard from '~icons/mdi/keyboard'
+  import IconMdiKeyboardOffOutline from '~icons/mdi/keyboard-off-outline'
+  import './keyman.css'
+  import { onDestroy, onMount, tick } from 'svelte'
+  import type { KeymanWritingSystems } from './writing-systems'
+  import { keyboard_for_bcp, load_keyman_writing_systems } from './writing-systems'
+  import { additional_keyboards, glossing_languages } from '$lib/gloss/glossing-languages'
+  import Modal from '$lib/components/ui/Modal.svelte'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
+  import { load_script_once } from '$lib/utils/load-once'
+  import { browser } from '$app/environment'
+
+  interface Props {
+    /**
+     * When using keyboard inside a fixed context like a modal, set fixed to true to use fixed positioning instead of absolute positioning to keep keyboard with fixed input, otherwise it will match page scroll height
+     */
+    fixed?: boolean
+    bcp?: string
+    canChooseKeyboard?: boolean
+    target?: string
+    show?: boolean
+    position?: 'top' | 'bottom'
+    version?: string // https://keyman.com/developer/keymanweb/, https://keyman.com/downloads/pre-release/, https://help.keyman.com/developer/engine/web/history
+    children?: import('svelte').Snippet
+  }
+
+  let {
+    fixed = false,
+    bcp = undefined,
+    canChooseKeyboard = false,
+    target = undefined,
+    show = $bindable(false),
+    position = 'top',
+    version = '16.0.141',
+    children,
+  }: Props = $props()
+
+  let kmw: KeymanWeb = $state()
+  let wrapperEl: HTMLDivElement = $state()
+  let inputEl: HTMLInputElement | HTMLTextAreaElement = $state()
+
+  let keyman_writing_systems: KeymanWritingSystems = $state()
+  let destroyed = false
+  let target_poll: ReturnType<typeof setInterval>
+
+  onMount(async () => {
+    load_keyman_writing_systems()
+      .then((systems) => {
+        keyman_writing_systems = systems
+      })
+      .catch(error => console.error('Keyman writing-systems map failed to load', error))
+
+    await load_script_once(`https://s.keyman.com/kmw/engine/${version}/keymanweb.js`)
+
+    await keyman.init({
+      attachType: 'manual',
+    })
+    if (destroyed)
+      return
+    kmw = keyman
+
+    await targetInput()
+    if (destroyed)
+      return
+
+    const root = document.documentElement
+    if (fixed) root.style.setProperty('--kmw-osk-pos', 'fixed')
+  })
+
+  onDestroy(() => {
+    if (browser) {
+      destroyed = true
+      clearInterval(target_poll)
+      const root = document.documentElement
+      root.style.setProperty('--kmw-osk-pos', 'absolute')
+      kmw?.detachFromControl(inputEl)
+    }
+  })
+
+  async function targetInput() {
+    // `wrapperEl` can be null if the entry dialog is torn down while Keyman's
+    // async init is still resolving (onMount → load_script_once → init → here).
+    // Touching `.querySelector`/`.firstElementChild` on null was a recurring
+    // `firstElementChild`-on-null unhandled_rejection in production.
+    if (!wrapperEl)
+      return
+
+    if (target) {
+      inputEl = wrapperEl.querySelector(target)
+      // The Tiptap notes editor mounts synchronously before this parent's
+      // onMount, so the target normally exists on the first query — this poll
+      // is a safety net for any async-mounted target.
+      if (!inputEl) await wait_for_target_to_mount()
+    }
+
+    if (!inputEl && wrapperEl)
+      inputEl = wrapperEl.firstElementChild as HTMLInputElement | HTMLTextAreaElement
+  }
+
+  function wait_for_target_to_mount() {
+    return new Promise<void>((resolve) => {
+      let attempts = 0
+      const MAX_ATTEMPTS = 10
+      target_poll = setInterval(() => {
+        attempts++
+        inputEl = wrapperEl?.querySelector(target)
+        if (inputEl || !wrapperEl || destroyed || attempts > MAX_ATTEMPTS) {
+          clearInterval(target_poll)
+          resolve()
+        }
+      }, 500)
+    })
+  }
+
+  let selectedBcp: string = $state()
+  const currentBcp = $derived(selectedBcp || bcp)
+  const glossLanguage = $derived(glossing_languages[currentBcp] || additional_keyboards[currentBcp])
+  const resolvedKeyboard = $derived(keyboard_for_bcp(currentBcp, keyman_writing_systems))
+  const internalName = $derived(resolvedKeyboard?.internalName)
+  const keyboardBcp = $derived(resolvedKeyboard?.keyboardBcp || currentBcp)
+  const keyboardId = $derived(`${internalName}@${keyboardBcp}`)
+  // Curated gloss languages keep their explicit `showKeyboard` flag; a bcp resolved
+  // only via the full Keyman set shows the keyboard toggle whenever a keyboard exists.
+  const showKeyboardButton = $derived(glossLanguage ? !!glossLanguage.showKeyboard : !!internalName)
+
+  $effect(() => {
+    if (kmw && show && internalName) {
+      (async () => {
+        await kmw.addKeyboards(keyboardId)
+        if (inputEl) {
+          kmw.attachToControl(inputEl)
+          kmw.setKeyboardForControl(inputEl, internalName, keyboardBcp)
+          inputEl.focus()
+
+          if (currentBcp === 'srb-sora') {
+            await tick()
+            document.querySelector('.kmw-osk-frame')?.classList.add('sompeng')
+          } else {
+            document.querySelector('.kmw-osk-frame')?.classList.remove('sompeng')
+          }
+        }
+      })()
+    }
+  })
+
+  $effect(() => {
+    if (show)
+      inputEl?.classList.remove('kmw-disabled')
+    else
+      inputEl?.classList.add('kmw-disabled')
+  })
+
+  const children_render = $derived(children)
+</script>
+
+<ShowHide>
+  {#snippet children({ show: showKeyboardOptions, toggle })}
+    <div bind:this={wrapperEl} class="keyman-wrap" class:sompeng={currentBcp === 'srb-sora'}>
+      {@render children_render?.()}
+
+      {#if kmw}
+        <div
+          class:at-top={position === 'top'}
+          class:at-bottom={position === 'bottom'}
+          class="keyboard-buttons">
+          {#if (show || !bcp) && canChooseKeyboard}
+            <button
+              class="keyboard-toggle"
+              type="button"
+              onclick={toggle}
+              title="Select Keyboard">
+              <IconPhGlobe />
+            </button>
+          {/if}
+          {#if showKeyboardButton}
+            <button
+              class="keyboard-toggle"
+              type="button"
+              onclick={() => (show = !show)}
+              title={show ? 'Keyboard active' : 'Keyboard inactive'}>
+              {#if show}
+                <IconMdiKeyboard />
+              {:else}
+                <IconMdiKeyboardOffOutline />
+              {/if}
+            </button>
+          {/if}
+        </div>
+      {/if}
+    </div>
+
+    {#if showKeyboardOptions}
+      <Modal on_close={toggle} noscroll>
+        {#snippet heading()}
+          <span>Select Keyboard</span>
+        {/snippet}
+        {#each [...Object.entries(glossing_languages), ...Object.entries(additional_keyboards)] as [_bcp, languageDefinition] (_bcp)}
+          {#if languageDefinition.showKeyboard}
+            <button
+              type="button"
+              class="btn-ghost btn-sm"
+              class:active={_bcp === bcp}
+              onclick={() => {
+                toggle()
+                selectedBcp = _bcp
+                show = true
+              }}>{languageDefinition.vernacularName}</button>
+          {/if}
+        {/each}
+      </Modal>
+    {/if}
+  {/snippet}
+</ShowHide>
+
+<style>
+  .keyman-wrap {
+    width: 100%;
+    position: relative;
+  }
+
+  .keyboard-buttons {
+    position: absolute;
+    right: 0.125rem;
+    z-index: 1;
+    display: flex;
+  }
+
+  .at-top {
+    top: 0.1875rem;
+  }
+
+  .at-bottom {
+    bottom: 0.1875rem;
+  }
+
+  .keyboard-toggle {
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    background-color: var(--background);
+    border-radius: 0.25rem;
+  }
+
+  .keyboard-toggle:hover {
+    color: var(--color);
+  }
+
+  button.active {
+    background-color: color-mix(in srgb, var(--background), var(--primary) 12%);
+    color: var(--primary);
+  }
+</style>

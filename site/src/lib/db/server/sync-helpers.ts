@@ -1,4 +1,5 @@
 import type { SyncableTableName, SyncRequest, SyncResponse, SyncRow } from '$lib/db/sync/types'
+import type { RejectedRow } from '$lib/db/sync/rejected-rows'
 import type Database from 'better-sqlite3'
 import type { Table } from 'drizzle-orm'
 import { stringify_row } from '$lib/db/schemas/json-columns'
@@ -136,6 +137,9 @@ export function process_sync({ db, request, user_id, logs_db = get_logs_db(), se
       const skip_keys = new Set(orphans.map(orphan => `${orphan.table_name}::${orphan.id}`))
       const response = apply_sync({ db, request, tables, skip_keys })
       response.skipped_orphans = orphans
+      // Additive refused-write contract: the orphans join whatever `apply_sync`
+      // already refused (tombstoned / duplicate / unauthorized) in ONE typed list.
+      add_rejected_rows(response, orphans.map(orphan => ({ table_name: orphan.table_name, id: orphan.id, reason: 'orphan' as const })))
       return response
     } catch {
       throw err
@@ -246,8 +250,15 @@ function apply_sync({ db, request, tables, skip_keys }: {
 
     // Process incoming dirty rows.
     for (const table_name of tables) {
-      if (is_readonly_table(table_name))
+      if (is_readonly_table(table_name)) {
+        // A client may not write this table at all (`users` is server-owned).
+        // Silently dropping the rows is what the refused-write contract exists
+        // to stop — report them so the pusher hears about it.
+        const refused = request.dirty_rows[table_name] ?? []
+        if (refused.length)
+          add_rejected_rows(response, refused.map(row => ({ table_name, id: row_key_of(table_name, row), reason: 'unauthorized' as const })))
         continue
+      }
       const rows = request.dirty_rows[table_name]
       if (!rows?.length)
         continue
@@ -406,6 +417,7 @@ function merge_row<K extends SyncableTableName>({ db, table_name, row, response 
     ).get(table_name, row_id)
     if (tombstoned) {
       response.deletes.push({ table_name, id: row_id })
+      add_rejected_rows(response, [{ table_name, id: row_id, reason: 'tombstoned' }])
       return
     }
 
@@ -425,6 +437,8 @@ function merge_row<K extends SyncableTableName>({ db, table_name, row, response 
         `INSERT OR REPLACE INTO deletes (table_name, id, updated_at) VALUES (?, ?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`,
       ).run(table_name, row_id)
       response.deletes.push({ table_name, id: row_id })
+      // The pushed id itself was refused (the canonical row absorbed its content).
+      add_rejected_rows(response, [{ table_name, id: row_id, reason: 'duplicate' }])
     }
   }
 
@@ -499,6 +513,16 @@ function echo_server_row<K extends SyncableTableName>({ db, table_name, id, resp
     (existing_changes as SyncRow<K>[]).push(server_row)
   else
     (response.changes[table_name] as SyncRow<K>[]) = [server_row]
+}
+
+/** Append to the response's refused-write list, creating it on first use. */
+function add_rejected_rows(response: SyncResponse, rows: RejectedRow[]): void {
+  if (!rows.length)
+    return
+  if (response.rejected_rows)
+    response.rejected_rows.push(...rows)
+  else
+    response.rejected_rows = [...rows]
 }
 
 function strip_sql_ext(migration_name: string): string {

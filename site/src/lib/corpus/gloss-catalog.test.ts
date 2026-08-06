@@ -61,6 +61,33 @@ describe(build_gloss_catalog, () => {
     ])
   })
 
+  test('a curated row that merely restates the standard wording defers to the localized standard expansion', () => {
+    const catalog = build_gloss_catalog({
+      legend: [
+        { code: '1SG', name: { default: 'first person singular' } },
+        { code: 'REFL', name: { default: 'reflexive — kig- "subject acts on self"' } },
+      ],
+      language: 'en',
+      t: ((options: { dynamicKey?: string, fallback?: string }) => `LOCALIZED ${options.fallback}`) as TranslateFunction,
+    })
+    expect(catalog.expand('1SG')).toBe('LOCALIZED first person singular')
+    expect(catalog.expand('REFL')).toBe('reflexive — kig- "subject acts on self"')
+  })
+
+  test('standard_codes_used collects standard codes from cells and prose, skipping bespoke curated ones', () => {
+    const catalog = build_gloss_catalog({ legend: ponca_legend, language: 'en', t })
+    expect(catalog.standard_codes_used({
+      gloss_cells: ['1SG.SBJ-REFL-lift', 'eat PFV'],
+      prose: ['The PST marker follows the stem.'],
+    })).toEqual(['PFV', 'PST', 'REFL', 'SBJ']) // 1SG is curated-bespoke → excluded
+    expect(catalog.standard_codes_used({})).toEqual([])
+  })
+
+  test('standard_codes_used excludes every curated code — even a restatement (the curated table shows it)', () => {
+    const catalog = build_gloss_catalog({ legend: [{ code: 'PL', name: { default: 'plural' } }], language: 'en', t })
+    expect(catalog.standard_codes_used({ gloss_cells: ['walk PL', 'eat PFV'] })).toEqual(['PFV'])
+  })
+
   test('curated codes still match anywhere inside a gloss cell', () => {
     const catalog = build_gloss_catalog({ legend: [{ code: 'PL', name: { en: 'plural' } }], language: 'en', t })
     expect(catalog.split_gloss_cell('walkPL')).toEqual([{ text: 'walk' }, { text: 'PL', code: 'PL' }])

@@ -8,6 +8,12 @@ import type { MultiString } from '$lib/types'
  * local snapshot opens. Cheap indexed reads (a handful of rows via subqueries).
  */
 
+export interface DictHomeCardAudio {
+  id: string
+  storage_path: string
+  speaker_name: string | null
+}
+
 export interface DictHomeCard {
   /** `featured_entries.id` for featured cards; the entry id for recent cards. */
   id: string
@@ -18,7 +24,8 @@ export interface DictHomeCard {
   parts_of_speech: string[] | null
   dialect: string | null
   photo_storage_path: string | null
-  audio_storage_path: string | null
+  /** Ordered (created_at ASC) — same shape the live client builds via `from_entry_audios`. */
+  audios: DictHomeCardAudio[]
 }
 
 const CARD_MEDIA_SUBQUERIES = `
@@ -30,8 +37,31 @@ const CARD_MEDIA_SUBQUERIES = `
   (SELECT p.storage_path FROM senses s
      JOIN sense_photos sp ON sp.sense_id = s.id
      JOIN photos p ON p.id = sp.photo_id
-   WHERE s.entry_id = e.id ORDER BY sp.created_at LIMIT 1) AS photo_storage_path,
-  (SELECT a.storage_path FROM audio a WHERE a.entry_id = e.id ORDER BY a.created_at LIMIT 1) AS audio_storage_path`
+   WHERE s.entry_id = e.id ORDER BY sp.created_at LIMIT 1) AS photo_storage_path`
+
+/** All audio options per card entry, with the first attached speaker's name (a handful of cards → one indexed query). */
+function attach_card_audios({ db, cards }: { db: Database.Database, cards: DictHomeCard[] }): DictHomeCard[] {
+  if (!cards.length)
+    return cards
+  const entry_ids = [...new Set(cards.map(({ entry_id }) => entry_id))]
+  const rows = db.prepare(`
+    SELECT a.entry_id, a.id, a.storage_path,
+      (SELECT s.name FROM audio_speakers asp
+         JOIN speakers s ON s.id = asp.speaker_id
+       WHERE asp.audio_id = a.id ORDER BY asp.created_at LIMIT 1) AS speaker_name
+    FROM audio a
+    WHERE a.entry_id IN (${entry_ids.map(() => '?').join(', ')})
+    ORDER BY a.created_at`).all(...entry_ids) as { entry_id: string, id: string, storage_path: string, speaker_name: string | null }[]
+  const by_entry = new Map<string, DictHomeCardAudio[]>()
+  for (const { entry_id, id, storage_path, speaker_name } of rows) {
+    if (!by_entry.has(entry_id))
+      by_entry.set(entry_id, [])
+    by_entry.get(entry_id).push({ id, storage_path, speaker_name })
+  }
+  for (const card of cards)
+    card.audios = by_entry.get(card.entry_id) ?? []
+  return cards
+}
 
 function parse_json_column<T>(value: unknown): T | null {
   if (typeof value !== 'string' || value === '')
@@ -53,7 +83,7 @@ function to_card(row: Record<string, unknown>): DictHomeCard {
     parts_of_speech: parse_json_column<string[]>(row.parts_of_speech),
     dialect: (row.dialect as string | null) ?? null,
     photo_storage_path: (row.photo_storage_path as string | null) ?? null,
-    audio_storage_path: (row.audio_storage_path as string | null) ?? null,
+    audios: [],
   }
 }
 
@@ -64,7 +94,7 @@ export function get_featured_cards({ db }: { db: Database.Database }): DictHomeC
     FROM featured_entries fe
     JOIN entries e ON e.id = fe.entry_id
     ORDER BY fe.sort_key`).all() as Record<string, unknown>[]
-  return rows.map(to_card)
+  return attach_card_audios({ db, cards: rows.map(to_card) })
 }
 
 /**
@@ -104,5 +134,5 @@ export function get_recent_cards({ db, limit = 12 }: { db: Database.Database, li
     FROM entries e
     ORDER BY e.created_at DESC
     LIMIT ?`).all(limit) as Record<string, unknown>[]
-  return rows.map(to_card)
+  return attach_card_audios({ db, cards: rows.map(to_card) })
 }

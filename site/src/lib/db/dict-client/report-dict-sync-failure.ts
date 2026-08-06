@@ -13,6 +13,7 @@
  *
  * Never throws — telemetry must not spawn more errors.
  */
+import type { RejectionGroup } from '$lib/db/sync/rejected-rows'
 import { api_log } from '$api/log/_call'
 import { version } from '$app/environment'
 import { classify_sync_failure, should_ship_failure, sync_failure_level } from '$lib/db/sync/sync-failure-classify'
@@ -201,6 +202,35 @@ export function report_dict_sync_halted({ dict_id, message, consecutive }: {
 }
 
 /**
+ * Ship the refused-write contract's client half: the server accepted the round
+ * trip but REFUSED some of the pushed rows (FK orphan, natural-key duplicate,
+ * or a caller whose editing role has lapsed). Error level and one row per
+ * (table, reason) per round trip — never one per row — so a whole-push refusal
+ * is one countable event. Before this the only refusal on the wire
+ * (`skipped_orphans`) reached a `console.warn` inside the worker and evaporated.
+ */
+export function report_dict_push_rejected({ dict_id, groups }: {
+  dict_id: string
+  groups: RejectionGroup[]
+}): void {
+  try {
+    void api_log({
+      entries: groups.map(group => ({
+        level: 'error' as const,
+        message: 'sync_push_rejected',
+        client_time: new Date().toISOString(),
+        user_agent: safe_user_agent(),
+        platform: 'web' as const,
+        app_version: version ?? null,
+        context: { worker: true, engine: 'dict', sector: dict_id, dict_id, reason: group.reason, table_name: group.table_name, count: group.count, ids: group.ids, session_id: worker_session_id ?? undefined },
+      })),
+    })
+  } catch {
+    // Never let telemetry break the sync path.
+  }
+}
+
+/**
  * Ship a "reopened the OPFS connection after the browser closed our access
  * handle" marker (`storage_lost` self-heal in `dict-instance.ts`) — the
  * observability that the recovery path actually ran in the wild.
@@ -262,8 +292,13 @@ export function report_dict_self_healed({ dict_id, reason, flushed_push }: {
  * in the wild. A row here followed by a healthy `dict_boot` = a real recovery;
  * a row here followed by `dict_boot_recovery_exhausted` = the environment (not
  * just the file) is broken. `warn` — a recovered degradation, not an error.
+ *
+ * `reason` distinguishes the branches of `poisoned_file_recovery_decision`:
+ * `viewer_replace` (a persisted file that stopped opening) vs `viewer_replace_fresh`
+ * (a snapshot we had JUST written, added 2026-08-03) — so "did widening it to
+ * fresh files cure anyone?" is one query, not an argument.
  */
-export function report_dict_file_replaced({ dict_id, boot_message }: { dict_id: string, boot_message: string }): void {
+export function report_dict_file_replaced({ dict_id, boot_message, reason }: { dict_id: string, boot_message: string, reason?: string }): void {
   try {
     void api_log({
       entries: [{
@@ -273,7 +308,7 @@ export function report_dict_file_replaced({ dict_id, boot_message }: { dict_id: 
         user_agent: safe_user_agent(),
         platform: 'web',
         app_version: version ?? null,
-        context: { worker: true, engine: 'dict', dict_id, boot_message, session_id: worker_session_id ?? undefined },
+        context: { worker: true, engine: 'dict', dict_id, boot_message, reason: reason ?? null, session_id: worker_session_id ?? undefined },
       }],
     })
   } catch {

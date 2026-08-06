@@ -1,5 +1,6 @@
 import type { Handle, HandleServerError } from '@sveltejs/kit'
-import { dev } from '$app/environment'
+import process from 'node:process'
+import { dev, version } from '$app/environment'
 import { env } from '$env/dynamic/private'
 import { start_crons_once } from '$lib/db/server/cron-scheduler'
 import { CRONS } from '$lib/db/server/crons'
@@ -33,6 +34,36 @@ split_client_logs_from_shared({ shared_db: get_shared_db(), logs_db: get_logs_db
 // Mirror the code's English i18n catalog into `i18n_keys` (new/changed/removed
 // keys) and, on a virgin DB, seed translations from the committed locale files.
 boot_i18n_catalog()
+
+/**
+ * ONE row per process boot — the deploy boundary, stated by the server instead
+ * of inferred (asked for by four consecutive log reviews; landed 2026-08-02).
+ *
+ * Every review until now reconstructed "when did this build go live" from the
+ * first time a BROWSER reported a new `app_version`, which needs a human to load
+ * the site before the boundary exists, misses the standby container entirely, and
+ * cannot distinguish a deploy from a crash-restart. This row is written by the
+ * process itself, by both containers, at the moment it happens.
+ *
+ * `app_version` is SvelteKit's build id — the SAME value client rows carry, so
+ * the two join. Deliberately NO `commit`: nothing in the running container knows
+ * it (the deploy writes `build-commits.log` next to the data volume, which a
+ * later deploy overwrites — an old container restarting would then report a
+ * commit it was never built from, and a plausible wrong answer is worse than no
+ * answer).
+ */
+log_server_event({
+  level: 'info',
+  message: 'server_started',
+  context: {
+    app_version: version,
+    container: env.IS_STANDBY === 'true' ? 'standby' : 'primary',
+    is_standby: env.IS_STANDBY === 'true',
+    node: process.versions.node,
+    pid: process.pid,
+    dev,
+  },
+})
 
 // Boot ALL background crons through the wall-clock scheduler. The roster
 // (`$lib/db/server/crons.ts`) declares every job + cadence in one place; the
@@ -122,6 +153,17 @@ function parse_byte_size(raw: string | undefined): number | null {
  * this the cause vanished into ephemeral `docker logs` (which rotate away on
  * redeploy — exactly what made the 2026-06-26 dict-load 500s unrecoverable).
  *
+ * VERIFIED 2026-08-01 (the "zero `crash` rows have ever been written" finding of
+ * the 07-31 review): this hook has been running correctly the whole time —
+ * production holds 32,871 rows it wrote (32,804 × 404 at `info`, 61 × 405 at
+ * `warn`, 6 × 500 that were all genuine client aborts). The count of `crash` rows
+ * is zero because NO server-side 5xx render has ever happened; every one of the
+ * ~403 "Internal Error" pages browsers reported was raised by SvelteKit in the
+ * BROWSER (399 of them within 2 s of `session_start` — i.e. during hydration),
+ * where nothing logged it until `hooks.client.ts` landed alongside this note.
+ * `error_id` below makes that ambiguity permanently unrepeatable: a client crash
+ * row carrying one came from here, one without it came from the browser.
+ *
  * Returns the safe shape SvelteKit shows the client; never throws (the logger
  * swallows its own errors).
  */
@@ -144,11 +186,20 @@ export const handleError: HandleServerError = ({ error, event, status, message }
     return { message }
   // 4xx (expected: missing route, auth gate) are not crashes; 5xx are.
   const level = is_client_abort ? 'info' : status >= 500 ? 'crash' : status === 404 ? 'info' : 'warn'
+  // The join key between this server row and the browser's `crash` row for the
+  // same page. Deliberately NOT part of `message` — the log review clusters by
+  // message, and a unique id per row would shatter one cluster into hundreds.
+  const error_id = level === 'crash' ? new_error_id() : null
   log_server_event({
     level,
     message: error instanceof Error ? error.message : message,
     error,
-    context: { route: event.route.id, path: event.url.pathname, status },
+    context: { route: event.route.id, path: event.url.pathname, status, ...(error_id ? { error_id } : {}) },
   })
-  return { message }
+  return error_id ? { message, error_id } : { message }
+}
+
+/** Short, human-quotable reference — long enough to be unique within a day's 500s. */
+function new_error_id(): string {
+  return crypto.randomUUID().slice(0, 8)
 }

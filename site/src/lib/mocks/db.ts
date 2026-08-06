@@ -6,6 +6,8 @@ export const log_writes: GuardedWrites = {
   check_ready: () => null,
   insert_entry: log_args,
   delete_entry: log_args,
+  set_sources: log_args,
+  set_review: log_args,
   insert_sense: log_args,
   delete_sense: log_args,
   insert_sentence: log_args,

@@ -4,7 +4,7 @@
   import { onMount } from 'svelte'
   import { crossfade, scale } from 'svelte/transition'
   import { page } from '$app/state'
-  import { photo_src, url_from_storage_path } from '$lib/utils/media-url'
+  import { audio_element_from_storage_path, photo_src } from '$lib/utils/media-url'
   import { play_audio_element } from '$lib/media/play-audio-element'
   import { bbox_contains } from './map/view-helpers'
   import FeaturedEntryFullscreen from './FeaturedEntryFullscreen.svelte'
@@ -85,7 +85,7 @@
       return
     }
     audio_element?.pause()
-    audio_element = new Audio(url_from_storage_path(card.audio_storage_path))
+    audio_element = audio_element_from_storage_path(card.audio_storage_path)
     const finish = () => {
       if (playing_id === card.id) {
         playing_id = null

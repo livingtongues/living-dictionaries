@@ -117,6 +117,37 @@ visitors, anon_visitors)` stores exactly that, keyed by calendar month:
 person on 3 devices → three) — no cookieless method solves that, so any public surface says so. See
 `.issues/true-unique-visitors.md` + `.issues/future/dictionary-public-visits-stat.md`.
 
+### Reading a MONTH out of this table — two traps that have already produced a wrong report
+
+Both bit the 2026-07-31 business review, which reported July as a "complete month" when it was neither
+complete nor uniformly device-keyed. Check both before quoting a monthly figure.
+
+**1. An unfrozen month's row is a partial snapshot as of the LAST SWEEP, not the month.** The row for
+the in-progress month is rewritten on every sweep, and the sweep runs *once a day* (03:30 PT). So the
+July row sitting in the table at any moment during July only covers up to that day's sweep. July did
+not become whole until the **first August sweep** (2026-08-01 10:30 UTC) recomputed it and advanced
+`monthly_visitors_finalized_through` to `2026-07`. Concretely: read at 2026-07-31 21:00 UTC the row said
+7,219 visitors / 14,706 visits; the frozen row says **7,332 / 14,945** — 14,105 raw rows in July's last
+13.5 h were simply not in it yet. **The check is one query** — a month is trustworthy only when
+`db_metadata.monthly_visitors_finalized_through >= that month`. Month windows are **UTC**
+(`YYYY-MM-01T00:00:00.000Z` → next month), so "end of month" is UTC midnight, not PT.
+
+**2. Rows before 2026-07-08 have no `visitor_id`, and the `visitor_id ?? session_id` fallback silently
+turns "visitors" into "sessions" for that stretch.** `visitor_id` shipped mid-July-07 (coverage: 0 rows
+through 07-06, ~46% on 07-07, ~100% from 07-08). For the earlier days every session is its own
+"visitor", so uniques are **inflated** and the anonymous share is **understated** — signed-in sessions
+stop collapsing to one device, which is the bigger distortion. In July: the frozen full-month figure is
+7,332 visitors / 86% anonymous, but restricted to the device-keyed window (07-08 → 07-31) it is
+**5,182 visitors / 97% anonymous**, and the signed-in visitor count falls from a nonsensical 998 to 170
+(cross-checks against ~163 signed-in users). The tell is in the daily series: while `visitor_id` is
+missing, daily `visitors == sessions` exactly. **July 2026 is therefore a valid corpus/traffic baseline
+but only a partially valid *unique-device* one; August 2026 is the first fully device-keyed calendar
+month.** June is not comparable at all (raw logs begin 06-26 because of the 60d prune, pre-cutover, 68
+`session_start` rows total).
+
+Aside: `anon_visitors` counts visitors with **≥1 signed-out session**, not "never signed in" — a person
+who browses logged-out and later signs in on the same device lands in both columns.
+
 ## Client SPA navigation timing was logged-but-invisible until 2026-07-07
 
 `log_navigation` has always folded a client-side SPA nav `duration_ms` (beforeNavigate→afterNavigate)

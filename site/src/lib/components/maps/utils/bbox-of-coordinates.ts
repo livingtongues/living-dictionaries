@@ -1,11 +1,11 @@
 /**
- * Bounding box of [lng, lat] positions as [minLng, minLat, maxLng, maxLat] —
+ * Bounding box of [lng, lat] positions as [min_lng, min_lat, max_lng, max_lat] —
  * local replacement for `bbox(lineString(positions))` from @turf/turf
  * (yoinked 2026-07-02 along with center_of_coordinates).
  */
 export function bbox_of_coordinates(
   positions: number[][],
-): [minLng: number, minLat: number, maxLng: number, maxLat: number] {
+): [min_lng: number, min_lat: number, max_lng: number, max_lat: number] {
   const lngs = positions.map(([lng]) => lng)
   const lats = positions.map(([, lat]) => lat)
   return [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)]

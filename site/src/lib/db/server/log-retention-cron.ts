@@ -1,4 +1,7 @@
 import type Database from 'better-sqlite3'
+import { join } from 'node:path'
+import process from 'node:process'
+import SqliteDatabase from 'better-sqlite3'
 import { is_noise_error_message } from '$lib/debug/classify-error'
 import { DICTIONARY_OPENED } from '$lib/debug/log-events'
 import { is_bot_user_agent } from '$lib/utils/bot-user-agent'
@@ -7,8 +10,8 @@ import { log_server_event } from '$lib/server/log-server-event'
 import { get_admin_user_ids } from './admin-user-ids'
 import type { SessionActivity } from './bot-sessions'
 import { classify_ua_frequency_bot_sessions } from './bot-sessions'
-import { get_log_archive_db } from './log-archive-db'
-import { CLIENT_LOG_COLUMNS, get_logs_db } from './logs-db'
+import { get_log_archive_db, open_log_archive_db } from './log-archive-db'
+import { CLIENT_LOG_COLUMNS, get_logs_db, open_logs_db } from './logs-db'
 import { get_shared_db } from './shared-db'
 
 /**
@@ -33,6 +36,28 @@ import { get_shared_db } from './shared-db'
 const HOT_WINDOW_DAYS = 14
 const ARCHIVE_WINDOW_DAYS = 60
 const DAY_MS = 24 * 60 * 60 * 1000
+
+/**
+ * Rows per write transaction in `rollup_day`. Bounds how long the child owns
+ * shared.db's single write lock — the serving process waits on it synchronously
+ * (see the long note at the write site). 500 keeps each hold in the low
+ * milliseconds while still amortizing the transaction overhead.
+ */
+export const ROLLUP_WRITE_CHUNK_ROWS = 500
+
+/** Apply `write` to every item, committing a transaction every `ROLLUP_WRITE_CHUNK_ROWS` rows. */
+function write_in_chunks<T>({ db, items, write }: {
+  db: Database.Database
+  items: T[]
+  write: (item: T) => void
+}): void {
+  const write_chunk = db.transaction((chunk: T[]) => {
+    for (const item of chunk)
+      write(item)
+  })
+  for (let i = 0; i < items.length; i += ROLLUP_WRITE_CHUNK_ROWS)
+    write_chunk(items.slice(i, i + ROLLUP_WRITE_CHUNK_ROWS))
+}
 
 const ERROR_LEVELS = new Set(['error', 'unhandled_rejection', 'crash'])
 const TOP_LEVEL_ROUTES = new Set(['dictionaries', 'about', 'tutorials', 'account', 'create-dictionary', 'admin', 'terms'])
@@ -63,7 +88,9 @@ interface AccumRow { source: string, level: string, message: string, user_id: st
  * `log_daily_metrics` + `log_daily_sessions`. Idempotent full-day REPLACE: the
  * day's existing rows are DELETEd first, so re-running (e.g. for "today", still
  * accumulating) is safe AND a metric that stopped occurring can't linger as a
- * ghost (see the gotcha note on write_all).
+ * ghost. The writes are CHUNKED (`ROLLUP_WRITE_CHUNK_ROWS`) — see the long note at
+ * the write site for why holding one whole-day transaction stalled the serving
+ * process, and what the chunking costs.
  */
 export function rollup_day({ day, shared_db = get_shared_db(), logs_db = get_logs_db() }: { day: string, shared_db?: Database.Database, logs_db?: Database.Database }): { metrics_written: number } {
   const rows = logs_db.prepare(`
@@ -305,39 +332,49 @@ export function rollup_day({ day, shared_db = get_shared_db(), logs_db = get_log
     INSERT INTO dictionary_daily_views (day, dictionary_id, sessions, anon_sessions, visitors, anon_visitors)
     VALUES (?, ?, ?, ?, ?, ?)
   `)
-  const write_all = shared_db.transaction((items: typeof metrics) => {
-    // Full-day REPLACE, not merge: without the delete, a metric that no longer
-    // exists for the day (e.g. a UA reclassified as a bot) would keep its stale
-    // value forever — upsert only overwrites keys that still occur. This "ghost
-    // metric" bug lived in prod (house post-mortem) until the reader started
-    // trusting rollups; the archived-days re-roll heals history.
-    shared_db.prepare('DELETE FROM log_daily_metrics WHERE day = ?').run(day)
-    for (const item of items)
-      upsert.run(day, item.metric, item.source, item.value)
-    shared_db.prepare('DELETE FROM log_daily_sessions WHERE day = ?').run(day)
-    for (const session of session_activity.values()) {
-      insert_session.run(
-        day,
-        session.session_id,
-        session.user_agent,
-        session.heartbeats,
-        session.has_user_id ? 1 : 0,
-        webdriver_sessions.has(session.session_id) ? 1 : null,
-        session.db_tier,
-        session.country,
-        session.region,
-        session.user_id,
-        session.visitor_id,
-        session.browser_locale,
-        session.ui_locale,
-      )
-    }
-    // Full-day REPLACE (same idempotency contract as the metrics/sessions above).
-    shared_db.prepare('DELETE FROM dictionary_daily_views WHERE day = ?').run(day)
-    for (const [dict_id, views] of dict_views)
-      insert_dict_view.run(day, dict_id, views.sessions.size, views.anon.size, views.visitors.size, views.anon_visitors.size)
-  })
-  write_all(metrics)
+  // Full-day REPLACE, not merge: without the delete, a metric that no longer
+  // exists for the day (e.g. a UA reclassified as a bot) would keep its stale
+  // value forever — upsert only overwrites keys that still occur. This "ghost
+  // metric" bug lived in prod (house post-mortem) until the reader started
+  // trusting rollups; the archived-days re-roll heals history.
+  //
+  // CHUNKED, not one whole-day transaction (2026-08-03). This runs in the niced
+  // child, but the SERVING process still waits on the locks it takes: better-sqlite3
+  // is synchronous, so a request that writes shared.db during the rollup parks the
+  // event loop until its `busy_timeout = 5000` expires and then fails. On 2026-08-02
+  // this single transaction ran 15.4 s across two days and the meter caught an 8.3 s
+  // event-loop stall with one signed-in user's HTTP 502 seven seconds before the
+  // sweep ended. The cure is to stop HOLDING the write lock for seconds — not to
+  // shorten shared.db's serving busy timeout (that converts waits into user-visible
+  // errors on a database carrying real request-path writes).
+  //
+  // Tradeoff, stated: a crash mid-rollup can now leave a PARTIALLY written day
+  // instead of rolling the whole day back. Both are healed the same way — drop the
+  // `ROLLUP_WATERMARK_KEY` row and re-run (`reroll_archived_days_once` does it for
+  // archived days) — and every write here is idempotent on re-roll.
+  const delete_day = (table: string): void => {
+    shared_db.prepare(`DELETE FROM "${table}" WHERE day = ?`).run(day)
+  }
+  delete_day('log_daily_metrics')
+  write_in_chunks({ db: shared_db, items: metrics, write: item => upsert.run(day, item.metric, item.source, item.value) })
+  delete_day('log_daily_sessions')
+  write_in_chunks({ db: shared_db, items: [...session_activity.values()], write: session => insert_session.run(
+    day,
+    session.session_id,
+    session.user_agent,
+    session.heartbeats,
+    session.has_user_id ? 1 : 0,
+    webdriver_sessions.has(session.session_id) ? 1 : null,
+    session.db_tier,
+    session.country,
+    session.region,
+    session.user_id,
+    session.visitor_id,
+    session.browser_locale,
+    session.ui_locale,
+  ) })
+  delete_day('dictionary_daily_views')
+  write_in_chunks({ db: shared_db, items: [...dict_views], write: ([dict_id, views]) => insert_dict_view.run(day, dict_id, views.sessions.size, views.anon.size, views.visitors.size, views.anon_visitors.size) })
   return { metrics_written: metrics.length }
 }
 
@@ -623,16 +660,28 @@ export function run_log_retention_once({ shared_db = get_shared_db(), logs_db = 
   logs_db?: Database.Database
   archive_db?: Database.Database
   now?: Date
-} = {}): { days_rolled: number, archived: number, pruned: number } {
+} = {}): { days_rolled: number, archived: number, pruned: number, vacuumed: string[], step_ms: Record<string, number> } {
+  // Per-step wall clock: the sweep's cost is wildly uneven (a VACUUM of a
+  // multi-GB file dwarfs everything else) and until 2026-08-02 its only account
+  // of itself was a console.info that dies with the container — so the 115 s
+  // blocking measurement of 2026-08-01 had to be reconstructed from a child
+  // process's spawn time. Per-day rollups are summed under one `rollup_day` key
+  // so a 14-day catch-up doesn't produce 14 keys.
+  const step_ms: Record<string, number> = {}
   const step = <T>({ label, fallback, run }: { label: string, fallback: T, run: () => T }): T => {
+    const started = performance.now()
     try {
       return run()
     } catch (err) {
       console.error(`[log-retention] step '${label}' failed (continuing sweep):`, err)
       log_server_event({ level: 'error', message: 'log_retention_step_failed', error: err, context: { step: label }, db: logs_db })
       return fallback
+    } finally {
+      const key = label.startsWith('rollup_day:') ? 'rollup_day' : label
+      step_ms[key] = Math.round((step_ms[key] ?? 0) + performance.now() - started)
     }
   }
+  const vacuumed: string[] = []
 
   step({ label: 'reroll_archived_days_once', fallback: undefined, run: () => reroll_archived_days_once({ shared_db, logs_db, archive_db }) })
   const watermark = get_rollup_watermark(shared_db)
@@ -672,36 +721,86 @@ export function run_log_retention_once({ shared_db = get_shared_db(), logs_db = 
     run: () => archive_old_logs({ logs_db, archive_db, now }),
   })
   // Return pruned disk to the OS once a growth bulge drains (guarded — see helper).
-  step({ label: 'vacuum_logs_db', fallback: undefined, run: () => vacuum_if_worthwhile({ db: logs_db, label: 'logs.db' }) })
-  step({ label: 'vacuum_archive_db', fallback: undefined, run: () => vacuum_if_worthwhile({ db: archive_db, label: 'logs-archive.db' }) })
+  for (const { label, db } of [{ label: 'logs.db', db: logs_db }, { label: 'logs-archive.db', db: archive_db }]) {
+    const result = step({
+      label: `vacuum_${label === 'logs.db' ? 'logs_db' : 'archive_db'}`,
+      fallback: { vacuumed: false, reclaimable_bytes: 0 },
+      run: () => vacuum_if_worthwhile({ db, label }),
+    })
+    if (result.vacuumed)
+      vacuumed.push(label)
+  }
   step({ label: 'record_ran_at', fallback: undefined, run: () => {
     shared_db.prepare(`
       INSERT INTO db_metadata (key, value) VALUES ('log_retention_ran_at', ?)
       ON CONFLICT(key) DO UPDATE SET value = excluded.value
     `).run(now.toISOString())
   } })
-  return { days_rolled, archived, pruned }
+  return { days_rolled, archived, pruned, vacuumed, step_ms }
+}
+
+/** What one child-run sweep reports home; the PARENT turns this into telemetry. */
+export interface RetentionSweepSummary {
+  duration_ms: number
+  days_rolled: number
+  archived: number
+  pruned: number
+  /** Which log files were rewritten this run ('logs.db' / 'logs-archive.db'). */
+  vacuumed: string[]
+  /** Wall clock per `step()` label — where the time actually went. */
+  step_ms: Record<string, number>
+  /** Set only when the whole sweep failed (individual steps self-heal via `step()`). */
+  error?: string
 }
 
 /**
- * The roster's `run` (scheduled by `cron-scheduler.ts`, see `crons.ts`): one
- * retention sweep + the injected after-sweep hook, with its own queryable failure
- * event. No env flag — log retention always runs on the active node so trends never
- * silently stop accumulating.
+ * ONE retention sweep, run INSIDE the analytics child process (see
+ * `analytics-snapshot.ts`, which forks it and owns the telemetry write).
  *
- * The hook is where the daily analytics checkpoint gets kicked (a niced child
- * process — see `analytics-snapshot.ts`), and the ORDER matters: this sweep advances
- * the rollup watermark first, so the child's payload is built on finalized rollups
- * rather than re-scanning raw rows for a day that was about to be materialized
- * anyway. It's injected by the roster to keep this module free of a cycle.
+ * WHY IT LIVES IN A CHILD (2026-08-01, `.issues/retention-sweep-blocks-request-thread.md`):
+ * every part of this sweep is synchronous better-sqlite3 work, and in the serving
+ * process it held the event loop for a MEASURED 115 seconds — the kernel's accept
+ * queue filled, Caddy logged six connections reset, and two signed-in editors got
+ * HTTP 502 on their sync at 03:30 Pacific. It recurs daily, and a `VACUUM` of the
+ * 2.0 GB logs.db would dwarf it. The analytics compute made this move on
+ * 2026-07-30; this is the sweep that ran immediately before it.
+ *
+ * Handles are opened HERE rather than through `get_shared_db()` / `get_logs_db()`:
+ * the child must not run the shared.db migration runner (the server owns
+ * migrations), and it wants a LONG busy timeout — unlike the serving process it is
+ * allowed to wait for a lock, because nobody is waiting on it.
+ *
+ * Never throws: a dead sweep must not take the analytics checkpoint down with it.
  */
-export function run_log_retention_sweep({ after_sweep }: { after_sweep?: () => Promise<void> } = {}): void {
+export function sweep_log_retention_in_child({ data_dir = process.env.DATA_DIR || '.data', now = new Date() }: {
+  data_dir?: string
+  now?: Date
+} = {}): RetentionSweepSummary {
+  const started = performance.now()
+  const summary: RetentionSweepSummary = { duration_ms: 0, days_rolled: 0, archived: 0, pruned: 0, vacuumed: [], step_ms: {} }
+  let shared_db: Database.Database | null = null
+  let logs_db: Database.Database | null = null
+  let archive_db: Database.Database | null = null
   try {
-    const result = run_log_retention_once()
-    console.info(`[log-retention] rolled ${result.days_rolled} day(s), archived ${result.archived}, pruned ${result.pruned} (hot ${HOT_WINDOW_DAYS}d, archive ${ARCHIVE_WINDOW_DAYS}d).`)
-    after_sweep?.().catch(err => console.error('[log-retention] after-sweep hook failed:', err))
+    shared_db = new SqliteDatabase(join(data_dir, 'shared.db'), { fileMustExist: true })
+    shared_db.pragma(`busy_timeout = ${CHILD_BUSY_TIMEOUT_MS}`)
+    shared_db.pragma('foreign_keys = ON')
+    logs_db = open_logs_db(join(data_dir, 'logs.db'), { busy_timeout_ms: CHILD_BUSY_TIMEOUT_MS })
+    archive_db = open_log_archive_db(join(data_dir, 'logs-archive.db'), { busy_timeout_ms: CHILD_BUSY_TIMEOUT_MS })
+    const result = run_log_retention_once({ shared_db, logs_db, archive_db, now })
+    Object.assign(summary, result)
+    console.info(`[log-retention] rolled ${result.days_rolled} day(s), archived ${result.archived}, pruned ${result.pruned}${result.vacuumed.length ? `, VACUUMed ${result.vacuumed.join(' + ')}` : ''} (hot ${HOT_WINDOW_DAYS}d, archive ${ARCHIVE_WINDOW_DAYS}d).`)
   } catch (err) {
+    summary.error = (err as Error)?.message ?? String(err)
     console.error('[log-retention] sweep failed:', err)
-    log_server_event({ level: 'error', message: 'log_retention_sweep_failed', error: err })
+  } finally {
+    shared_db?.close()
+    logs_db?.close()
+    archive_db?.close()
+    summary.duration_ms = Math.round(performance.now() - started)
   }
+  return summary
 }
+
+/** The child may wait as long as it takes for a lock — it is serving nobody. */
+const CHILD_BUSY_TIMEOUT_MS = 60_000

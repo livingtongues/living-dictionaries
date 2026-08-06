@@ -5,9 +5,20 @@
 
   /**
    * The dictionary's glossing-abbreviations legend, grouped by the optional
-   * `category` column. Renders nothing when the dictionary has no legend — most
-   * don't, and an empty "Glossing abbreviations" heading is just noise.
+   * `category` column, plus a collapsed roll of the STANDARD Leipzig codes the
+   * page actually uses (localized — curated rows stay dictionary data). Renders
+   * nothing when both are empty — most dictionaries have neither, and an empty
+   * "Glossing abbreviations" heading is just noise.
    */
+
+  interface Props {
+    /** Standard codes used on the page (from `catalog.standard_codes_used`). */
+    standard_codes?: readonly string[]
+    /** `catalog.expand` — localizes standard codes + curated restatements. */
+    expand?: ((code: string) => string) | null
+  }
+
+  const { standard_codes = [], expand = null }: Props = $props()
 
   const { dict_db, dictionary, t } = $derived(page.data)
 
@@ -30,7 +41,7 @@
   })
 </script>
 
-{#if entries.length}
+{#if entries.length || standard_codes.length}
   <section class="legend">
     <h4 class="heading">{t('grammar.glossing_legend')}</h4>
     {#each groups as [category, group] (category)}
@@ -38,10 +49,21 @@
       <dl>
         {#each group as entry (entry.code)}
           <dt>{entry.code}</dt>
-          <dd>{gloss_for_language(entry.name, language)}</dd>
+          <dd>{expand?.(entry.code) || gloss_for_language(entry.name, language)}</dd>
         {/each}
       </dl>
     {/each}
+    {#if standard_codes.length}
+      <details class="standard" class:solo={!entries.length}>
+        <summary>{t('grammar.standard_abbreviations')} ({standard_codes.length})</summary>
+        <dl>
+          {#each standard_codes as code (code)}
+            <dt>{code}</dt>
+            <dd>{expand?.(code) || ''}</dd>
+          {/each}
+        </dl>
+      </details>
+    {/if}
   </section>
 {/if}
 
@@ -88,5 +110,33 @@
 
   dd {
     margin: 0;
+  }
+
+  .standard {
+    margin-top: 0.875rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .standard.solo {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+
+  .standard summary {
+    cursor: pointer;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-secondary);
+    user-select: none;
+  }
+
+  .standard summary:hover {
+    color: var(--color);
+  }
+
+  .standard dl {
+    margin-top: 0.5rem;
   }
 </style>

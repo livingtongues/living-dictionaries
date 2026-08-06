@@ -1,4 +1,4 @@
-import { glossing_languages } from '$lib/glosses/glossing-languages'
+import { glossing_languages } from '$lib/gloss/glossing-languages'
 import { get_dictionary_db } from './dictionary-db'
 import { get_shared_db } from './shared-db'
 

@@ -12,14 +12,25 @@
   import { page } from '$app/state'
   import { browser } from '$app/environment'
   import { log_warning } from '$lib/debug/remote-log'
+  import { dedupe_entries_list } from '$lib/utils/dedupe-entries-list'
 
   interface Props {
     entries: EntryData[]
     page_data: EntriesPageData
   }
 
-  const { entries, page_data }: Props = $props()
+  const { entries: raw_entries, page_data }: Props = $props()
   const { dictionary, can_edit, preferred_table_columns, writes, search_params } = $derived(page_data)
+
+  // One de-dupe before all three keyed views consume the array — a single duplicated
+  // id otherwise throws `each_key_duplicate` and the boundary below catches it, which
+  // renders an EMPTY results area. `dedupe_entries_list` also names the duplicated id.
+  const entries = $derived(dedupe_entries_list({
+    entries: raw_entries ?? [],
+    dict_id: dictionary?.id,
+    view: search_params.value.view ?? 'list',
+    query: search_params.value.query,
+  }))
 
   // Defensive boundary around the results render. A client-local corruption of the
   // local dict.db (or a would-be render recursion) must not white-screen the whole
@@ -65,17 +76,6 @@
           can_edit={can_edit}
           on_click={(e) => { handle_entry_click(e, entry) }}
           {writes} />
-
-        {#if page.state.entry_id === entry.id}
-          <Modal noscroll class="entry-overlay-modal" on_close={() => history.back()} show_x={false}>
-            <EntryPage
-              data={{
-                ...page_data,
-                entry_from_page: entry,
-                shallow: true,
-              }} />
-          </Modal>
-        {/if}
       {/each}
     {:else if search_params.value.view === 'table'}
       <EntriesTable
@@ -83,6 +83,7 @@
         preferred_table_columns={preferred_table_columns.value}
         {dictionary}
         can_edit={can_edit}
+        on_open_entry={handle_entry_click}
         {writes} />
     {:else if search_params.value.view === 'gallery'}
       <EntriesGallery
@@ -95,6 +96,20 @@
         {entries}
         {dictionary}
         can_edit={can_edit} />
+    {/if}
+
+    {#if page.state.entry_id}
+      {@const overlay_entry = entries.find(entry => entry.id === page.state.entry_id)}
+      {#if overlay_entry}
+        <Modal noscroll class="entry-overlay-modal" on_close={() => history.back()} show_x={false}>
+          <EntryPage
+            data={{
+              ...page_data,
+              entry_from_page: overlay_entry,
+              shallow: true,
+            }} />
+        </Modal>
+      {/if}
     {/if}
 
     {#snippet failed(_error, reset)}

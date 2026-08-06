@@ -212,7 +212,7 @@
   <HeadlessButton
     class="btn-primary waveform-play-button {playing ? 'playing' : ''}"
     onclick={start_stop}>
-    <IconMaterialSymbolsHearing style="margin-top: 0.25rem; margin-bottom: 0.25rem; width: 2em; height: 2em;" />
+    <IconMaterialSymbolsHearing style="width: 1.75em; height: 1.75em;" />
   </HeadlessButton>
   <div bind:this={container} class="waveform" style:height="{HEIGHT}px">
     <canvas bind:this={canvas} onclick={seek} style:height="{HEIGHT}px"></canvas>
@@ -222,6 +222,10 @@
 <style>
   :global(.waveform-play-button) {
     margin-right: 0.5rem;
+    width: 3rem;
+    height: 3rem;
+    padding: 0;
+    flex-shrink: 0;
   }
   .waveform {
     flex-grow: 1;

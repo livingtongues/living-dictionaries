@@ -20,7 +20,7 @@ export const WithPhotoFullData: Story<typeof Component> = {
     glosses: [story_cards[0].gloss, 'helecho'],
     dialect: 'Northern',
     photo_storage_path: story_cards[0].photo_storage_path,
-    audio_storage_path: story_cards[0].audio_storage_path,
+    audios: [{ id: 'a1', storage_path: story_cards[0].audio_storage_path, speaker_name: 'Rosa Lopez' }],
   },
 }
 
@@ -33,7 +33,7 @@ export const NoPhotoFullData: Story<typeof Component> = {
     phonetic: 'tsʼikin',
     pos: 'n.',
     glosses: ['bird', 'pájaro'],
-    audio_storage_path: story_cards[0].audio_storage_path,
+    audios: [{ id: 'a1', storage_path: story_cards[0].audio_storage_path, speaker_name: 'Rosa Lopez' }],
   },
 }
 
@@ -47,7 +47,7 @@ export const NoPhotoAltOrthography: Story<typeof Component> = {
     pos: 'n.',
     glosses: ['orange'],
     dialect: 'Mayurbhanj',
-    audio_storage_path: story_cards[0].audio_storage_path,
+    audios: [{ id: 'a1', storage_path: story_cards[0].audio_storage_path, speaker_name: 'Rosa Lopez' }],
   },
 }
 
@@ -79,7 +79,7 @@ export const NoPhotoLongLexeme: Story<typeof Component> = {
     phonetic: 'nakattiɾundʱukondiɾuppen',
     pos: 'v.',
     glosses: ['I will keep on swimming'],
-    audio_storage_path: story_cards[0].audio_storage_path,
+    audios: [{ id: 'a1', storage_path: story_cards[0].audio_storage_path, speaker_name: 'Rosa Lopez' }],
   },
 }
 
@@ -95,7 +95,7 @@ export const ManageControls: Story<typeof Component> = {
     lexeme: story_cards[0].lexeme,
     glosses: [story_cards[0].gloss],
     photo_storage_path: story_cards[0].photo_storage_path,
-    audio_storage_path: story_cards[0].audio_storage_path,
+    audios: [{ id: 'a1', storage_path: story_cards[0].audio_storage_path, speaker_name: 'Rosa Lopez' }],
     manage: {
       can_move_left: true,
       can_move_right: false,
@@ -103,5 +103,21 @@ export const ManageControls: Story<typeof Component> = {
       on_move_right: noop,
       on_unstar: noop,
     },
+  },
+}
+
+/** Multiple recordings → count badge on the overlay ear. */
+export const MultiAudio: Story<typeof Component> = {
+  props: {
+    href: '#',
+    entry_id: 'e-multi',
+    lexeme: story_cards[0].lexeme,
+    glosses: [story_cards[0].gloss],
+    photo_storage_path: story_cards[0].photo_storage_path,
+    audios: [
+      { id: 'a1', storage_path: story_cards[0].audio_storage_path, speaker_name: 'Rosa Lopez' },
+      { id: 'a2', storage_path: story_cards[0].audio_storage_path, speaker_name: 'Sam Brown' },
+      { id: 'a3', storage_path: story_cards[0].audio_storage_path, speaker_name: 'Sam Brown' },
+    ],
   },
 }

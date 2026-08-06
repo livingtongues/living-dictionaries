@@ -12,10 +12,10 @@
   import { page } from '$app/state'
 
   interface Props {
-    initialCenter?: LngLatFull
+    initial_center?: LngLatFull
     lng?: number
     lat?: number
-    canRemove?: boolean
+    can_remove?: boolean
     on_update: (coordinates: { lat: number, lng: number }) => void
     on_remove?: () => void
     on_close: () => void
@@ -23,34 +23,34 @@
   }
 
   let {
-    initialCenter = undefined,
+    initial_center = undefined,
     lng = $bindable(undefined),
     lat = $bindable(undefined),
-    canRemove = true,
+    can_remove = true,
     on_update,
     on_remove,
     on_close,
     children,
   }: Props = $props()
 
-  let centerLng = $state(lng)
-  let centerLat = $state(lat)
+  let center_lng = $state(lng)
+  let center_lat = $state(lat)
 
   const zoom = lng && lat ? 6 : 3
 
   onMount(() => {
     if (lng && lat) return
-    if (initialCenter) {
-      ({ longitude: centerLng, latitude: centerLat } = initialCenter)
+    if (initial_center) {
+      ({ longitude: center_lng, latitude: center_lat } = initial_center)
     } else if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
-        centerLng = position.coords.longitude
-        centerLat = position.coords.latitude
+        center_lng = position.coords.longitude
+        center_lat = position.coords.latitude
       })
     }
   })
 
-  function handleGeocoderResult(result) {
+  function handle_geocoder_result(result) {
     if (result?.user_coordinates?.[0])
       set_marker(result.user_coordinates[0], result.user_coordinates[1])
     else
@@ -111,8 +111,8 @@
 
     <div style="height: 50vh;">
       <Map
-        lng={centerLng}
-        lat={centerLat}
+        lng={center_lng}
+        lat={center_lat}
         {zoom}
         on_click={lng_lat => ({ lng, lat } = set_marker(lng_lat.lng, lng_lat.lat))}>
         {@render children?.()}
@@ -120,7 +120,7 @@
         <Geocoder
           options={{ marker: false }}
           placeholder={page.data.t('about.search')}
-          on_result={handleGeocoderResult}
+          on_result={handle_geocoder_result}
           on_error={error => console.error(error)} />
         {#if lng !== undefined && lat !== undefined}
           <Marker
@@ -137,7 +137,7 @@
       <HeadlessButton class="btn-ghost btn-default" onclick={on_close}>
         {page.data.t('misc.cancel')}
       </HeadlessButton>
-      {#if canRemove}
+      {#if can_remove}
         <HeadlessButton style="color: var(--danger)" class="btn-ghost btn-default" onclick={remove}>
           {page.data.t('misc.remove')}
         </HeadlessButton>

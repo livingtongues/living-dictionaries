@@ -4,7 +4,7 @@
   import { goto } from '$app/navigation'
   import { page } from '$app/state'
   import { api_admin_featured_entries_set_status } from '$api/admin/featured-entries/_call'
-  import { photo_src, url_from_storage_path } from '$lib/utils/media-url'
+  import { audio_element_from_storage_path, photo_src } from '$lib/utils/media-url'
   import { read_choice_param, update_query_params } from '$lib/utils/url-search-params'
   import IconMdiPlay from '~icons/mdi/play'
   import IconMdiPause from '~icons/mdi/pause'
@@ -52,7 +52,7 @@
       return
     }
     audio_element?.pause()
-    audio_element = new Audio(url_from_storage_path(row.audio_storage_path))
+    audio_element = audio_element_from_storage_path(row.audio_storage_path)
     audio_element.onended = () => playing_id = null
     audio_element.onerror = () => playing_id = null
     playing_id = row.id

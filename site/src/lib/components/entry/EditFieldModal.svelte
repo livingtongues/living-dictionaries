@@ -5,13 +5,16 @@
 
   interface Props {
     display: string
-    value?: string
+    /** SQLite hands back NULL for an empty field — normalized below, never passed on raw. */
+    value?: string | null
     field: EntryFieldValue
     bcp?: string
     isSompeng?: boolean
     addingLexeme?: boolean
     on_update: (new_value: string) => void | Promise<void>
     on_close: () => void
+    /** Adds a "Save ↓" action (also Ctrl+Enter) that saves, closes, then continues editing the same field one row down. */
+    on_save_next?: () => void
   }
 
   const {
@@ -23,6 +26,7 @@
     addingLexeme = false,
     on_update,
     on_close,
+    on_save_next = undefined,
   }: Props = $props()
 </script>
 
@@ -33,5 +37,5 @@
   {#snippet heading()}
     <span>{display}</span>
   {/snippet}
-  <EditField {on_close} {on_update} {value} {field} {bcp} {isSompeng} {addingLexeme} />
+  <EditField {on_close} {on_update} {on_save_next} value={value ?? ''} {field} {bcp} {isSompeng} {addingLexeme} />
 </Modal>

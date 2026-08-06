@@ -102,6 +102,10 @@ try {
       `INSERT OR IGNORE INTO entries (id, lexeme, created_by_user_id, created_at, updated_by_user_id, updated_at)
        VALUES (?, ?, ?, ?, ?, ?)`,
     ).run('e_ja', JSON.stringify({ default: 'ja\'' }), MOCK_USER_ID, now, MOCK_USER_ID, now)
+    // `INSERT OR IGNORE` leaves an existing row alone, so reset the one field
+    // the sync e2e overwrites with a unique marker — otherwise a second run
+    // sees the previous run's marker and bails ("re-seed needed").
+    dev_db.prepare(`UPDATE entries SET phonetic = ? WHERE id = ?`).run('haʔ', 'e_ja')
     const has_sense = dev_db.prepare('SELECT 1 FROM senses WHERE entry_id = ? LIMIT 1').get('e_ja')
     if (!has_sense) {
       dev_db.prepare(

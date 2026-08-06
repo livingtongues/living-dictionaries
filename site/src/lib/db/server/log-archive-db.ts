@@ -36,12 +36,13 @@ export function get_log_archive_db(): Database.Database {
   return archive_singleton
 }
 
-export function open_log_archive_db(path: string | ':memory:'): Database.Database {
+/** `busy_timeout_ms`: the retention child waits patiently; nothing else writes this file. */
+export function open_log_archive_db(path: string | ':memory:', { busy_timeout_ms = 5000 }: { busy_timeout_ms?: number } = {}): Database.Database {
   if (path !== ':memory:')
     mkdirSync(dirname(path), { recursive: true })
   const db = new Database(path)
   db.pragma('journal_mode = WAL')
-  db.pragma('busy_timeout = 5000')
+  db.pragma(`busy_timeout = ${busy_timeout_ms}`)
   db.exec(`
     ${CLIENT_LOGS_TABLE_SQL}
     CREATE INDEX IF NOT EXISTS idx_archive_client_logs_received_at ON client_logs(received_at DESC);

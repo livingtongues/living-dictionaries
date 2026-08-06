@@ -11,12 +11,19 @@ describe(poisoned_file_recovery_decision, () => {
       .toEqual({ replace: false, reason: 'editor_preserve' })
   })
 
-  test('never replaces a freshly-fetched file (failure there is environmental, not a poisoned file)', () => {
+  test('DOES replace a freshly-fetched file for a viewer — `drop_in_snapshot` swallows a failed write, so a truncated file is exactly what sqlite3_open_v2 refuses (2026-08-03)', () => {
     expect(poisoned_file_recovery_decision({ file_existed: false, has_editor_role: false, already_attempted: false }))
-      .toEqual({ replace: false, reason: 'not_existing' })
-    // an editor with no prior file is likewise not eligible
+      .toEqual({ replace: true, reason: 'viewer_replace_fresh' })
+  })
+
+  test('an EDITOR with a freshly-fetched file is still preserved-and-refused (the UI asks instead of discarding)', () => {
     expect(poisoned_file_recovery_decision({ file_existed: false, has_editor_role: true, already_attempted: false }))
-      .toEqual({ replace: false, reason: 'not_existing' })
+      .toEqual({ replace: false, reason: 'editor_preserve' })
+  })
+
+  test('the fresh-file branch rides the SAME page-session permit, so it cannot refetch-loop', () => {
+    expect(poisoned_file_recovery_decision({ file_existed: false, has_editor_role: false, already_attempted: true }))
+      .toEqual({ replace: false, reason: 'already_attempted' })
   })
 
   test('refuses a replacement after the page-session permit was claimed by an earlier worker', () => {

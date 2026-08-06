@@ -1,5 +1,10 @@
 <script lang="ts">
   import IconInfoCircle from '~icons/fa-solid/info-circle'
+  import IconMdiWaveform from '~icons/mdi/waveform'
+  import IconMdiTranslate from '~icons/mdi/translate'
+  import IconMdiKeyboardOutline from '~icons/mdi/keyboard-outline'
+  import IconMdiAccountGroupOutline from '~icons/mdi/account-group-outline'
+  import IconMdiDatabaseImportOutline from '~icons/mdi/database-import-outline'
   import type { IPoint, IRegion } from '$lib/types'
   import { onMount } from 'svelte'
   import { convert_to_friendly_url, is_url_like } from './convert-to-friendly-url'
@@ -8,11 +13,12 @@
   import Form from '$lib/components/ui/Form.svelte'
   import { page } from '$app/state'
   import Header from '$lib/components/shell/Header.svelte'
-  import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte'
-  import WhereSpoken from '$lib/components/settings/WhereSpoken.svelte'
-  import EditableAlternateNames from '$lib/components/settings/EditableAlternateNames.svelte'
-  import { glossing_languages } from '$lib/glosses/glossing-languages'
+  import EditableGlossesField from '$lib/settings/EditableGlossesField.svelte'
+  import WhereSpoken from '$lib/settings/WhereSpoken.svelte'
+  import EditableAlternateNames from '$lib/settings/EditableAlternateNames.svelte'
+  import { glossing_languages } from '$lib/gloss/glossing-languages'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
+  import JsonLd from '$lib/components/JsonLd.svelte'
   import { debounce } from '$lib/utils/debounce'
   import { browser, dev } from '$app/environment'
 
@@ -72,9 +78,58 @@
       author_connection = 'aaaaa '.repeat(10)
     }
   })
+
+  const PAGE_DESCRIPTION = 'Build a free online dictionary for your language — with audio from native speakers, photos, video and translations into multiple languages. Living Dictionaries supports endangered, under-represented and minority languages. Create yours in minutes and invite your community to contribute.'
+
+  const features = [
+    { icon: IconMdiWaveform, key: 'multimedia' },
+    { icon: IconMdiTranslate, key: 'glossing' },
+    { icon: IconMdiKeyboardOutline, key: 'keyboards' },
+    { icon: IconMdiAccountGroupOutline, key: 'collaboration' },
+    { icon: IconMdiDatabaseImportOutline, key: 'import' },
+  ] as const
+
+  // The visible "About" sections and the FAQPage JSON-LD share this array so
+  // structured data can never drift from what the page actually says.
+  const faqs = $derived(['what', 'who', 'need', 'after'].map(topic => ({
+    question: page.data.t(`create.faq_${topic}_q` as 'create.faq_what_q'),
+    answer: page.data.t(`create.faq_${topic}_a` as 'create.faq_what_a'),
+  })))
+
+  const json_ld = $derived([
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      '@id': 'https://livingdictionaries.app/create-dictionary',
+      'url': 'https://livingdictionaries.app/create-dictionary',
+      'name': page.data.t('create.page_title'),
+      'description': PAGE_DESCRIPTION,
+      'isPartOf': { '@id': 'https://livingdictionaries.app' },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      'mainEntity': faqs.map(({ question, answer }) => ({
+        '@type': 'Question',
+        'name': question,
+        'acceptedAnswer': { '@type': 'Answer', 'text': answer },
+      })),
+    },
+  ])
 </script>
 
 <Header>{page.data.t('create.create_new_dictionary')}</Header>
+
+<section class="intro">
+  <h1>{page.data.t('create.page_title')}</h1>
+  <p class="lede">{page.data.t('create.lede_1')}</p>
+  <ul class="feature-strip">
+    {#each features as { icon: Icon, key } (key)}
+      <li><Icon /> {page.data.t(`home_v2.feature_${key}_title` as 'home_v2.feature_multimedia_title')}</li>
+    {/each}
+  </ul>
+  <p class="lede secondary">{page.data.t('create.lede_2')}</p>
+</section>
 
 <Form
 
@@ -422,6 +477,13 @@ Use: ${conlang_use.trim()}`
   {/snippet}
 </Form>
 
+<section class="learn-more">
+  {#each faqs as { question, answer } (question)}
+    <h2>{question}</h2>
+    <p>{answer}</p>
+  {/each}
+</section>
+
 {#if modal === 'auth'}
   {#await import('$lib/components/shell/AuthModal.svelte') then { default: AuthModal }}
     <AuthModal
@@ -432,17 +494,91 @@ Use: ${conlang_use.trim()}`
   {/await}
 {/if}
 
+<JsonLd data={json_ld} />
+
 <SeoMetaTags
-  title={page.data.t('create.create_new_dictionary')}
-  description="Build a new Living Dictionary in a few short steps. Create a title and set the URL, and then configure the settings. Living Dictionaries are comprehensive, free, online technological tools integrating audio, images and video."
-  keywords="Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary" />
+  title={page.data.t('create.page_title')}
+  description={PAGE_DESCRIPTION}
+  keywords="Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Make Your Own Dictionary, Dictionary Maker, Dictionary Creator, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary" />
 
 <style>
+  .intro {
+    max-width: 40rem;
+    margin: 0 auto;
+    padding: 2rem 1rem 0.5rem;
+    text-align: center;
+  }
+
+  .intro h1 {
+    font-size: clamp(1.6rem, 4vw, 2.25rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 0.75rem;
+  }
+
+  .lede {
+    margin: 0 0 1rem;
+    font-size: 1.0625rem;
+    line-height: 1.55;
+  }
+
+  .lede.secondary {
+    margin-bottom: 0;
+    font-size: 0.9375rem;
+    color: var(--color-secondary);
+  }
+
+  .feature-strip {
+    list-style: none;
+    margin: 0 0 1rem;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .feature-strip li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 9999px;
+    background: var(--surface);
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+
+  .feature-strip li :global(svg) {
+    color: var(--primary);
+  }
+
+  .learn-more {
+    max-width: 40rem;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .learn-more h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 2rem 0 0.5rem;
+  }
+
+  .learn-more h2:first-child {
+    margin-top: 0;
+  }
+
+  .learn-more p {
+    margin: 0;
+    line-height: 1.6;
+  }
+
   .create-form {
     flex-direction: column; /* (was flex-col without display:flex — inert, kept for parity) */
     justify-content: center;
     padding: 1rem;
-    max-width: 28rem;
+    max-width: 32rem;
     margin-left: auto;
     margin-right: auto;
   }
@@ -473,6 +609,7 @@ Use: ${conlang_use.trim()}`
   }
 
   .create-form input:not([type='radio']):not([type='checkbox']),
+  .create-form textarea,
   .create-form select {
     width: 100%;
   }

@@ -8,18 +8,22 @@ export const default_columns: IColumn[] = [
     sticky: true,
   },
   {
+    field: 'homograph',
+    width: 80,
+    hidden: true,
+  },
+  {
     field: 'audio',
-    width: 31, // 50? // AudioCell
+    width: 44,
   },
   {
     field: 'photo',
-    width: 31, // 50? // ImageCell
+    width: 56,
   },
-  // TODO: add videos to columns
-  // {
-  //   field: 'videoFile',
-  //   width: 31, // 50? // VideoCell
-  // },
+  {
+    field: 'video',
+    width: 56,
+  },
   {
     field: 'gloss',
     width: 250,
@@ -42,7 +46,7 @@ export const default_columns: IColumn[] = [
   },
   {
     field: 'parts_of_speech',
-    width: 137, // SelectPOS
+    width: 137,
   },
   {
     field: 'noun_class',
@@ -54,7 +58,7 @@ export const default_columns: IColumn[] = [
   },
   {
     field: 'speaker',
-    width: 150, // SelectSpeakerCell
+    width: 150,
   },
   {
     field: 'custom_tags',
@@ -81,6 +85,11 @@ export const default_columns: IColumn[] = [
     width: 150,
   },
   {
+    // hidden is per-dictionary when unset — see set_up_columns
+    field: 'variant',
+    width: 150,
+  },
+  {
     field: 'notes',
     width: 300,
   },
@@ -93,7 +102,17 @@ export const default_columns: IColumn[] = [
     width: 300,
   },
   {
+    field: 'sense_sources',
+    width: 200,
+    hidden: true,
+  },
+  {
     field: 'sources',
     width: 200,
+  },
+  {
+    field: 'coordinates',
+    width: 60,
+    hidden: true,
   },
 ]

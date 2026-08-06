@@ -8,17 +8,15 @@
   import { seo_description } from './seo_description'
   import { seo_entry_title } from './seo_entry_title'
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
-  import JSON from '$lib/components/ui/JSON.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
   import { share } from '$lib/utils/share'
   import { get_headword } from '$lib/orthography/orthographies'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import JsonLd from '$lib/components/JsonLd.svelte'
-  import ChangeHistory from '$lib/components/history/ChangeHistory.svelte'
+  import ChangeHistory from '$lib/history/ChangeHistory.svelte'
   import { track } from '$lib/debug/remote-log'
   import { ENTRY_FEATURED, ENTRY_OPENED, ENTRY_UNFEATURED } from '$lib/debug/log-events'
   import { page } from '$app/state'
-  import { dev } from '$app/environment'
   import { key_between } from '$lib/api/v1/fractional-index'
   import IconMdiHistory from '~icons/mdi/history'
   import IconMdiStar from '~icons/mdi/star'
@@ -175,9 +173,6 @@
   </HeadlessButton>
 
   <div class="entry-actions">
-    {#if dev || auth_user.admin_level >= 3}
-      <JSON obj={entry} />
-    {/if}
     {#if can_edit}
       <HeadlessButton
         style="color: var(--danger)"

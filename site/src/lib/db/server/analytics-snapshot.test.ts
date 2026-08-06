@@ -15,6 +15,7 @@ import {
   snapshot_targets,
   spawn_analytics_snapshot_job,
 } from './analytics-snapshot'
+import { sweep_log_retention_in_child } from './log-retention-cron'
 import { open_logs_db } from './logs-db'
 import { open_shared_db } from './shared-db'
 
@@ -115,6 +116,73 @@ describe(run_analytics_snapshot_job, () => {
     await expect(run_analytics_snapshot_job({ reason: 'test' })).rejects.toThrow()
     // …and nothing half-written is left readable.
     expect(read_analytics_snapshot({ range: '30', audience: 'humans' })).toBe(null)
+  })
+})
+
+/**
+ * The daily RETENTION SWEEP rides the same child (2026-08-02). In the serving
+ * process it held the event loop for a measured 115 s and cost two signed-in
+ * editors a 502; here it must run FIRST (the analytics payload is built on the
+ * rollups it finalizes) and must never be able to take the checkpoint down.
+ */
+describe(sweep_log_retention_in_child, () => {
+  test('the cron child sweeps BEFORE it computes, and reports what it did', async () => {
+    seed_databases()
+    // A row from three days ago: old enough that its day is past the watermark
+    // and gets rolled up into shared.db by the sweep.
+    const logs = open_logs_db(join(data_dir, 'logs.db'))
+    const three_days_ago = new Date(Date.now() - 3 * 86_400_000).toISOString()
+    logs.prepare(`
+      INSERT INTO client_logs (id, received_at, level, message, source, session_id, user_id)
+      VALUES ('old1', ?, 'info', 'session_start', 'client', 's-old', 'u1')
+    `).run(three_days_ago)
+    logs.close()
+
+    const summary = await run_analytics_snapshot_job({ reason: 'cron', sweep_retention: true })
+
+    // eslint-disable-next-line no-restricted-syntax -- a wall-clock duration
+    expect(summary.retention?.duration_ms).toBeGreaterThanOrEqual(0)
+    expect(summary.retention?.error).toBeUndefined()
+    // eslint-disable-next-line no-restricted-syntax -- at least today + the seeded old day
+    expect(summary.retention?.days_rolled).toBeGreaterThanOrEqual(1)
+    // Where the time went, per step — the number that had to be reconstructed by
+    // hand from a proxy log on 2026-08-01.
+    expect(Object.keys(summary.retention?.step_ms ?? {})).toContain('rollup_day')
+
+    // The sweep's writes really landed in shared.db (a child that silently no-ops
+    // would still return a clean summary).
+    const shared = open_shared_db(join(data_dir, 'shared.db'))
+    const rolled = shared.prepare(`SELECT COUNT(*) count FROM log_daily_metrics`).get() as { count: number }
+    const watermark = shared.prepare(`SELECT value FROM db_metadata WHERE key = 'log_rollup_finalized_through'`).get() as { value: string } | undefined
+    shared.close()
+    // eslint-disable-next-line no-restricted-syntax -- any rollup row proves the write path ran
+    expect(rolled.count).toBeGreaterThan(0)
+    expect(watermark?.value).toBeTruthy()
+
+    // …and the analytics half still ran, in the same child, after it.
+    expect(summary.written.map(entry => entry.key)).toEqual(['30-humans', '30-bots'])
+  })
+
+  test('a sweep that cannot even open its databases reports the failure instead of throwing', () => {
+    // No files at all: the parent must still get a summary it can log, because a
+    // dead sweep must not take the analytics checkpoint down with it.
+    const summary = sweep_log_retention_in_child({ data_dir: join(data_dir, 'nowhere') })
+
+    expect(summary.error).toBeTruthy()
+    expect(summary.days_rolled).toBe(0)
+  })
+
+  test('only the daily cron asks for a sweep — the Recompute button and the boot catch-up never do', async () => {
+    const child = { pid: 7, on: vi.fn(), kill: vi.fn() }
+    const fork_impl = vi.fn(() => child) as never
+
+    await spawn_analytics_snapshot_job({ reason: 'cron', sweep_retention: true, fork_impl, inline: false })
+    _reset_analytics_snapshot_running_for_tests()
+    await spawn_analytics_snapshot_job({ reason: 'manual', fork_impl, inline: false })
+
+    const { calls } = (fork_impl as unknown as { mock: { calls: [string, string[], { env: Record<string, string> }][] } }).mock
+    expect(calls[0][2].env.ANALYTICS_SNAPSHOT_SWEEP).toBe('1')
+    expect(calls[1][2].env.ANALYTICS_SNAPSHOT_SWEEP).toBeUndefined()
   })
 })
 

@@ -19,7 +19,7 @@
   import { page } from '$app/state'
 
   interface Props {
-    initialCenter?: LngLatFull
+    initial_center?: LngLatFull
     region: IRegion
     on_update: (region: IRegion) => void
     on_remove?: () => void
@@ -27,26 +27,26 @@
     children?: import('svelte').Snippet
   }
 
-  const { initialCenter = undefined, region, on_update, on_remove, on_close, children }: Props = $props()
+  const { initial_center = undefined, region, on_update, on_remove, on_close, children }: Props = $props()
   const zoom = region ? 4 : 3
 
-  let centerLng: number = $state()
-  let centerLat: number = $state()
+  let center_lng: number = $state()
+  let center_lat: number = $state()
 
   onMount(() => {
     if (region) {
-      [centerLng, centerLat] = center_of_coordinates(region.coordinates)
-    } else if (initialCenter) {
-      ({ longitude: centerLng, latitude: centerLat } = initialCenter)
+      [center_lng, center_lat] = center_of_coordinates(region.coordinates)
+    } else if (initial_center) {
+      ({ longitude: center_lng, latitude: center_lat } = initial_center)
     } else if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
-        centerLng = position.coords.longitude
-        centerLat = position.coords.latitude
+        center_lng = position.coords.longitude
+        center_lat = position.coords.latitude
       })
     }
   })
 
-  function handleGeocoderResult(result, add) {
+  function handle_geocoder_result(result, add) {
     if (result?.user_coordinates?.[0]) {
       add({
         longitude: result.user_coordinates[0],
@@ -59,7 +59,7 @@
     on_update({ coordinates })
     on_close()
   }
-  function removeRegion() {
+  function remove_region() {
     on_remove?.()
     on_close()
   }
@@ -80,8 +80,8 @@
       <form onsubmit={(e) => { e.preventDefault(); update(points) }}>
         <div style="height: 50vh;">
           <Map
-            lng={centerLng}
-            lat={centerLat}
+            lng={center_lng}
+            lat={center_lat}
             {zoom}
             on_click={({ lng, lat }) =>
               add({ longitude: lng, latitude: lat })}>
@@ -90,7 +90,7 @@
             <Geocoder
               options={{ marker: false }}
               placeholder={page.data.t('about.search')}
-              on_result={result => handleGeocoderResult(result, add)}
+              on_result={result => handle_geocoder_result(result, add)}
               on_error={error => console.error(error)} />
             {#each Array.from(points) as point (point)}
               <Marker
@@ -142,7 +142,7 @@
           <HeadlessButton class="btn-ghost btn-default" onclick={on_close}>
             {page.data.t('misc.cancel')}
           </HeadlessButton>
-          <HeadlessButton style="color: var(--danger)" class="btn-ghost btn-default" onclick={removeRegion}>
+          <HeadlessButton style="color: var(--danger)" class="btn-ghost btn-default" onclick={remove_region}>
             {page.data.t('misc.remove')}
           </HeadlessButton>
           <HeadlessButton class="btn-primary btn-default" type="submit" disabled={size < 3}>

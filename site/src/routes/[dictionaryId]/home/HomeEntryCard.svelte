@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { photo_src, url_from_storage_path } from '$lib/utils/media-url'
-  import { create_exclusive_audio } from '$lib/utils/exclusive-audio.svelte'
+  import { photo_src } from '$lib/utils/media-url'
+  import EntryAudioControl from '$lib/entry/entry-audio/EntryAudioControl.svelte'
+  import type { AudioOptionInput } from '$lib/entry/entry-audio/audio-option-labels'
   import { card_hue } from './home-helpers'
   import StruckText from '$lib/orthography/StruckText.svelte'
-  import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'
   import IconMdiStarOff from '~icons/mdi/star-off'
   import IconMdiChevronLeft from '~icons/mdi/chevron-left'
   import IconMdiChevronRight from '~icons/mdi/chevron-right'
@@ -29,7 +29,8 @@
     glosses?: string[]
     dialect?: string | null
     photo_storage_path?: string | null
-    audio_storage_path?: string | null
+    /** Ordered (created_at ASC) audio options with speaker names. */
+    audios?: AudioOptionInput[]
     manage?: Manage | null
     /** Touch devices have no hover — the strip's mobile edit toggle forces the manage controls visible. */
     force_manage?: boolean
@@ -45,7 +46,7 @@
     glosses = [],
     dialect = null,
     photo_storage_path = null,
-    audio_storage_path = null,
+    audios = [],
     manage = null,
     force_manage = false,
   }: Props = $props()
@@ -53,15 +54,7 @@
   const sparse = $derived(!alt && !phonetic && !pos && !glosses.length && !dialect)
 
   const has_photo = $derived(!!photo_storage_path)
-
-  const audio = create_exclusive_audio()
-
-  function toggle_audio(event: MouseEvent) {
-    event.preventDefault()
-    event.stopPropagation()
-    if (audio_storage_path)
-      audio.toggle(url_from_storage_path(audio_storage_path))
-  }
+  const has_audio = $derived(!!audios.length)
 
   function manage_click(event: MouseEvent, action: () => void) {
     event.preventDefault()
@@ -88,7 +81,7 @@
     {/if}
     {#if !sparse}
       <div class="spacer"></div>
-      <div class="bottom" class:room-for-ear={!!audio_storage_path}>
+      <div class="bottom" class:room-for-ear={has_audio}>
         {#if pos}
           <div class="pos">{pos}</div>
         {/if}
@@ -98,15 +91,8 @@
       </div>
     {/if}
   </div>
-  {#if audio_storage_path}
-    <button
-      type="button"
-      class="overlay-button play"
-      class:playing={audio.playing}
-      onclick={toggle_audio}
-      aria-label="{audio.playing ? page.data.t('misc.pause') : page.data.t('misc.play')} {lexeme}">
-      <IconMaterialSymbolsHearing />
-    </button>
+  {#if has_audio}
+    <EntryAudioControl class="home-play" {audios} {entry_id} surface="home" appearance="overlay" entry_name={lexeme} />
   {/if}
   {#if manage}
     <div class="manage" class:force-visible={force_manage}>
@@ -308,7 +294,7 @@
     transform: scale(0.88);
   }
 
-  .play {
+  .card :global(.home-play) {
     position: absolute;
     right: 0.4375rem;
     bottom: 0.4375rem;

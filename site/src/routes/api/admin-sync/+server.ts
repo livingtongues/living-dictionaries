@@ -5,6 +5,7 @@ import { verify_auth } from '$lib/auth/verify'
 import { ResponseCodes } from '$lib/constants'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { process_sync } from '$lib/db/server/sync-helpers'
+import { group_rejected_rows } from '$lib/db/sync/rejected-rows'
 import { log_server_event } from '$lib/server/log-server-event'
 import { CLIENT_BEHIND, SERVER_BEHIND, SyncVersionError } from '$lib/db/sync/errors'
 import { error, json } from '@sveltejs/kit'
@@ -27,6 +28,13 @@ export const POST: RequestHandler = async (event) => {
     // recurring poison-pill is diagnosable (parity with the dict endpoint).
     if (response.skipped_orphans?.length)
       log_server_event({ level: 'warn', message: 'admin_sync_orphans_skipped', user_id, context: { orphans: response.skipped_orphans } })
+    // The refused-write contract's server half: one queryable row per (table,
+    // reason). The client emits its own `sync_push_rejected`; this side survives
+    // a closed browser.
+    if (response.rejected_rows?.length) {
+      for (const group of group_rejected_rows(response.rejected_rows))
+        log_server_event({ level: 'warn', message: 'admin_sync_push_refused', user_id, context: { reason: group.reason, table_name: group.table_name, rows: group.count, ids: group.ids } })
+    }
     return json(response satisfies AdminSyncResponseBody)
   } catch (err) {
     if (err instanceof SyncVersionError) {

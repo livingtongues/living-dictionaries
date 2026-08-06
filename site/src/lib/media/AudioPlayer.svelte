@@ -1,10 +1,12 @@
 <script lang="ts">
+  import { tick } from 'svelte'
   import { page } from '$app/state'
   import IconMdiPlay from '~icons/mdi/play'
   import IconMdiPause from '~icons/mdi/pause'
   import IconMdiAccountVoice from '~icons/mdi/account-voice'
   import IconMdiVolumeOff from '~icons/mdi/volume-off'
   import { play_audio_element } from '$lib/media/play-audio-element'
+  import { audio_sources } from '$lib/utils/media-url'
 
   interface SpeakerLabel {
     name: string
@@ -32,6 +34,12 @@
   let errored = $state(false)
   /** When set, playback pauses once the cursor reaches this ms (single-sentence play). */
   let stop_at_ms: number | null = null
+  const sources = $derived(audio_sources(audio_url))
+
+  $effect(() => {
+    audio_url
+    void tick().then(() => element?.load())
+  })
 
   function on_time() {
     if (!element) return
@@ -90,7 +98,6 @@
 <div class="player">
   <audio
     bind:this={element}
-    src={audio_url}
     preload="metadata"
     ontimeupdate={on_time}
     onloadedmetadata={on_loaded}
@@ -98,7 +105,14 @@
     onplay={() => { playing = true; errored = false }}
     onpause={() => playing = false}
     onended={() => playing = false}
-    onerror={() => { errored = true; playing = false }}></audio>
+    onerror={() => { errored = true; playing = false }}>
+    {#each sources as source, index (source.src)}
+      <source
+        src={source.src}
+        type={source.type}
+        onerror={index === sources.length - 1 ? () => { errored = true; playing = false } : undefined} />
+    {/each}
+  </audio>
 
   <button
     type="button"

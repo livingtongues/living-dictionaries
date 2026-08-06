@@ -8,7 +8,7 @@ interface OgEvent {
    * invisible, so "96% of renders succeeded" read healthy on a night when 55% of
    * `/og` requests were shed to the generic card (2026-07-29 review).
    */
-  message: 'og_card_served' | 'og_card_rendered' | 'og_render_failed' | 'og_render_shed' | 'og_remote_card_fault'
+  message: 'og_card_served' | 'og_card_rendered' | 'og_render_failed' | 'og_render_shed' | 'og_remote_card_fault' | 'og_store_state'
   error?: unknown
   context?: Record<string, unknown>
 }
