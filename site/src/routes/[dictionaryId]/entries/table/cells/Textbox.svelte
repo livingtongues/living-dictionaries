@@ -4,6 +4,7 @@
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
   import GlossedText from '$lib/corpus/GlossedText.svelte'
+  import StruckText from '$lib/orthography/StruckText.svelte'
 
   interface Props {
     value: string
@@ -41,7 +42,7 @@
       {#if gloss_codes && value}
         <GlossedText text={value} />
       {:else}
-        {@html sanitizedHtml}
+        <StruckText text={value || ''} />
       {/if}
       &nbsp;
     </div>
