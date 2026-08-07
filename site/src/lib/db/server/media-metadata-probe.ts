@@ -1,3 +1,4 @@
+import type Database from 'better-sqlite3'
 import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { parseBuffer } from 'music-metadata'
 import { get_r2_media } from '$lib/server/r2-media'
@@ -21,8 +22,10 @@ export interface MediaMetadataProbeSummary {
   failures: number
 }
 
-export async function run_media_metadata_probe_once(): Promise<MediaMetadataProbeSummary> {
-  const db = get_shared_db()
+export async function run_media_metadata_probe_once({ db = get_shared_db() }: {
+  /** Ledger handle. The media-sweep CHILD passes its own (it must not call `get_shared_db`). */
+  db?: Database.Database
+} = {}): Promise<MediaMetadataProbeSummary> {
   const { client, bucket } = get_r2_media()
   const summary: MediaMetadataProbeSummary = { probed: 0, filled: 0, failures: 0 }
 
@@ -44,12 +47,12 @@ export async function run_media_metadata_probe_once(): Promise<MediaMetadataProb
         const dimensions = await read_photo_dimensions(bytes)
         if (!dimensions)
           throw new Error('undecodable image')
-        set_media_object_metadata({ key: row.key, ...dimensions })
+        set_media_object_metadata({ key: row.key, ...dimensions, db })
       } else {
         const { format } = await parseBuffer(bytes, { mimeType: object.ContentType }, { duration: true })
         if (!format.duration || !Number.isFinite(format.duration))
           throw new Error('no duration in parsed metadata')
-        set_media_object_metadata({ key: row.key, duration_ms: Math.round(format.duration * 1000) })
+        set_media_object_metadata({ key: row.key, duration_ms: Math.round(format.duration * 1000), db })
       }
       summary.filled++
     } catch (err) {

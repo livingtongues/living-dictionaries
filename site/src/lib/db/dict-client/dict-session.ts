@@ -7,7 +7,7 @@ import type { ReloadGuard } from '$lib/db/client/client-behind-recovery'
 import type { RejectionReason } from '$lib/db/sync/rejected-rows'
 import { REJECTION_REASON_I18N_KEYS } from '$lib/db/sync/rejected-rows'
 import { CLIENT_BEHIND_GUARD_KEY, decide_client_behind_recovery } from '$lib/db/client/client-behind-recovery'
-import { missing_build_artifact_reason } from '$lib/db/client/stale-build-artifact'
+import { classify_boot_failure } from '$lib/db/client/stale-build-artifact'
 import { recover_from_stale_bundle } from './stale-bundle-recovery'
 import { create_db_client } from './worker/db-client'
 import { ensure_persistent_storage } from './worker/persistent-storage'
@@ -109,6 +109,16 @@ export async function open_dict(options: OpenDictOptions): Promise<DictConnectio
     // nothing new after the first few, and the rows cost the bandwidth of a device
     // that is already in trouble.
     const boot_log_counts = { warns: 0, terminals: 0 }
+    // What the probe actually found for the most recent boot failure — set by the
+    // classifier below, read by the telemetry immediately after. Both run inside
+    // one `handle_boot_failure` call, so there is no interleaving to race.
+    let last_boot_evidence: {
+      script_url: string | null
+      online: boolean
+      probed_url: string | null
+      probe_status: number | null
+      probe_verdict: string
+    } | null = null
     const client = create_db_client({
       instance_options: { dict_id, has_editor_role: options.has_editor_role, auth: options.auth, session_id: get_session_id() || null },
       // Worker-internal boot failures never reach the main-thread console.error
@@ -118,16 +128,28 @@ export async function open_dict(options: OpenDictOptions): Promise<DictConnectio
       // failure caused by a chunk the server has DELETED can never be retried into
       // success, so it never enters the ladder — the client reports it terminal and
       // the app reloads once onto the current build.
-      boot_failure_terminal_reason: ({ message }) => missing_build_artifact_reason({
-        message,
-        online: typeof navigator === 'undefined' || navigator.onLine !== false,
-      }),
+      //
+      // …but only once the server has CONFIRMED the file is gone. `classify_boot_failure`
+      // HEAD-probes the artifact first; its evidence is stashed here so every boot
+      // failure row can say what we actually checked, instead of leaving a verdict
+      // nobody can audit (2026-08-06 log review §1.4 — 19 false verdicts in a day).
+      boot_failure_terminal_reason: async ({ message, script_url, online }) => {
+        const evidence = await classify_boot_failure({ message, script_url, online })
+        last_boot_evidence = {
+          script_url,
+          online,
+          probed_url: evidence.probed_url,
+          probe_status: evidence.probe_status,
+          probe_verdict: evidence.verdict,
+        }
+        return evidence.reason
+      },
       on_boot_failed: async ({ message, last_stage, attempt, will_retry, will_reelect = true, reelect_attempt = 0, terminal_reason }) => {
         if (terminal_reason) {
           // `recover_from_stale_bundle` emits the single terminal row for this
           // outcome (reloaded / deferred / gave_up); a `dict_boot_recovery_exhausted`
           // on top would double-count the same event in error triage.
-          recover_from_stale_bundle({ dict_id, boot_message: message, reason: terminal_reason, t: boot_t })
+          recover_from_stale_bundle({ dict_id, boot_message: message, reason: terminal_reason, evidence: last_boot_evidence, t: boot_t })
           return
         }
         if (!will_retry)
@@ -152,7 +174,7 @@ export async function open_dict(options: OpenDictOptions): Promise<DictConnectio
         log_event({
           level: will_retry ? 'warn' : 'error',
           message: event_message,
-          context: { dict_id, boot_message: message, last_stage, attempt, will_retry, will_reelect, reelect_attempt, ...failure_context },
+          context: { dict_id, boot_message: message, last_stage, attempt, will_retry, will_reelect, reelect_attempt, ...last_boot_evidence, ...failure_context },
         })
       },
       // Feed the boot download progress bar (root-layout `DictBootProgress`). Only

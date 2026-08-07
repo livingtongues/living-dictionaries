@@ -10,6 +10,7 @@ import { open_memory_connection } from './memory-connection'
 import { report_dict_boot, report_dict_file_replaced, report_dict_self_healed, report_dict_storage_reopened, report_dict_sync_halted, set_dict_log_session } from './report-dict-sync-failure'
 import { delete_opfs_db_file, open_opfs_connection, opfs_file_exists, write_opfs_db_file } from './worker/opfs-connection'
 import { DICT_DB_OPFS_PREFIX } from '$lib/constants'
+import { new_uuid } from '$lib/utils/new-uuid'
 
 /**
  * The per-dictionary DB instance owned by the leader dedicated worker (the
@@ -554,7 +555,7 @@ async function ensure_migrations({ dict_id, connection }: { dict_id: string, con
       await connection.exec_raw(sql)
       await connection.execute(
         `INSERT INTO migrations (id, name, run_on) VALUES (?, ?, ?)`,
-        [crypto.randomUUID(), name, new Date().toISOString()],
+        [new_uuid(), name, new Date().toISOString()],
       )
       await connection.execute('COMMIT')
     } catch (error) {

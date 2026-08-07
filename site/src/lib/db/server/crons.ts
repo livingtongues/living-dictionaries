@@ -87,11 +87,11 @@ export const CRONS: CronDef[] = [
   },
   {
     name: 'media-sweep',
-    description: 'Daily media ledger rollup + weekly R2 reconcile / orphan cleanup / variant self-heal',
+    description: 'Daily media ledger rollup + weekly R2 reconcile / orphan cleanup / variant self-heal (forked child)',
     // Was hourly and no-opped 23×/day: the body is already a daily rollup + a
     // 6.5-day reconcile, so the tick was pure polling.
     every_ms: days(1),
-    run: run_media_sweep,
+    run: async () => { await run_media_sweep() },
     disabled_reason: media_sweep_disabled_reason,
   },
   {

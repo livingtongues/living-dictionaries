@@ -223,6 +223,9 @@ describe('DictSyncEngine junction natural-key replace-all apply ordering', () =>
     db = new BetterSqlite3(':memory:')
     db.exec('CREATE TABLE db_metadata (key TEXT PRIMARY KEY, value TEXT);')
     db.exec('CREATE TABLE deletes (table_name TEXT NOT NULL, id TEXT NOT NULL);')
+    // The refused-write quarantine (`20260807_rejected_pushes.sql`) — bookkeeping,
+    // never synced, so it is not in DICT_SYNCABLE_TABLES.
+    db.exec(`CREATE TABLE rejected_pushes (id INTEGER PRIMARY KEY AUTOINCREMENT, table_name TEXT NOT NULL, row_id TEXT NOT NULL, user_id TEXT, payload TEXT NOT NULL, reason TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')), acknowledged_at TEXT);`)
     for (const table of DICT_SYNCABLE_TABLES) {
       if (table === 'entry_tags')
         db.exec(`CREATE TABLE entry_tags (id TEXT PRIMARY KEY, entry_id TEXT NOT NULL, tag_id TEXT NOT NULL, dirty INTEGER, UNIQUE (entry_id, tag_id));`)
@@ -300,6 +303,96 @@ describe('DictSyncEngine junction natural-key replace-all apply ordering', () =>
 
     expect(on_rows_deleted).toHaveBeenCalledTimes(1)
     expect(on_rows_deleted).toHaveBeenCalledWith([{ table_name: 'entries', id: 'present-id' }])
+  })
+
+  /**
+   * THE REFUSED-WRITE QUARANTINE (ported from house `4d9da404`).
+   *
+   * The incident: on 2026-08-04 an editor spent an evening writing into a
+   * document the server had already deleted. The refused-write contract made the
+   * refusal VISIBLE; it did not make the work SURVIVE. The server refuses the row
+   * and echoes a delete for it in the same response, so the apply transaction
+   * removes the only copy — the author is handed an id and a reason with no text.
+   *
+   * Each of these asserts the property by RUNNING the real engine against a real
+   * SQLite DB and then reading the text back out.
+   */
+  test('a refused row\'s TEXT survives on the device the author is standing at', async () => {
+    // Unsynced local work, about to be pushed.
+    db.prepare(`INSERT INTO entries (id, dirty) VALUES ('doomed', 1)`).run()
+
+    globalThis.fetch = vi.fn(() => Promise.resolve({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({
+        new_synced_up_to: 5,
+        changes: {},
+        // The brutal composition: refuse the row AND echo its delete.
+        rejected_rows: [{ table_name: 'entries', id: 'doomed', reason: 'tombstoned' }],
+        deletes: [{ table_name: 'entries', id: 'doomed' }],
+      }),
+    })) as never
+
+    const engine = new DictSyncEngine({ dict_id: 'test-dict', connection: real_connection(), has_editor_role: true, get_auth: () => ({}) as never })
+    await engine.sync_once()
+
+    // The live row is gone (the delete-echo is authoritative) …
+    expect(db.prepare(`SELECT id FROM entries WHERE id = 'doomed'`).all()).toEqual([])
+    // … and the pushed payload survives, which is the whole point.
+    const quarantined = db.prepare(`SELECT table_name, row_id, reason, payload FROM rejected_pushes`).all() as { table_name: string, row_id: string, reason: string, payload: string }[]
+    expect(quarantined).toHaveLength(1)
+    expect(quarantined[0]).toMatchObject({ table_name: 'entries', row_id: 'doomed', reason: 'tombstoned' })
+    expect(JSON.parse(quarantined[0].payload)).toMatchObject({ id: 'doomed' })
+  })
+
+  test('a refusal that recurs every 30s REFRESHES its quarantine row instead of piling up', async () => {
+    db.prepare(`INSERT INTO entries (id, dirty) VALUES ('wedged', 1)`).run()
+
+    globalThis.fetch = vi.fn(() => Promise.resolve({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({
+        new_synced_up_to: 5,
+        changes: {},
+        // `unauthorized` is the class nothing ever clears — a lapsed role re-pushes
+        // and is re-refused on every single round trip, forever.
+        rejected_rows: [{ table_name: 'entries', id: 'wedged', reason: 'unauthorized' }],
+        deletes: [],
+      }),
+    })) as never
+
+    const engine = new DictSyncEngine({ dict_id: 'test-dict', connection: real_connection(), has_editor_role: true, get_auth: () => ({}) as never })
+    await engine.sync_once()
+    db.prepare(`UPDATE entries SET dirty = 1 WHERE id = 'wedged'`).run()
+    await engine.sync_once()
+    db.prepare(`UPDATE entries SET dirty = 1 WHERE id = 'wedged'`).run()
+    await engine.sync_once()
+
+    expect(db.prepare(`SELECT COUNT(*) n FROM rejected_pushes`).get()).toEqual({ n: 1 })
+  })
+
+  test('a quarantine fault never fails a sync that otherwise succeeded', async () => {
+    // No quarantine table at all — the worst case (an old OPFS file whose
+    // migration has not run yet). The sync must still apply.
+    db.exec('DROP TABLE rejected_pushes')
+    db.prepare(`INSERT INTO entries (id, dirty) VALUES ('doomed', 1)`).run()
+
+    globalThis.fetch = vi.fn(() => Promise.resolve({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({
+        new_synced_up_to: 5,
+        changes: {},
+        rejected_rows: [{ table_name: 'entries', id: 'doomed', reason: 'orphan' }],
+        deletes: [{ table_name: 'entries', id: 'doomed' }],
+      }),
+    })) as never
+
+    const engine = new DictSyncEngine({ dict_id: 'test-dict', connection: real_connection(), has_editor_role: true, get_auth: () => ({}) as never })
+    await expect(engine.sync_once()).resolves.not.toThrow()
+    // The apply committed: the delete landed and the cursor advanced.
+    expect(db.prepare(`SELECT id FROM entries WHERE id = 'doomed'`).all()).toEqual([])
+    expect(db.prepare(`SELECT value FROM db_metadata WHERE key = 'synced_seq'`).get()).toEqual({ value: '5' })
   })
 })
 

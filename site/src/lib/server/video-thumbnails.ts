@@ -6,6 +6,7 @@ import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { photo_variant_key } from '$lib/utils/media-path'
 import { record_media_object_by_key } from '$lib/db/server/media-ledger'
 import { generate_photo_variant } from './photo-variants'
+import type Database from 'better-sqlite3'
 import { store_media_bytes } from './media-storage'
 import { get_r2_media, r2_media_is_configured } from './r2-media'
 import { log_server_event } from './log-server-event'
@@ -81,9 +82,11 @@ export async function generate_video_thumbnail({ bytes }: { bytes: Uint8Array })
  * from R2 (browser-upload fast path + sweep self-heal). Returns the stored key +
  * size, or null when no thumbnail could be produced (skipped in dev with no R2).
  */
-export async function generate_and_store_video_thumbnail({ original_key, bytes }: {
+export async function generate_and_store_video_thumbnail({ original_key, bytes, db }: {
   original_key: string
   bytes?: Uint8Array
+  /** Ledger handle. The media-sweep CHILD passes its own (it must not call `get_shared_db`). */
+  db?: Database.Database
 }): Promise<{ key: string, bytes: number } | null> {
   let video_bytes = bytes
   if (!video_bytes) {
@@ -98,7 +101,7 @@ export async function generate_and_store_video_thumbnail({ original_key, bytes }
     return null
   const key = photo_variant_key({ original_key, variant: 'thumb' })
   await store_media_bytes({ file_type: 'image/webp', bytes: thumb, r2_key: key })
-  record_media_object_by_key({ key, bytes: thumb.length })
+  record_media_object_by_key({ key, bytes: thumb.length, db })
   return { key, bytes: thumb.length }
 }
 

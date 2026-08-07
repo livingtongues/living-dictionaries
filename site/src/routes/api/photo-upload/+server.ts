@@ -4,7 +4,7 @@ import { verify_auth_dict_role } from '$lib/auth/verify-dict-role'
 import { ResponseCodes } from '$lib/constants'
 import { get_dictionary_by_url_or_id } from '$lib/db/server/get-dictionary'
 import { record_media_object_by_key } from '$lib/db/server/media-ledger'
-import { MediaStorageNotConfiguredError, store_media_bytes } from '$lib/server/media-storage'
+import { MediaStorageNotConfiguredError, MediaStorageTimeoutError, store_media_bytes } from '$lib/server/media-storage'
 import { store_photo_variants_in_background } from '$lib/server/photo-variants'
 import { read_photo_dimensions } from '$lib/server/photo-dimensions'
 import { extract_photo_exif } from '$lib/server/photo-exif'
@@ -36,6 +36,19 @@ const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
 const TEN_MB = 10_485_760
 
 export const POST: RequestHandler = async (event) => {
+  // Stage timings, because a 100-second hang used to leave ZERO server rows and
+  // we could not tell a slow storage write from a slow edge (2026-08-06 §1.5).
+  const request_started = performance.now()
+  const step_ms = { exif: 0, store: 0, dimensions: 0 }
+  const time = async <T>(step: keyof typeof step_ms, run: () => Promise<T>): Promise<T> => {
+    const started = performance.now()
+    try {
+      return await run()
+    } finally {
+      step_ms[step] = Math.round(performance.now() - started)
+    }
+  }
+
   const form = await event.request.formData().catch(() => null)
   if (!form)
     error(ResponseCodes.BAD_REQUEST, 'Expected multipart form data')
@@ -73,7 +86,7 @@ export const POST: RequestHandler = async (event) => {
     longitude: number_field(form.get('longitude')),
     taken_at: typeof form.get('taken_at') === 'string' ? form.get('taken_at') as string : null,
   })
-  const exif: PhotoExif = { ...await extract_photo_exif(bytes), ...client_exif }
+  const exif: PhotoExif = { ...await time('exif', () => extract_photo_exif(bytes)), ...client_exif }
 
   // No-HEIC bucket policy: Safari converts client-side before upload, so this
   // net only catches a non-Safari browser holding a HEIC — try one transcode,
@@ -99,18 +112,43 @@ export const POST: RequestHandler = async (event) => {
   })
 
   try {
-    await store_media_bytes({ file_type, bytes, r2_key: storage_path })
+    await time('store', () => store_media_bytes({ file_type, bytes, r2_key: storage_path }))
   } catch (err) {
     if (err instanceof MediaStorageNotConfiguredError)
       error(ResponseCodes.SERVICE_UNAVAILABLE, err.message)
+    const common = { dictionary_id, storage_path, bytes: file.size, mimetype: file_type, duration_ms: Math.round(performance.now() - request_started), step_ms }
+    if (err instanceof MediaStorageTimeoutError) {
+      // OUR timeout, not the edge's. Before this the request ran on until
+      // Cloudflare answered 524 and the origin recorded nothing at all.
+      console.error(`Photo upload timed out: ${err.message}`)
+      log_server_event({ level: 'error', message: 'photo_upload_timeout', error: err, context: common })
+      error(ResponseCodes.GATEWAY_TIMEOUT, 'Storing this photo took too long. Please check your connection and try again.')
+    }
     console.error(`Photo upload failed: ${err.message}`)
-    log_server_event({ level: 'error', message: 'photo_upload_failed', error: err, context: { dictionary_id, storage_path, bytes: file.size } })
+    log_server_event({ level: 'error', message: 'photo_upload_failed', error: err, context: common })
     error(ResponseCodes.INTERNAL_SERVER_ERROR, `Photo upload failed: ${err.message}`)
   }
 
-  const dimensions = await read_photo_dimensions(bytes)
+  const dimensions = await time('dimensions', () => read_photo_dimensions(bytes))
   record_media_object_by_key({ key: storage_path, bytes: bytes.length, ...dimensions })
   store_photo_variants_in_background({ original_key: storage_path, bytes })
+
+  // The SUCCESS path, which had no telemetry at all — so "uploads are fine" was
+  // an assumption rather than a measurement, and a hang left no baseline to
+  // compare against (2026-08-06 §5.1, the highest-value coverage gap on the list).
+  log_server_event({
+    level: 'info',
+    message: 'photo_upload_completed',
+    context: {
+      dictionary_id,
+      bytes: bytes.length,
+      mimetype: file_type,
+      duration_ms: Math.round(performance.now() - request_started),
+      store_ms: step_ms.store,
+      exif_ms: step_ms.exif,
+      dimensions_ms: step_ms.dimensions,
+    },
+  })
 
   return json({ storage_path, ...exif } satisfies PhotoUploadResponseBody)
 }

@@ -40,6 +40,7 @@ export enum ResponseCodes {
   GONE = 410,
   BAD_GATEWAY = 502,
   SERVICE_UNAVAILABLE = 503,
+  GATEWAY_TIMEOUT = 504,
 }
 
 export const MINIMUM_ABOUT_LENGTH = 100

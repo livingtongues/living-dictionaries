@@ -6,7 +6,9 @@ import { minutes, seconds } from './crons'
 
 const { env_mock } = vi.hoisted(() => ({ env_mock: {} as Record<string, string | undefined> }))
 vi.mock('$env/dynamic/private', () => ({ env: env_mock }))
-vi.mock('$app/environment', () => ({ building: false, dev: false }))
+// `version` is read by `insert-client-log` (build-identity resolution at ingest),
+// which the roster reaches through `log-server-event` — a partial mock 500s the suite.
+vi.mock('$app/environment', () => ({ building: false, dev: false, browser: false, version: 'test' }))
 
 let db: ReturnType<typeof open_test_shared_db>
 

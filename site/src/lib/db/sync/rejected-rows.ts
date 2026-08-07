@@ -112,6 +112,72 @@ export function should_report_rejections({ signature, last, now }: {
   return now - last.at >= REJECTION_REPORT_THROTTLE_MS
 }
 
+/* ── THE DEVICE-SIDE QUARANTINE ───────────────────────────────────────────────
+ *
+ * Everything above tells the author their write was refused. This keeps WHAT was
+ * refused.
+ *
+ * The refusal and the loss are the same event: the server declares the row
+ * refused AND echoes a delete for it, so the apply transaction removes the only
+ * copy that ever existed. The author is then handed an id and a reason with no
+ * text attached — which is precisely the 2026-08-04 incident the whole contract
+ * was built for. house shipped the quarantine alongside its contract; LD (and
+ * tutor) shipped only the announcement, proved by execution in the 2026-08-06
+ * cross-repo review (fan-out ledger row 1).
+ *
+ * So the engines call this BEFORE the delete-echo / full-resync prune, inside
+ * the same transaction.
+ */
+
+/** The quarantine table (`20260807_rejected_pushes.sql`, both DBs). Never synced. */
+export const REJECTED_PUSHES_TABLE = 'rejected_pushes'
+
+/**
+ * Preserve each refused row's PUSHED PAYLOAD in the local quarantine.
+ *
+ * MUST run inside the apply transaction and BEFORE the deletes/prune, or there
+ * is a window in which the work exists nowhere.
+ *
+ * Idempotent per (table, row): a refusal nothing can clear — a lapsed role, a
+ * permanently orphaned parent — comes back on every round trip, so an unacked
+ * row is REFRESHED rather than duplicated.
+ *
+ * `find_pushed_row` returns `undefined` when the refusal was for a TOMBSTONE we
+ * pushed (there is no row to preserve, only the intent); a marker is stored so
+ * the trail stays complete.
+ */
+export async function quarantine_rejected_rows({ execute, query, rejected, find_pushed_row, user_id = null }: {
+  execute: (sql: string, params?: unknown[]) => Promise<void>
+  query: <T>(sql: string, params?: unknown[]) => Promise<T[]>
+  rejected: readonly RejectedRow[]
+  /** The row this client actually sent for that (table, id), if it sent one. */
+  find_pushed_row: (rejection: RejectedRow) => Record<string, unknown> | undefined
+  user_id?: string | null
+}): Promise<number> {
+  let quarantined = 0
+  for (const rejection of rejected) {
+    const pushed = find_pushed_row(rejection)
+    const payload = JSON.stringify(pushed ?? { op: 'delete' })
+    const unacked = await query<{ id: number }>(
+      `SELECT id FROM ${REJECTED_PUSHES_TABLE} WHERE table_name = ? AND row_id = ? AND acknowledged_at IS NULL`,
+      [rejection.table_name, rejection.id],
+    )
+    if (unacked.length) {
+      await execute(
+        `UPDATE ${REJECTED_PUSHES_TABLE} SET payload = ?, reason = ?, user_id = ?, created_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?`,
+        [payload, rejection.reason, user_id, unacked[0].id],
+      )
+    } else {
+      await execute(
+        `INSERT INTO ${REJECTED_PUSHES_TABLE} (table_name, row_id, user_id, payload, reason, created_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`,
+        [rejection.table_name, rejection.id, user_id, payload, rejection.reason],
+      )
+    }
+    quarantined++
+  }
+  return quarantined
+}
+
 /**
  * i18n keys for the toast's "why" clause. Written out (not built by string
  * concatenation) so the key catalog stays greppable and the missing-key report

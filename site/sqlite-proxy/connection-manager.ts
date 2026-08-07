@@ -35,7 +35,14 @@ export class ConnectionManager {
     console.info(`[sqlite-proxy] Browser connected: ${client_id}`)
   }
 
-  remove_websocket(client_id: string) {
+  remove_websocket(client_id: string, ws: WebSocket) {
+    // Only remove the entry if it is still THIS socket. A replacement tab
+    // registers under the same client_id and `set_websocket` closes the old
+    // socket — whose late 'close' event must not evict the live replacement
+    // (ported from house a2040633).
+    const current = this.clients.get(client_id)
+    if (current?.websocket !== ws)
+      return
     this.clients.delete(client_id)
     console.info(`[sqlite-proxy] Browser disconnected: ${client_id}`)
   }

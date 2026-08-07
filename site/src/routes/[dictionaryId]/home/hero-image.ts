@@ -1,6 +1,7 @@
 import type { MediaUploadHandle } from '$lib/media/upload-media'
 import type { TablesUpdate } from '$lib/types'
 import { upload_media } from '$lib/media/upload-media'
+import { new_uuid } from '$lib/utils/new-uuid'
 import { page } from '$app/state'
 
 const TEN_MB = 10_485_760
@@ -27,7 +28,7 @@ export function upload_cover_image({ file, dictionary_id, update_dictionary, on_
   }
 
   // Not a photos row — a fresh uuid keys the R2 object (`{dict}/photo/{uuid}.{ext}`).
-  const handle = upload_media({ file, dictionary_id, kind: 'image', media_id: crypto.randomUUID() })
+  const handle = upload_media({ file, dictionary_id, kind: 'image', media_id: new_uuid() })
   const done = handle.done.then(async ({ storage_path }) => {
     await update_dictionary({ featured_image: { storage_path } })
     on_saved()

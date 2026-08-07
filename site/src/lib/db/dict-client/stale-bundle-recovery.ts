@@ -74,15 +74,21 @@ const default_deps: StaleBundleRecoveryDeps = {
 
 export type StaleBundleOutcome = 'reloaded' | 'deferred' | 'gave-up'
 
-export function recover_from_stale_bundle({ dict_id, boot_message, reason, t }: {
+export function recover_from_stale_bundle({ dict_id, boot_message, reason, evidence = null, t }: {
   dict_id: string
   boot_message: string
   /** The classifier's terminal reason, carried into telemetry. */
   reason: string
+  /**
+   * What the classifier actually CHECKED before accusing the server — the probed
+   * URL, its status and the verdict. Every terminal row carries it so a future
+   * review can audit the call instead of taking it on faith (2026-08-06 §1.4).
+   */
+  evidence?: Record<string, unknown> | null
   t: TranslateFunction
 }, overrides: Partial<StaleBundleRecoveryDeps> = {}): StaleBundleOutcome {
   const deps = { ...default_deps, ...overrides }
-  const context = { dict_id, boot_message, reason, app_version: version }
+  const context = { dict_id, boot_message, reason, app_version: version, ...evidence }
 
   const decision = decide_client_behind_recovery({ stored: deps.read_guard(), now: deps.now() })
   if (decision.action !== 'reload') {
@@ -99,7 +105,7 @@ export function recover_from_stale_bundle({ dict_id, boot_message, reason, t }: 
     // alone until the person comes back to it. No guard is written yet, so the
     // deferred reload still gets the full one-shot budget when it fires.
     log_event({ level: 'warn', message: 'stale_bundle_reload_deferred', context })
-    deps.on_visible(() => { recover_from_stale_bundle({ dict_id, boot_message, reason, t }, overrides) })
+    deps.on_visible(() => { recover_from_stale_bundle({ dict_id, boot_message, reason, evidence, t }, overrides) })
     return 'deferred'
   }
 

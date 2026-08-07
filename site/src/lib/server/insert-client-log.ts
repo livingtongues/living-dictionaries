@@ -1,7 +1,9 @@
 import type Database from 'better-sqlite3'
 import type { ClientLogLevel } from '$lib/db/schemas/shared.types'
 import type { RequestGeo } from './geo-from-request'
+import { version } from '$app/environment'
 import { get_logs_db, open_logs_db } from '$lib/db/server/logs-db'
+import { is_bot_user_agent } from '$lib/utils/bot-user-agent'
 import { EMPTY_GEO } from './geo-from-request'
 
 /**
@@ -35,6 +37,55 @@ const VALID_LEVELS: ReadonlySet<ClientLogLevel> = new Set([
 const MAX_MESSAGE_LEN = 2000
 const MAX_STACK_LEN = 16_000
 const MAX_CONTEXT_LEN = 16_000
+
+/**
+ * SvelteKit's own djb2 (`@sveltejs/kit/src/utils/hash.js`) — the hash it uses to
+ * name the `__sveltekit_<hash>` page-shell global. Same function as
+ * `scripts/check-build-version.mjs`.
+ */
+export function djb2(value: string): string {
+  let hash = 5381
+  let index = value.length
+  while (index) hash = (hash * 33) ^ value.charCodeAt(--index)
+  return (hash >>> 0).toString(36)
+}
+
+/** `djb2(version)` for the build this process IS. Computed once at module load. */
+const CURRENT_VERSION_HASH = version ? djb2(version) : null
+
+/**
+ * The boot-error reporter in `app.html` can only read the page shell's
+ * `__sveltekit_<hash>` global — the bundle that would have told it the real
+ * version is exactly what failed to load. That hash (`myjgkn`) is not a build
+ * name, and every reader of `app_version` compares STRINGS: the
+ * current-vs-stale error split, errors-by-build, and build adoption all
+ * therefore filed every blank boot against a phantom stale build (2026-08-06 log
+ * review §1.3 — it silently undid the same day's build-identity deploy).
+ *
+ * So translate at ingest, where the server knows its own `version`: when the
+ * incoming value is THIS build's hash, store the real version. The raw hash is
+ * kept in `context.version_hash` either way, so a STALE tab's unresolvable hash
+ * stays visible and is obviously not a build name.
+ */
+export function resolve_app_version({ app_version, current_version = version, current_version_hash = CURRENT_VERSION_HASH }: {
+  app_version: string | null | undefined
+  current_version?: string | null
+  current_version_hash?: string | null
+}): { app_version: string | null, version_hash: string | null } {
+  if (!app_version)
+    return { app_version: null, version_hash: null }
+  // Only a bare hash shape can be a version hash — a real build name
+  // (`34fe97ec…-20260806155506`) never matches, so this can't mangle one.
+  if (!/^[a-z0-9]{1,10}$/.test(app_version))
+    return { app_version, version_hash: null }
+  if (current_version_hash && app_version === current_version_hash)
+    return { app_version: current_version ?? app_version, version_hash: app_version }
+  // An UNRESOLVABLE hash is a tab on some OLDER build — genuinely stale, so it
+  // stays in `app_version` and keeps counting as a stale-build error (that part
+  // was never wrong). It just carries a hash for a name until a reader resolves
+  // it; `version_hash` is now there for one that wants to.
+  return { app_version, version_hash: app_version }
+}
 
 function clamp(value: string | null | undefined, max: number): string | null {
   if (value === null || value === undefined)
@@ -81,8 +132,22 @@ export function insert_client_log({
     const received_at = now.toISOString()
     const message = clamp(payload.message, MAX_MESSAGE_LEN) ?? ''
     const stack = clamp(payload.stack, MAX_STACK_LEN)
-    const context_json = payload.context
-      ? stringify_context_capped(payload.context)
+    // The build the reporter named, resolved from SvelteKit's version HASH back
+    // to a real build name where we can (see `resolve_app_version`).
+    const build = resolve_app_version({ app_version: payload.app_version })
+    // Crawler flag, stamped SERVER-side from the UA. The boot-error reporter
+    // (app.html) has no session id, so the session-level bot filters cannot
+    // reach its rows — 13 of the first 25 reports were crawlers with no way to
+    // tell (2026-08-06 log review §5.5). Only ever set to `true`: absence keeps
+    // meaning "not classified as a bot", so no reader has to distinguish
+    // `false` from a pre-2026-08-07 row.
+    const is_bot = source === 'client' && is_bot_user_agent(payload.user_agent ?? null) ? true : null
+    const context_json = payload.context || build.version_hash || is_bot
+      ? stringify_context_capped({
+          ...payload.context,
+          ...(build.version_hash ? { version_hash: build.version_hash } : {}),
+          ...(is_bot ? { is_bot: true } : {}),
+        })
       : null
     // Promote context.session_id to a real column so analytics filters/groups on
     // it directly (never a per-row json_extract — the old hot-path cost).
@@ -108,7 +173,7 @@ export function insert_client_log({
       payload.url ?? null,
       payload.user_agent ?? null,
       payload.platform ?? null,
-      payload.app_version ?? null,
+      build.app_version,
       payload.build_target ?? null,
       context_json,
       source,
@@ -236,7 +301,78 @@ export function _reset_rate_state(): void {
 }
 
 if (import.meta.vitest) {
+  describe(djb2, () => {
+    /**
+     * Pinned against SvelteKit's own `src/utils/hash.js`. If these drift, the
+     * page-shell global no longer matches what we compute and every boot-error
+     * row silently stops resolving — the exact defect this fixes.
+     */
+    test('reproduces SvelteKit\'s hash', () => {
+      expect(djb2('')).toBe('45h')
+      expect(djb2('a')).toBe('3t1g')
+      expect(djb2('sveltekit')).toBe('1rq3hla')
+      expect(djb2('anything')).toMatch(/^[a-z0-9]+$/)
+    })
+  })
+
+  describe(resolve_app_version, () => {
+    const current_version = '34fe97ec-20260806155506'
+    const current_version_hash = djb2(current_version)
+    const options = { current_version, current_version_hash }
+
+    test('resolves THIS build\'s hash back to the real build name', () => {
+      expect(resolve_app_version({ app_version: current_version_hash, ...options }))
+        .toEqual({ app_version: current_version, version_hash: current_version_hash })
+    })
+
+    test('a real build name passes through untouched and gets no hash', () => {
+      expect(resolve_app_version({ app_version: current_version, ...options }))
+        .toEqual({ app_version: current_version, version_hash: null })
+    })
+
+    test('an OLDER build\'s unresolvable hash stays stale but is now labelled', () => {
+      expect(resolve_app_version({ app_version: '16719h5', ...options }))
+        .toEqual({ app_version: '16719h5', version_hash: '16719h5' })
+    })
+
+    test('a legacy epoch-named build is not mistaken for a hash', () => {
+      expect(resolve_app_version({ app_version: '1785330268796', ...options }))
+        .toEqual({ app_version: '1785330268796', version_hash: null })
+    })
+
+    test('absent app_version stays absent', () => {
+      expect(resolve_app_version({ app_version: null, ...options })).toEqual({ app_version: null, version_hash: null })
+      expect(resolve_app_version({ app_version: undefined, ...options })).toEqual({ app_version: null, version_hash: null })
+    })
+  })
+
   describe(insert_client_log, () => {
+    test('a boot-error row\'s version HASH is resolved to the real build at ingest', () => {
+      const db = open_logs_db(':memory:')
+      insert_client_log({ payload: { level: 'error', message: 'boot_error', app_version: djb2(version) }, user_id: null, db })
+      const row = db.prepare('SELECT app_version, context FROM client_logs').get() as { app_version: string, context: string }
+      expect(row.app_version).toBe(version)
+      expect(JSON.parse(row.context).version_hash).toBe(djb2(version))
+    })
+
+    test('stamps context.is_bot for a crawler UA, and leaves a person\'s rows alone', () => {
+      const db = open_logs_db(':memory:')
+      const crawler = 'Mozilla/5.0 (compatible; ClaudeBot/1.0; +claudebot@anthropic.com)'
+      const person = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36'
+      insert_client_log({ payload: { level: 'error', message: 'boot_error', user_agent: crawler }, user_id: null, db })
+      insert_client_log({ payload: { level: 'error', message: 'boot_error', user_agent: person }, user_id: null, db })
+      const rows = db.prepare('SELECT context FROM client_logs ORDER BY rowid').all() as { context: string | null }[]
+      expect(JSON.parse(rows[0].context).is_bot).toBe(true)
+      expect(rows[1].context).toBeNull()
+    })
+
+    test('a SERVER-source row is never bot-classified (its UA is our own prober)', () => {
+      const db = open_logs_db(':memory:')
+      insert_client_log({ payload: { level: 'info', message: 'uptime_probe', user_agent: 'curl/8.5.0' }, user_id: null, source: 'server', db })
+      const row = db.prepare('SELECT context FROM client_logs').get() as { context: string | null }
+      expect(row.context).toBeNull()
+    })
+
     test('inserts a minimal valid payload', () => {
       const db = open_logs_db(':memory:')
       const ok = insert_client_log({ payload: { level: 'error', message: 'boom' }, user_id: null, db })

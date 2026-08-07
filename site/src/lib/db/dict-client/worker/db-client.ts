@@ -16,6 +16,15 @@
  * viewer-mode (see `dict-session.ts`).
  */
 import type { BootFailure, BootProgressDetail, DbEvent, DbRequest, InstanceOptions, LeaderMeta, WorkerInitMessage } from './instance'
+// `?worker&url` (Vite) instead of the usual
+// `new Worker(new URL('./leader-worker.ts', import.meta.url))`: it builds the
+// same worker bundle but hands us the URL AS A STRING, which is the only way to
+// know WHICH file the browser refused to load. A worker `error` event carries
+// nothing else — verified in Chromium, the event is `{ type: 'error' }` and no
+// message/filename — and without the URL the failure path had to GUESS, which is
+// how 19 sessions were told their app was deleted over files that answered 200
+// (2026-08-06 log review §1.4). The URL feeds one HEAD probe before we accuse.
+import leader_worker_url from './leader-worker.ts?worker&url'
 import { carry_poison_recovery_claim, db_channel_name, db_lock_name } from './instance'
 import { start_leader_election } from './leader-election'
 import type { LeaderElection } from './leader-election'
@@ -56,16 +65,22 @@ export function create_db_client({ instance_options, on_boot_failed, on_boot_pro
    */
   on_boot_progress?: (info: { stage: string, detail?: BootProgressDetail }) => void
   /**
-   * Injected policy: given a boot failure message, is retrying PROVABLY useless?
-   * Return a reason string if so, `null` to run the normal ladder. Default: nothing
-   * is terminal.
+   * Injected policy: given the EVIDENCE about a boot failure, is retrying
+   * PROVABLY useless? Return a reason string if so, `null` to run the normal
+   * ladder. Default: nothing is terminal.
+   *
+   * Async because the honest answer needs the network: the app's classifier
+   * HEAD-probes `script_url` (or the URL named in `message`) before declaring a
+   * build artifact deleted. `online` is passed because offline vetoes the whole
+   * classification. Awaiting it costs at most the probe timeout, and only on a
+   * boot that has already failed.
    *
    * This is a hook rather than a hard-coded rule so the harness stays app-agnostic
    * (it is copy-paste-shared with house — see its `$lib/db/worker/PARITY.md`). LD
    * passes the deleted-build-artifact classifier; see
    * `$lib/db/client/stale-build-artifact.ts` for the rule and the incident.
    */
-  boot_failure_terminal_reason?: (info: { message: string }) => string | null
+  boot_failure_terminal_reason?: (info: { message: string, script_url: string | null, online: boolean }) => string | null | Promise<string | null>
 }): DbClient {
   const { dict_id } = instance_options
   const channel_name = db_channel_name(dict_id)
@@ -115,7 +130,7 @@ export function create_db_client({ instance_options, on_boot_failed, on_boot_pro
 
   function spawn_leader_worker(): void {
     if (worker) return
-    const spawned = new Worker(new URL('./leader-worker.ts', import.meta.url), {
+    const spawned = new Worker(leader_worker_url, {
       type: 'module',
       name: `ld-db-leader-${dict_id}`,
     })
@@ -127,12 +142,19 @@ export function create_db_client({ instance_options, on_boot_failed, on_boot_pro
     // A worker whose SCRIPT ITSELF cannot be fetched never posts anything — it
     // fires `error` on the Worker object. Unhandled (as it was), that was a SILENT
     // permanent wedge: no `boot_failed`, no `ready`, and the tab still holding the
-    // lock. The URL is a content-hashed `/_app/immutable/*` chunk, so a failure to
-    // load it is the deleted-build-artifact case BY CONSTRUCTION — no message
-    // sniffing needed.
+    // lock.
+    //
+    // PROBE BEFORE YOU ACCUSE (2026-08-06 log review §1.4). This path used to
+    // declare the artifact deleted BY CONSTRUCTION — "the URL is content-hashed,
+    // so a load failure means it's gone". The immutable-asset archive made that
+    // false: the previous builds' assets are served for 30 days, so the common
+    // cause of this event is now a dropped connection. It cost 19 sessions a
+    // bogus "this app was updated" (or a dead end) in one day over files that
+    // answered 200. We now hand the classifier the evidence — the script URL and
+    // `navigator.onLine` — and it settles the question with one HEAD request.
     spawned.onerror = (event) => {
       const message = (event as ErrorEvent)?.message || 'leader worker script failed to load'
-      handle_boot_failure({ message, terminal_reason: boot_failure_terminal_reason?.({ message }) ?? 'missing_build_artifact' })
+      void handle_boot_failure({ message, script_url: leader_worker_url })
     }
 
     spawned.onmessage = (event: MessageEvent<{ type?: string, message?: string, last_stage?: string, stage?: string, detail?: BootProgressDetail }>) => {
@@ -142,11 +164,13 @@ export function create_db_client({ instance_options, on_boot_failed, on_boot_pro
       }
       if (event.data?.type !== 'boot_failed')
         return
-      const message = event.data.message ?? 'unknown'
-      handle_boot_failure({
-        message,
+      void handle_boot_failure({
+        message: event.data.message ?? 'unknown',
         last_stage: event.data.last_stage,
-        terminal_reason: boot_failure_terminal_reason?.({ message }) ?? null,
+        // A failure REPORTED BY the worker names its own culprit in the message
+        // (or names none at all, Safari-style) — the worker script itself
+        // clearly loaded, so blaming it here would probe the wrong file.
+        script_url: null,
       })
     }
 
@@ -157,12 +181,17 @@ export function create_db_client({ instance_options, on_boot_failed, on_boot_pro
     // with no other waiter to promote); once the budget is spent, RESIGN so the
     // browser can promote another tab (or, if none, callers fall back). The one
     // exception is a `terminal_reason` — see below.
-    function handle_boot_failure({ message, last_stage, terminal_reason }: { message: string, last_stage?: string, terminal_reason: string | null }): void {
+    async function handle_boot_failure({ message, last_stage, script_url }: { message: string, last_stage?: string, script_url: string | null }): Promise<void> {
+      // Claim + tear down SYNCHRONOUSLY, before any await: both channels can fire
+      // for the same worker, and a gap here would let the second one through.
       if (handled) return
       handled = true
       spawned.onerror = null
       spawned.terminate()
       if (worker === spawned) worker = null
+
+      const online = typeof navigator === 'undefined' || navigator.onLine !== false
+      const terminal_reason = (await boot_failure_terminal_reason?.({ message, script_url, online })) ?? null
       // THE RELOAD-ONCE RULE: when the artifact is gone from the server, no number
       // of retries can succeed — burning the ladder just costs the person minutes
       // (39 retries / 6 minutes for one signed-in editor, 2026-07-29). Report it as

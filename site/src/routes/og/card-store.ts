@@ -56,12 +56,14 @@ const STORE_FORMAT = 2
 
 /**
  * The hot tier's size — a LATENCY knob now, never again the thing that decides
- * whether we re-render (Jacob, 2026-07-30). ~173 KB per card, so ~5,000 cards is
- * about 1 GB: 1.3% of free disk for the whole popular head of the card space,
- * with everything past it one R2 GET away instead of one 450 ms render away.
+ * whether we re-render (Jacob, 2026-07-30). Raised 1 GB → 4 GB 2026-08-07: the
+ * store hit the 1 GB cap on Aug 5 and evicted ~300–370 cards/day on a volume
+ * that was 25% full with 73 GB free (2026-08-06 log review §1.9). Cards run
+ * ~220 KB in practice, so both knobs scale together — the entry cap alone would
+ * have re-bound eviction at ~1.1 GB.
  */
-const MAX_ENTRIES = 5000
-const MAX_BYTES = 1_000_000_000
+const MAX_ENTRIES = 20_000
+const MAX_BYTES = 4_000_000_000
 /** Amortize the O(n) prune: one readdir per this many saves, never on the hot path. */
 const PRUNE_EVERY_SAVES = 25
 /** Approximate LRU without a metadata write per hit. */
@@ -225,7 +227,11 @@ export interface PruneResult {
  * Enforce the entry + byte caps, oldest (least recently touched) first. Exported
  * for the tests and for anything that ever wants to reclaim disk on demand.
  */
-export function prune_card_store(): PruneResult {
+export function prune_card_store({ max_entries = MAX_ENTRIES, max_bytes = MAX_BYTES }: {
+  /** Injected by tests so the entry-cap behaviour is provable without writing 20,000 files. */
+  max_entries?: number
+  max_bytes?: number
+} = {}): PruneResult {
   const dir = store_dir()
   let entries: { path: string, mtime: number, size: number }[]
   try {
@@ -246,7 +252,7 @@ export function prune_card_store(): PruneResult {
   let removed = 0
   for (const entry of entries) {
     const would_be_bytes = bytes + entry.size
-    if (kept < MAX_ENTRIES && would_be_bytes <= MAX_BYTES) {
+    if (kept < max_entries && would_be_bytes <= max_bytes) {
       kept++
       bytes = would_be_bytes
       continue
@@ -419,16 +425,17 @@ if (import.meta.vitest) {
     test('removes the oldest when the entry cap is exceeded', () => {
       const png = Buffer.from([1, 2, 3])
       const old_time = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000)
-      for (let i = 0; i < MAX_ENTRIES + 5; i++)
+      const cap = 20 // the real MAX_ENTRIES is 20,000 — the BEHAVIOUR is what's under test
+      for (let i = 0; i < cap + 5; i++)
         save_card({ key: `n${i}`, png })
       // Age the first five so they sort last and get evicted.
       for (let i = 0; i < 5; i++)
         utimesSync(join(data_dir, 'og-cache', `n${i}.png`), old_time, old_time)
-      const result = prune_card_store()
+      const result = prune_card_store({ max_entries: cap })
       expect(result.removed).toBe(5)
-      expect(result.kept).toBe(MAX_ENTRIES)
+      expect(result.kept).toBe(cap)
       expect(read_local_card('n0')).toBe(null)
-      expect(read_local_card(`n${MAX_ENTRIES + 4}`)).toEqual(png)
+      expect(read_local_card(`n${cap + 4}`)).toEqual(png)
     })
   })
 }

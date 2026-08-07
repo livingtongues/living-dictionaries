@@ -1,3 +1,4 @@
+import type Database from 'better-sqlite3'
 import { get_shared_db } from './shared-db'
 
 /**
@@ -5,11 +6,16 @@ import { get_shared_db } from './shared-db'
  * media-bucket object, so /admin/storage never has to list R2. `+=` at upload
  * time from every write path; trued-up (sizes, abandoned presigns, deletions)
  * by the weekly media sweep. See the 20260723a migration header.
+ *
+ * Every writer takes an optional `db`. It defaults to the serving process'
+ * shared.db handle, and the weekly media-sweep CHILD passes its own — the child
+ * must never call `get_shared_db()`, which would run migrations from a process
+ * that is not the server (same rule as the retention + analytics children).
  */
 
 export type MediaLedgerType = 'audio' | 'video' | 'photo'
 
-export function record_media_object({ key, dict_id, media_type, bytes, is_variant = false, duration_ms = null, width = null, height = null }: {
+export function record_media_object({ key, dict_id, media_type, bytes, is_variant = false, duration_ms = null, width = null, height = null, db = get_shared_db() }: {
   key: string
   dict_id: string
   media_type: MediaLedgerType
@@ -19,8 +25,8 @@ export function record_media_object({ key, dict_id, media_type, bytes, is_varian
   duration_ms?: number | null
   width?: number | null
   height?: number | null
+  db?: Database.Database
 }): void {
-  const db = get_shared_db()
   db.prepare(`
     INSERT INTO media_objects (key, dict_id, media_type, is_variant, bytes, uploaded_at, duration_ms, width, height)
     VALUES (@key, @dict_id, @media_type, @is_variant, @bytes, @uploaded_at, @duration_ms, @width, @height)
@@ -32,27 +38,29 @@ export function record_media_object({ key, dict_id, media_type, bytes, is_varian
 }
 
 /** Ledger-record a stored object straight from its R2 key (no-op for unparseable keys). */
-export function record_media_object_by_key({ key, bytes, duration_ms, width, height }: {
+export function record_media_object_by_key({ key, bytes, duration_ms, width, height, db }: {
   key: string
   bytes: number
   duration_ms?: number | null
   width?: number | null
   height?: number | null
+  db?: Database.Database
 }): void {
   const parsed = parse_media_key(key)
   if (!parsed)
     return
-  record_media_object({ key, bytes, duration_ms, width, height, ...parsed })
+  record_media_object({ key, bytes, duration_ms, width, height, db, ...parsed })
 }
 
 /** Sweep/probe helper: fill missing metadata without touching bytes/orphan state (COALESCE keeps existing values). */
-export function set_media_object_metadata({ key, duration_ms = null, width = null, height = null }: {
+export function set_media_object_metadata({ key, duration_ms = null, width = null, height = null, db = get_shared_db() }: {
   key: string
   duration_ms?: number | null
   width?: number | null
   height?: number | null
+  db?: Database.Database
 }): void {
-  get_shared_db().prepare(`
+  db.prepare(`
     UPDATE media_objects SET
       duration_ms = COALESCE(@duration_ms, duration_ms),
       width = COALESCE(@width, width),

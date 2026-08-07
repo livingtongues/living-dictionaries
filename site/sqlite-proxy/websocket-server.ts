@@ -28,12 +28,12 @@ export function create_websocket_server(connection_manager: ConnectionManager, p
     })
 
     ws.on('close', () => {
-      connection_manager.remove_websocket(client_id)
+      connection_manager.remove_websocket(client_id, ws)
     })
 
     ws.on('error', (err) => {
       console.error(`[sqlite-proxy] WebSocket error for ${client_id}:`, err)
-      connection_manager.remove_websocket(client_id)
+      connection_manager.remove_websocket(client_id, ws)
     })
   })
 

@@ -50,6 +50,33 @@ interface PingMessage {
 
 type ChannelMessage = RequestMessage | ResponseMessage | EventMessage | ReadyMessage | PingMessage
 
+/**
+ * `crypto.randomUUID` is a 2021 API (Chrome 92 / Safari 15.4). Calling it
+ * unguarded in transport setup KILLS THE BOOT on an older device — a white page
+ * instead of a degraded one (LD, Android 8.1 / Chrome 87, 2026-08-06). Kept
+ * self-contained: this folder is copy-paste-shared between apps and takes no app
+ * imports (see PARITY.md). These ids are channel/epoch labels, never secrets.
+ */
+function transport_uuid(): string {
+  try {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function')
+      return crypto.randomUUID()
+    if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+      const bytes = crypto.getRandomValues(new Uint8Array(16))
+      bytes[6] = (bytes[6] & 0x0F) | 0x40
+      bytes[8] = (bytes[8] & 0x3F) | 0x80
+      return [...bytes].map(byte => (byte + 0x100).toString(16).slice(1)).join('')
+        .replace(/^(.{8})(.{4})(.{4})(.{4})(.{12})$/, '$1-$2-$3-$4-$5')
+    }
+  } catch {
+    // A hardened/embedded context can throw on either call — fall through.
+  }
+  return `xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx`.replace(/[xy]/g, (char) => {
+    const random = Math.floor(Math.random() * 16)
+    return (char === 'x' ? random : (random & 0x3) | 0x8).toString(16)
+  })
+}
+
 const DEFAULT_TIMEOUT_MS = 20000
 const PING_RETRY_MS = 750
 
@@ -68,7 +95,7 @@ export interface TransportClient {
 }
 
 export function create_transport_client({ channel_name }: { channel_name: string }): TransportClient {
-  const client_id = crypto.randomUUID()
+  const client_id = transport_uuid()
   const channel = new BroadcastChannel(channel_name)
   const pending = new Map<number, {
     resolve: (value: unknown) => void
@@ -197,7 +224,7 @@ export function create_transport_server({ channel_name, on_request, get_meta }: 
   get_meta: () => unknown
 }): TransportServer {
   const channel = new BroadcastChannel(channel_name)
-  const epoch = crypto.randomUUID()
+  const epoch = transport_uuid()
   // Don't claim leadership to pinging clients until the DB is actually open
   // (`announce_ready`). Otherwise a first-load ping mid-download would resolve
   // clients before any rows exist.

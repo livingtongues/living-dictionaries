@@ -50,6 +50,36 @@ and fork it standalone with a scratch `DATA_DIR` before believing it works.
 - `setPriority(0, 19)` + `ionice -c 3` are set by the child **on itself** — both need no privileges,
   and busybox's `ionice` applet exists in `node:24-alpine`.
 
+## When the child MUST write (the exception, 2026-08-07)
+
+"Keep it read-only" is the default because a short-lived process is the wrong place to own a WAL
+writer — but some jobs' entire OUTPUT is rows. The weekly media sweep reconciles a full R2 listing
+against the `media_objects` ledger; sending ~380k adopt/true-up/orphan decisions to the parent over
+IPC would just move the work back onto the request thread one message at a time.
+
+So it writes, following the log-retention child's precedent:
+
+- open shared.db **directly** (`new Database(join(data_dir, 'shared.db'), { fileMustExist: true })`),
+  never `get_shared_db()` — the rule about migrations is the one that never bends;
+- a LONG `busy_timeout` (60 s). The child serves nobody and can afford to wait; the serving process
+  is the one that must never block on a lock (its own logs.db timeout is 250 ms for the same reason);
+- keep writes in bounded transactions rather than one giant one, so the lock is released often.
+
+**Telemetry still goes through the parent**, even when the writes don't. The child has no logs.db
+handle by design, so per-item alarms it discovers (here `media_sweep_dict_unreadable` /
+`media_orphan_brake_tripped`) ride home as a CAPPED `alerts[]` array on the summary and the parent
+emits them. Cap it: a systemic fault must not turn one summary into a thousand-entry IPC payload.
+
+**Threading the handle beats a global override.** Every helper the child reaches
+(`media-ledger`, `photo-variants`, `video-thumbnails`, `media-metadata-probe`) takes an optional
+`db` defaulting to `get_shared_db()`. A `set_shared_db_for_child()` escape hatch would have been one
+line instead of eight signatures — and a loaded gun in the serving process forever.
+
+**Verify the split in the BUILT output, not by reading imports.** Two greps settle it:
+the child's chunk must contain the guard (`CHILD === "1"`) and the job body while containing **zero**
+cron-scheduler references, and the hooks chunk must contain only the `env` string the parent passes
+to `fork()`. Then fork the real chunk with a scratch `DATA_DIR` and read the rows back.
+
 ## Report `blocking_ms`, not just `duration_ms`
 
 A job that moved off-thread must prove it. `duration_ms` is the child's wall clock and says nothing

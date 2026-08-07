@@ -4,6 +4,7 @@ import { upload_media } from './upload-media'
 import type { GuardedWrites } from '$lib/db/dict-client/guarded-writes'
 import { track } from '$lib/debug/remote-log'
 import { MEDIA_UPLOADED } from '$lib/debug/log-events'
+import { new_uuid } from '$lib/utils/new-uuid'
 import { api_video_generate_thumbnail } from '$api/video/generate-thumbnail/_call'
 
 /** Which editing surface launched the upload — for the `media_uploaded` analytics event. */
@@ -45,7 +46,7 @@ export function add_photo({ writes, dictionary_id, sense_id, file, source, photo
   if (not_ready)
     return blocked_handle(not_ready)
   // Row uuid is minted BEFORE upload — the R2 object is keyed by it (`{dict}/photo/{id}.{ext}`).
-  const media_id = crypto.randomUUID()
+  const media_id = new_uuid()
   const handle = upload_media({ file, dictionary_id, kind: 'image', media_id })
   const done = handle.done.then(async ({ storage_path, exif }) => {
     // EXIF coords arrive pre-blunted to village level (2dp); absent = null.
@@ -87,7 +88,7 @@ export function add_audio({ writes, dictionary_id, entry_id, sentence_id, text_i
   if (not_ready)
     return blocked_handle(not_ready)
   // Row uuid is minted BEFORE upload — the R2 object is keyed by it (`{dict}/audio/{id}.{ext}`).
-  const media_id = crypto.randomUUID()
+  const media_id = new_uuid()
   const handle = upload_media({ file, dictionary_id, kind: 'audio', media_id, trim_audio: Boolean(entry_id) })
   const done = handle.done.then(async ({ storage_path }) => {
     // ONE atomic dict_write: audio row + speaker junction commit together.
@@ -115,7 +116,7 @@ export function add_video({ writes, dictionary_id, sense_id, file, speaker_id, s
   if (not_ready)
     return blocked_handle(not_ready)
   // Row uuid is minted BEFORE upload — the R2 object is keyed by it (`{dict}/video/{id}.{ext}`).
-  const media_id = crypto.randomUUID()
+  const media_id = new_uuid()
   const handle = upload_media({ file, dictionary_id, kind: 'video', media_id })
   const done = handle.done.then(async ({ storage_path }) => {
     // ONE atomic dict_write: video + sense junction + speaker junction.

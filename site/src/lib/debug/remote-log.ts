@@ -2,6 +2,7 @@ import type { ClientLogPayload } from '$lib/server/insert-client-log'
 import { api_log, send_log_beacon } from '$api/log/_call'
 import { version } from '$app/environment'
 import { detect_db_capabilities, resolve_db_tier } from '$lib/db/dict-client/worker/db-capabilities'
+import { new_uuid } from '$lib/utils/new-uuid'
 
 /**
  * Client-side error capture + remote-log shipper. Initialized once from
@@ -160,7 +161,7 @@ let session_ui_locale: string | null = null
  */
 export function get_session_id(): string {
   if (!session_id && typeof window !== 'undefined')
-    session_id = crypto.randomUUID()
+    session_id = new_uuid()
   return session_id
 }
 
@@ -187,12 +188,12 @@ function ensure_visitor_id(): string {
       visitor_id = existing
       return visitor_id
     }
-    visitor_id = crypto.randomUUID()
+    visitor_id = new_uuid()
     localStorage.setItem(VISITOR_ID_KEY, visitor_id)
   } catch {
     // Private mode / disabled storage: fall back to a per-session id so the row
     // still carries *a* visitor_id (server COALESCEs to session_id anyway).
-    visitor_id = visitor_id || crypto.randomUUID()
+    visitor_id = visitor_id || new_uuid()
   }
   return visitor_id
 }
@@ -352,7 +353,7 @@ function is_webdriver(): boolean {
 
 function enrich(entry: ClientLogPayload): InternalEntry {
   return {
-    _id: crypto.randomUUID(),
+    _id: new_uuid(),
     ...entry,
     client_time: entry.client_time ?? new Date().toISOString(),
     url: entry.url ?? safe_url(),

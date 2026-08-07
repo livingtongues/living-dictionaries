@@ -2,6 +2,7 @@ import type { SyncableTableName } from '$lib/db/sync/types'
 import type { SqliteConnection } from './connection'
 import type { LiveDb } from './live/live-db.svelte'
 import { ADMIN_DB_ID_FOR_USER_PREFIX } from '$lib/constants'
+import { new_uuid } from '$lib/utils/new-uuid'
 import { create_sqlite_connection } from './connection'
 import { create_live_db } from './live/live-db.svelte.js'
 
@@ -23,7 +24,7 @@ function get_db_id(user_id: string) {
   const existing = localStorage.getItem(key)
   if (existing)
     return existing
-  const fresh = crypto.randomUUID()
+  const fresh = new_uuid()
   localStorage.setItem(key, fresh)
   return fresh
 }
@@ -84,7 +85,7 @@ async function open_admin_db(user_id: string, options: OpenAdminDbOptions): Prom
   for (const name of applied) {
     await connection.execute(
       `INSERT INTO migrations (id, name, run_on) VALUES (?, ?, ?)`,
-      [crypto.randomUUID(), name, new Date().toISOString()],
+      [new_uuid(), name, new Date().toISOString()],
     )
   }
 

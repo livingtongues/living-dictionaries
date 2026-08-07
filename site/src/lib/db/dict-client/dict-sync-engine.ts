@@ -9,7 +9,7 @@ import { ResponseCodes } from '$lib/constants'
 import { parse_dict_row, stringify_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import { DICT_SYNCABLE_TABLES, MAX_DIRTY_PROBES } from '$lib/db/dict-syncable-tables'
 import { classify_sync_failure, is_storage_lost_error, RepeatFailureTracker } from '$lib/db/sync/sync-failure-classify'
-import { group_rejected_rows, rejection_signature, resolve_rejected_rows, should_report_rejections, summarize_rejections } from '$lib/db/sync/rejected-rows'
+import { group_rejected_rows, quarantine_rejected_rows, rejection_signature, resolve_rejected_rows, should_report_rejections, summarize_rejections } from '$lib/db/sync/rejected-rows'
 import { LATEST_DICT_MIGRATION } from './dict-migrations-bundle'
 import { report_dict_dirty_reconciled, report_dict_push_rejected, report_dict_stuck_dirty, report_dict_sync_failure } from './report-dict-sync-failure'
 
@@ -525,6 +525,29 @@ export class DictSyncEngine {
     await this.#connection.execute('PRAGMA defer_foreign_keys = ON')
     await this.#connection.execute('BEGIN')
     try {
+      // QUARANTINE FIRST. A refused push is about to be destroyed by its own
+      // delete-echo (and, on a full pull, by the prune below) — this is the last
+      // moment the author's text exists anywhere. Best-effort: a quarantine
+      // fault must never fail a sync that otherwise succeeded, because failing
+      // it would ALSO leave the work unsaved and add a wedge on top.
+      // See `$lib/db/sync/rejected-rows.ts` for the incident.
+      const rejected = resolve_rejected_rows(response)
+      if (rejected.length) {
+        try {
+          const quarantined = await quarantine_rejected_rows({
+            execute: (sql, params) => this.#connection.execute(sql, params),
+            query: <T>(sql: string, params?: unknown[]) => this.#connection.query<T>(sql, params),
+            rejected,
+            find_pushed_row: rejection => (request.dirty_rows?.[rejection.table_name as DictSyncableTable] ?? [])
+              .find(row => (row as { id: string }).id === rejection.id),
+          })
+          if (quarantined)
+            affected.add('rejected_pushes')
+        } catch (err) {
+          console.warn(`[dict-sync] ${this.#dict_id} could not quarantine ${rejected.length} refused row(s):`, err)
+        }
+      }
+
       // Deletes are applied BEFORE upserts (parity with house's 2026-07-05 fix).
       // Every dict junction table (entry_tags, entry_dialects, sense_photos,
       // sense_sentences, audio_speakers, …) carries a synthetic-UUID PK PLUS a

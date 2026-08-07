@@ -4,8 +4,9 @@ import type { Database } from 'better-sqlite3'
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 import { sign_jwt } from '$lib/auth/jwt'
 import { open_test_shared_db } from '$lib/db/server/shared-db'
-import { store_media_bytes } from '$lib/server/media-storage'
+import { MediaStorageTimeoutError, store_media_bytes } from '$lib/server/media-storage'
 import { store_photo_variants_in_background } from '$lib/server/photo-variants'
+import { log_server_event } from '$lib/server/log-server-event'
 import { POST } from './+server'
 
 let db: Database
@@ -26,6 +27,16 @@ vi.mock('$lib/server/media-storage', async (orig) => {
 vi.mock('$lib/server/photo-variants', () => ({
   store_photo_variants_in_background: vi.fn(),
 }))
+
+vi.mock('$lib/server/log-server-event', () => ({
+  log_server_event: vi.fn(),
+}))
+
+interface LoggedEvent { level: string, message: string, context?: Record<string, unknown> }
+function logged(message: string): LoggedEvent | undefined {
+  return (log_server_event as unknown as { mock: { calls: [LoggedEvent][] } })
+    .mock.calls.map(([call]) => call).find(call => call.message === message)
+}
 
 beforeAll(() => {
   process.env.JWT_SECRET = 'test-secret-that-is-long-enough-for-hs256'
@@ -104,5 +115,32 @@ describe(POST, () => {
     await expect(call({ file: new File([html], 'pic.jpg', { type: 'image/jpeg' }) }))
       .rejects.toMatchObject({ status: 415 })
     expect(store_media_bytes).not.toHaveBeenCalled()
+  })
+
+  /**
+   * A 4.75 MB upload hung to Cloudflare's 100-second limit on 2026-08-06 and the
+   * ORIGIN LOGGED NOTHING — no start, no duration, no success, no failure. These
+   * two are the whole point of §1.5: an upload always says what it did.
+   */
+  test('a successful upload reports itself with stage timings', async () => {
+    await call({ file: new File([JPEG_BYTES], 'pic.jpg', { type: 'image/jpeg' }) })
+    const event = logged('photo_upload_completed')
+    expect(event.level).toBe('info')
+    expect(event.context).toMatchObject({ dictionary_id: 'dict1', bytes: JPEG_BYTES.length, mimetype: 'image/jpeg' })
+    for (const field of ['duration_ms', 'store_ms', 'exif_ms', 'dimensions_ms'])
+      expect(typeof event.context[field]).toBe('number')
+  })
+
+  test('a storage write that outlives its budget becomes OUR 504, with a row', async () => {
+    ;(store_media_bytes as unknown as { mockRejectedValueOnce: (err: Error) => void })
+      .mockRejectedValueOnce(new MediaStorageTimeoutError('Storage write exceeded 45000ms'))
+
+    await expect(call({ file: new File([JPEG_BYTES], 'pic.jpg', { type: 'image/jpeg' }) }))
+      .rejects.toMatchObject({ status: 504 })
+
+    const event = logged('photo_upload_timeout')
+    expect(event.level).toBe('error')
+    expect(event.context).toMatchObject({ dictionary_id: 'dict1', mimetype: 'image/jpeg' })
+    expect(logged('photo_upload_completed')).toBeUndefined()
   })
 })

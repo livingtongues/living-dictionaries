@@ -2,6 +2,7 @@ import type { MultiString } from '$lib/types'
 import type { SentenceToken, SentenceTokens } from '$lib/db/schemas/dictionary.types'
 import { parse_dict_row, stringify_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import { DICT_SYNCABLE_TABLES } from '$lib/db/dict-syncable-tables'
+import { new_uuid } from '$lib/utils/new-uuid'
 import { initial_keys } from '$lib/api/v1/fractional-index'
 import { analyze_sentence_tokens, load_ignored_forms, load_lexeme_index, tokens_reference_sense } from '$lib/corpus/sentence-analysis'
 import type { LexemeIndex } from '$lib/corpus/match-tokens'
@@ -115,7 +116,7 @@ async function insert_row({ connection, table, row, user_id }: {
   const row_data = { ...row }
   const has_id_column = await table_has_id_column({ connection, table })
   if (has_id_column && !row_data.id)
-    row_data.id = crypto.randomUUID()
+    row_data.id = new_uuid()
   if (is_syncable(table)) {
     if (row_data.dirty === undefined)
       row_data.dirty = 1

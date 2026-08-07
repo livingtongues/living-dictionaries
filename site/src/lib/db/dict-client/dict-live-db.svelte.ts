@@ -10,6 +10,7 @@ import { reconcile_rows } from '$lib/db/client/live/reconcile-rows'
 import { DICT_JSON_COLUMNS, parse_dict_row, stringify_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import { save_changed_dict_columns } from './dict-save-row'
 import { DICT_SYNCABLE_TABLES } from '$lib/db/dict-syncable-tables'
+import { new_uuid } from '$lib/utils/new-uuid'
 import { log_warning } from '$lib/debug/remote-log'
 import { tick } from 'svelte'
 
@@ -499,21 +500,21 @@ class DictLiveDbImpl {
       // worker-side id silently creating a duplicate. (Caller-provided ids
       // win via spread order; link/unlink are naturally idempotent.)
       this.#writes = {
-        insert_entry: args => write('insert_entry', { entry_id: crypto.randomUUID(), ...args }),
-        insert_sentence: args => write('insert_sentence', { ...args, sentence: { id: crypto.randomUUID(), ...args.sentence } }),
-        insert_sentences: args => write('insert_sentences', { rows: args.rows.map(row => ({ id: crypto.randomUUID(), ...row })) }),
+        insert_entry: args => write('insert_entry', { entry_id: new_uuid(), ...args }),
+        insert_sentence: args => write('insert_sentence', { ...args, sentence: { id: new_uuid(), ...args.sentence } }),
+        insert_sentences: args => write('insert_sentences', { rows: args.rows.map(row => ({ id: new_uuid(), ...row })) }),
         update_sentence: args => write('update_sentence', args),
         analyze_sentences: args => write('analyze_sentences', args),
         set_token_link: args => write('set_token_link', args),
-        create_entry_from_token: args => write('create_entry_from_token', { entry_id: crypto.randomUUID(), ...args }),
+        create_entry_from_token: args => write('create_entry_from_token', { entry_id: new_uuid(), ...args }),
         ignore_form: args => write('ignore_form', args),
         restore_form: args => write('restore_form', args),
         link_form: args => write('link_form', args),
-        create_entry_from_form: args => write('create_entry_from_form', { entry_id: crypto.randomUUID(), ...args }),
-        insert_text: args => write('insert_text', { text_id: crypto.randomUUID(), ...args }),
-        insert_audio: args => write('insert_audio', { ...args, audio: { id: crypto.randomUUID(), ...args.audio } }),
-        insert_photo: args => write('insert_photo', { ...args, photo: { id: crypto.randomUUID(), ...args.photo } }),
-        insert_video: args => write('insert_video', { ...args, video: { id: crypto.randomUUID(), ...args.video } }),
+        create_entry_from_form: args => write('create_entry_from_form', { entry_id: new_uuid(), ...args }),
+        insert_text: args => write('insert_text', { text_id: new_uuid(), ...args }),
+        insert_audio: args => write('insert_audio', { ...args, audio: { id: new_uuid(), ...args.audio } }),
+        insert_photo: args => write('insert_photo', { ...args, photo: { id: new_uuid(), ...args.photo } }),
+        insert_video: args => write('insert_video', { ...args, video: { id: new_uuid(), ...args.video } }),
         link_junction: args => write('link_junction', args),
         unlink_junction: args => write('unlink_junction', args),
       }
@@ -583,7 +584,7 @@ class DictLiveDbImpl {
     // Stamp ids client-side (content tables all have a synthetic UUID id) so a
     // hand-off re-send collides loudly instead of duplicating — see `writes`.
     const rows = is_dict_syncable(table_name)
-      ? items.map(item => (item as { id?: string }).id ? item : { id: crypto.randomUUID(), ...item })
+      ? items.map(item => (item as { id?: string }).id ? item : { id: new_uuid(), ...item })
       : items
     const { result } = await this.#dict_write<Record<string, unknown>[]>('insert_rows', { table: table_name, rows })
     return result as DictRowType<T>[]

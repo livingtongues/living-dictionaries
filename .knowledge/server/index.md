@@ -41,7 +41,10 @@ this category is about the runtime.
   request thread: the fork-your-own-bundled-chunk trick, the trap that your module can silently land
   in the HOOKS chunk (and start a second cron scheduler in every child), what is different inside a
   child (`$env/dynamic/private` is empty, never `get_shared_db()`, keep it read-only + report over
-  IPC), and why every such job must emit `blocking_ms` and not just `duration_ms`.
+  IPC), the EXCEPTION for a job whose whole output is rows (open shared.db directly with a long busy
+  timeout, thread the handle rather than adding a global override, and still route telemetry through
+  the parent as a capped `alerts[]`), how to verify the chunk split in the BUILT output, and why
+  every such job must emit `blocking_ms` and not just `duration_ms`.
 - [long-running-corpus-jobs.md](./long-running-corpus-jobs.md) — one-off multi-hour operator passes
   over the whole corpus (from the 13-hour, 147k-object audio-derivative backfill): why it must be a
   detached `systemd-run --user` unit and never an agent-session child, the append-only log that

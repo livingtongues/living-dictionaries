@@ -173,6 +173,48 @@ in `instance.ts`. All three files are 🔴 divergent in house's `PARITY.md`, so 
 breaks nothing; house's own worker is re-examining its triage. When house adopts them, the classifier
 + recovery pair are the parts worth copying verbatim.
 
+## 2026-08-07 — the classifier had to be told the archive exists
+
+The reload-once seam above answers "retrying is provably useless" from the browser's failure
+MESSAGE. That premise died quietly when the immutable-asset **archive** shipped: previous builds'
+assets are served for 30 days, so a bare "module failed to load" became far more often a dropped
+connection than a deleted file. On 2026-08-06 the machinery fired **19 terminal verdicts, and the
+files answered `200`** (`x-immutable-archive: hit`); of the whole 38-row stale-bundle family that
+day only 3 came from a build whose assets were genuinely gone.
+
+`spawned.onerror` was the worst offender — it never consulted the classifier at all, hard-coding
+`?? 'missing_build_artifact'` under a comment claiming the deleted case "BY CONSTRUCTION".
+
+**The rule that replaced it: probe before you accuse.** One `HEAD`; only `404`/`410` is terminal.
+Any other status proves reachability; an incomplete probe is itself a network fault; offline still
+vetoes everything. Where no URL exists (Safari names no module) it falls back to the message
+patterns, so nobody loses a rescue they had before.
+
+**Two things here are not discoverable from the code, and both cost time to find:**
+
+1. **A worker `error` event carries NOTHING.** Measured in Chromium against production: the event
+   is `{ type: 'error' }` — no `message`, no `filename`, no `lineno`. So the failing script URL has
+   to come from the spawn side.
+2. **…and you cannot hoist that URL out of the `new Worker(new URL('…', import.meta.url))` call.**
+   Vite's `vite:worker-import-meta-url` plugin matches that pattern as **literal source text**
+   (`workerImportMetaUrlRE`) and rewrites the `new URL(…)` span in place. Move the URL into a
+   variable and the rewrite silently stops firing; a lone `new URL('./leader-worker.ts',
+   import.meta.url)` instead falls to the ASSET plugin, which would emit the raw `.ts`.
+   A module-scoped `class URL extends globalThis.URL` shadow *does* work (the rewrite is textual)
+   but is deeply surprising and has a TDZ trap. **Use Vite's documented
+   `import leader_worker_url from './leader-worker.ts?worker&url'`** — same worker bundle, URL as a
+   plain string. Verified in the built output: `new Worker(Se, …)` with
+   `Se = "/_app/immutable/workers/leader-worker-<hash>.js"`, a file that exists on disk.
+
+Two smaller notes: **HEAD is load-bearing**, because LD's service worker returns early for non-GET,
+so the probe always reaches the network rather than the cache under suspicion (no cache-buster
+needed); and making the failure path async means the `handled` claim + `terminate()` must happen
+**before the first `await`**, or a second boot outcome slips through the gap.
+
+**The generalisation, worth carrying to the siblings: any app that adds an immutable-asset archive
+must revisit every "this artifact is gone" classifier in the same pass.** The archive changes the
+base rate; the classifier does not find out on its own.
+
 ## Unrelated: 413 for oversized bodies
 
 `hooks.server.ts` now pre-checks `content-length` against `BODY_SIZE_LIMIT` (16 M, unchanged) and

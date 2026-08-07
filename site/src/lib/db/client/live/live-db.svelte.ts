@@ -14,6 +14,7 @@ import type {
 import { parse_row, stringify_row } from '$lib/db/schemas/json-columns'
 import { is_syncable_table } from '$lib/db/sync/types'
 import { log_warning } from '$lib/debug/remote-log'
+import { new_uuid } from '$lib/utils/new-uuid'
 import { construct_outside_reaction } from './construct-outside-reaction.svelte'
 import { TableChangeNotifier } from './notifier'
 import { save_changed_columns } from './save-row'
@@ -391,7 +392,7 @@ class LiveDbImpl {
           for (const row of batch) {
             const row_data = row as Record<string, unknown>
             if (table_has_id && (!has_id_in_data || !row_data.id))
-              row_data.id = crypto.randomUUID()
+              row_data.id = new_uuid()
             if (is_syncable) {
               if (row_data.dirty === undefined)
                 row_data.dirty = 1

@@ -295,3 +295,31 @@ DELETE a line once its rule is obsolete. Keep it small — standing law, not a l
   so when the edge↔origin link broke (42 user 520/522/525s while the box sat at 2–4% CPU) the probe
   failed too and no instrument could say whose fault it was. Any probe meant to answer "is it us?"
   needs a leg that bypasses the layer it is trying to exonerate.
+- **2026-08-06 — AN ASSET ARCHIVE CHANGES THE BASE RATE UNDER EVERY "MISSING CHUNK" CLASSIFIER
+  (standing rule, fleet-wide corollary to the 08-05 opaque-load-failure rule).** Once the previous
+  builds' `_app/immutable/` assets are served for 30 days, any code that calls a failed chunk load a
+  deleted file *by construction* is simply wrong, and it will mislabel network failures forever.
+  Measured the day after LD's archive shipped: 19 reload-once verdicts over files that return `200`
+  with `x-immutable-archive: hit`, against 3 rows in the whole family that were genuinely 404 (all
+  from pre-archive epoch-named builds). **When a storage-side fix lands, revisit the classifiers that
+  were tuned against the old base rate in the same pass** — and prefer one cheap `HEAD` on the failure
+  path over any comment asserting the cause.
+- **2026-08-06 — ClaudeBot's `e.replaceAll is not a function` hydration failures are KNOWN NOISE.**
+  Its engine predates `String.prototype.replaceAll` (universal in real browsers since 2020), so it
+  dies inside Svelte's own template helper on every page; server-rendered content still reaches it and
+  only hydration is lost. Same family as the other declared-crawler boot rows. Don't re-triage, and
+  don't read a crawler's engine gap as a browser-support regression — check the user agent first.
+- **2026-08-07 — the prober's 08-07 fixes do NOT answer §1.8; the origin-direct leg is still the
+  ask.** Two different failures were being conflated. (a) FIXED: a curl killed at its timeout after an
+  interim `103 Early Hints` was scored `ok:true` — non-zero curl exit is now down, and rows from
+  2026-08-07 carry `context.curl_exit`. (b) STILL OPEN and untouched: a probe that COMPLETES with a
+  200 in 15 s (LD's 19:54:45 row, 14,994 ms to first byte, event loop's worst stall 63 ms) is
+  correctly `ok:true` — it says nothing about whose fault the slowness is. The 08-05 rule stands
+  unchanged: only a leg that bypasses Cloudflare can exonerate the origin. Don't mark it done
+  because the availability fix shipped.
+- **2026-08-07 — LD's paint/uptime metric ingest was never broken; don't file it.** mustang's
+  `warn: … post failed` lines are POST failures, not missing rows: LD's `logs.db` held 83/87/87
+  `paint_probe` rows on 08-04/05/06 throughout. It was a ~0.5% transient loss on the
+  mustang(MY)→Cloudflare→Boston leg, now retried. Also: `paint_probe` rows before 2026-08-07 are
+  unconfirmed FIRST-attempt verdicts (the prober now posts only the confirmed one) — don't trend
+  across that boundary.

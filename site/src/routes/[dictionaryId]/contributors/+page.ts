@@ -4,6 +4,7 @@ import { api_dictionaries_partners } from '$api/dictionaries/[id]/partners/_call
 import { api_dictionaries_id_roles_role_id_delete } from '$api/dictionaries/[id]/roles/[role_id]/_call'
 import { api_dictionaries_id_invite_cancel } from '$api/dictionaries/[id]/invites/[invite_id]/_call'
 import { upload_media } from '$lib/media/upload-media'
+import { new_uuid } from '$lib/utils/new-uuid'
 import { invalidate } from '$app/navigation'
 import { invite_helper } from '$lib/invite/invite'
 
@@ -80,7 +81,7 @@ export const load = (async ({ parent, data }) => {
 
     add_partner_image: (partner_id: string, file: File) => {
       // Not a photos row — a fresh uuid keys the R2 object (`{dict}/photo/{uuid}.{ext}`).
-      const handle = upload_media({ file, dictionary_id, kind: 'image', media_id: crypto.randomUUID() })
+      const handle = upload_media({ file, dictionary_id, kind: 'image', media_id: new_uuid() })
       const done = handle.done.then(async ({ storage_path }) => {
         const { error } = await api_dictionaries_partners(dictionary_id, {
           action: 'set_photo',

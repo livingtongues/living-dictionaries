@@ -8,7 +8,7 @@ import { JSON_COLUMNS, parse_row, stringify_row } from '$lib/db/schemas/json-col
 import { online } from 'svelte/reactivity/window'
 import { ClientBehindError, ServerBehindError } from './errors'
 import { SyncHistory } from './history.svelte.js'
-import { group_rejected_rows, rejection_signature, resolve_rejected_rows, should_report_rejections, summarize_rejections } from './rejected-rows'
+import { group_rejected_rows, quarantine_rejected_rows, rejection_signature, resolve_rejected_rows, should_report_rejections, summarize_rejections } from './rejected-rows'
 import { report_sync_failure, report_sync_halted, report_sync_push_rejected, report_sync_self_healed } from './report-sync-failure'
 import { classify_sync_failure, RepeatFailureTracker } from './sync-failure-classify'
 import { is_readonly_table, SYNCABLE_TABLE_NAMES } from './types'
@@ -345,6 +345,26 @@ export class Sync {
     await this.#connection.execute('BEGIN')
 
     try {
+      // QUARANTINE FIRST. A refused push is about to be destroyed by its own
+      // delete-echo (and, on a full pull, by the prune below) — this is the last
+      // moment the author's text exists anywhere. Best-effort: a quarantine
+      // fault must never fail a sync that otherwise succeeded, because failing
+      // it would ALSO leave the work unsaved and add a wedge on top.
+      // See `./rejected-rows.ts` for the incident.
+      if (rejected.length) {
+        try {
+          await quarantine_rejected_rows({
+            execute: (sql, params) => this.#connection.execute(sql, params),
+            query: <T>(sql: string, params?: unknown[]) => this.#connection.query<T>(sql, params),
+            rejected,
+            find_pushed_row: rejection => (dirty_rows[rejection.table_name] as Record<string, unknown>[] | undefined)
+              ?.find(row => (row as { id: string }).id === rejection.id),
+          })
+        } catch (err) {
+          this.#log({ level: 'warn', phase: 'sync', message: `Could not quarantine ${rejected.length} refused row(s) — reporting them anyway: ${err}` })
+        }
+      }
+
       // Deletes are applied BEFORE upserts (parity with house's 2026-07-05 fix +
       // the dict engine). `dictionary_roles` is a junction with a synthetic-UUID
       // PK plus a natural-key UNIQUE (dictionary_id, user_id, role) that

@@ -816,3 +816,59 @@ house's **/admin/revenue** dashboard (no payments).
      build bakes anything fetched-at-build-time into the bundle, check your own `version.name`.
   3. **An immutable-asset archive is forward-only and its first run protects nobody** — copy from the
      RUNNING container as well as the new image if you want it correct on day one.
+
+### Cross-pollination update — 2026-08-06 (read house + tutor 08-05 reviews/backlogs + house commits from today)
+
+- **NEW, LD-originated (filed tonight): ★★★ Teach the dashboards that a build can be named by its
+  version HASH, not only by its version string.** *(filed 2026-08-06 · LOW cost, HIGH value ·
+  verified against `log-analytics.ts` tonight.)* The boot-error reporter shipped in `ec9d8d9c` today
+  stamps `app_version` with SvelteKit's djb2 hash of the version (`16719h5` = `ec9d8d9c…`,
+  `myjgkn` = `34fe97ec…-20260806155506`, both verified locally with the repo's own hash function in
+  `scripts/check-build-version.mjs`), because the hash is the only build identity readable when the
+  bundle that would name the build never loaded. Nothing translates it back, so three panels
+  silently miscount:
+  - the daily `stale_errors` split (`log-analytics.ts:1517`) — **all 25 of today's blank boots are
+    filed against a stale build, and every one of them happened on the build that was current at the
+    time**. That is the exact number `34fe97ec` shipped two hours later to make honest;
+  - errors-by-build (`:2292`) — two permanent phantom builds;
+  - build adoption / stranded tabs (`:2595`) — phantom builds nobody ever migrates off.
+  **Preferred fix is at INGEST** (compute `djb2(version)` once in `insert_client_log`, store the real
+  version on a match, keep the raw hash in `context.version_hash`) so every reader inherits it; the
+  dashboard-side belt is to treat `^[a-z0-9]{5,8}$` as a hash and resolve it rather than count it as
+  stale. Failure mode is the silent kind — no panel looks broken, the numbers merely lie.
+
+- **Inbound, ACCEPTED from house (2):**
+  1. **★★ Resolve a build name to its commit subject + date on `/admin/health`** *(ported from house
+     `403330bf`, 2026-08-06).* House's `build_ms()` tested the version name against a ten-or-more-digit
+     pattern, so from the day its stamp stopped being a clock it returned null for every new build:
+     the errors-by-build panel showed a literal `—` for the date, no change description, no commit
+     link, and a sort order that pushed the CURRENT build below every legacy one. House fixed it with
+     an exact hash lookup against `build-commits.log`, which its deploy already writes to `DATA_DIR`,
+     and collapsed the build-name shape into ONE module per app (`$lib/analytics/dashboard-format`)
+     because three readers each carrying a private assumption is what caused the defect. **LD adopted
+     the compound `<sha>-<build id>` shape TODAY, so LD is one day behind house on the same road.** LD
+     is partly protected (`build_time_ms()` falls back to first-sighting for age) but still cannot show
+     WHAT a build was. LD has the same `dashboard-format.ts` file to centralise into.
+  2. **★★ The honest terminal-failure alarm** *(ported from house, now COMMITTED — `4d9da404`, so the
+     port is unblocked; it was held last night as a moving target).* "A reload attempt was recorded" is
+     not "a reload happened" — a terminal claim must wait for the NEXT healthy page load to stamp the
+     record, or two assets failing in the same instant make the second report a dead end before the
+     first one's reload has navigated. House measured 2,191 false terminal rows in one 17-minute
+     scraper burst. LD's `stale_bundle_reload_gave_up` rows on 2026-08-06 fired in bursts of 2–5 within
+     milliseconds on the same session — the same signature.
+
+- **NOT APPLICABLE:** house's revenue dashboard; tutor's mobile-memory / OOM panel.
+
+- **OUTBOUND to house + tutor (3):**
+  1. **A boot-error reporter reports a build name nothing else uses** — house shipped the same reporter
+     today (`4d9da404`). If house's reads `__sveltekit_<hash>` the same way, house has the identical
+     silent stale-build miscount, and its freshly centralised `dashboard-format` module is the natural
+     place to fix it. Urgent for house, which just spent a commit making build identity honest.
+  2. **An immutable-asset archive changes the base rate under every "missing chunk" classifier.** Once
+     the previous builds' assets are served for 30 days, code that says a failed chunk load is a
+     deleted file BY CONSTRUCTION is simply wrong and mislabels network failures forever. Any app that
+     adds an archive must revisit its classifier in the same pass. (LD measured it: 19 verdicts in one
+     day over files that return 200 from the archive.)
+  3. **Instrument the upload path's SUCCESS, not only its failure.** A hang that ends at the edge's
+     100-second timeout leaves no server row at all; house and tutor have upload endpoints of the same
+     shape.
