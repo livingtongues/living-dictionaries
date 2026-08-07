@@ -1,10 +1,11 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
+import { dirname, join, sep } from 'node:path'
 import { error, redirect } from '@sveltejs/kit'
 import type { RequestHandler } from './$types'
 import { R2_MEDIA_DOMAIN, ResponseCodes } from '$lib/constants'
 import { dev_media_dir } from '$lib/server/dev-media-dir'
 import { is_r2_media_path } from '$lib/utils/media-path'
+import { path_is_within_root } from './path-boundary'
 
 /**
  * DEV-ONLY local media store. `/api/upload` hands the client a local PUT URL;
@@ -20,7 +21,7 @@ import { is_r2_media_path } from '$lib/utils/media-path'
 function safe_join(path: string): string {
   const root = dev_media_dir()
   const full = join(root, path)
-  if (!full.startsWith(`${root}/`) && full !== root)
+  if (!path_is_within_root({ root, full, separator: sep }))
     error(ResponseCodes.BAD_REQUEST, 'Invalid path')
   return full
 }

@@ -22,11 +22,11 @@ import nodePlugin from 'eslint-plugin-n'
 import perfectionist from 'eslint-plugin-perfectionist'
 import regexp from 'eslint-plugin-regexp'
 import svelte from 'eslint-plugin-svelte'
-import svelteStylistic from 'eslint-plugin-svelte-stylistic'
 import unicorn from 'eslint-plugin-unicorn'
 import svelteParser from 'svelte-eslint-parser'
 import tseslint from 'typescript-eslint'
 import vitestPlugin from '@vitest/eslint-plugin'
+import svelteStylistic from './eslint/svelte-stylistic.js'
 
 export default tseslint.config(
   // ─────────────────────────────────────────────────────────────
