@@ -3,6 +3,7 @@
   import sanitize from 'xss'
   import { page } from '$app/state'
   import GlossedText from '$lib/corpus/GlossedText.svelte'
+  import StruckText from '$lib/orthography/StruckText.svelte'
   import { column_run } from '../column-run.svelte'
 
   interface Props {
@@ -100,8 +101,10 @@
     }}>
     {#if gloss_codes && value}
       <GlossedText text={value} />
+    {:else if htmlValue}
+      {@html sanitize(htmlValue)}
     {:else}
-      {@html sanitizedHtml}
+      <StruckText text={value || ''} />
     {/if}
     &nbsp;
   </div>

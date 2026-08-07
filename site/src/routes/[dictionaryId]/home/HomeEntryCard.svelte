@@ -3,6 +3,7 @@
   import EntryAudioControl from '$lib/entry/entry-audio/EntryAudioControl.svelte'
   import type { AudioOptionInput } from '$lib/entry/entry-audio/audio-option-labels'
   import { card_hue } from './home-helpers'
+  import StruckText from '$lib/orthography/StruckText.svelte'
   import IconMdiStarOff from '~icons/mdi/star-off'
   import IconMdiChevronLeft from '~icons/mdi/chevron-left'
   import IconMdiChevronRight from '~icons/mdi/chevron-right'
@@ -71,9 +72,9 @@
     {#if dialect}
       <span class="dialect">{dialect}</span>
     {/if}
-    <div class="lexeme" class:solo={sparse}>{lexeme}</div>
+    <div class="lexeme" class:solo={sparse}><StruckText text={lexeme} /></div>
     {#if alt}
-      <div class="alt">{alt}</div>
+      <div class="alt"><StruckText text={alt} /></div>
     {/if}
     {#if phonetic}
       <div class="phonetic">[{phonetic}]</div>
