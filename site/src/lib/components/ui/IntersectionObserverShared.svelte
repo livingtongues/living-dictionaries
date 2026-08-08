@@ -33,19 +33,19 @@
 
   let intersecting = $state(false)
   let container = $state()
-  let childElement
+  let child_element
   let interval = $state()
 
   onMount(() => {
-    childElement = container.firstElementChild
-    if (!childElement)
+    child_element = container.firstElementChild
+    if (!child_element)
       return console.error('IntersectionObserver: No child element found')
 
     if (typeof IntersectionObserver !== 'undefined') {
       if (!observer) {
-        const isIframe = window !== window.parent
-        const root = isIframe ? window.document : null
-        const rootMargin = `${top}px ${right}px ${bottom}px ${left}px`
+        const is_iframe = window !== window.parent
+        const root = is_iframe ? window.document : null
+        const root_margin = `${top}px ${right}px ${bottom}px ${left}px`
         observer = new IntersectionObserver(
           (entries) => {
             for (const entry of entries) {
@@ -53,22 +53,22 @@
               callback?.(entry.isIntersecting)
             }
           },
-          { root, rootMargin, threshold },
+          { root, rootMargin: root_margin, threshold },
         )
       }
-      const fired_when_intersecting_changes = (isIntersecting) => {
-        if (once && isIntersecting)
-          remove(childElement)
-        if (isIntersecting)
+      const fired_when_intersecting_changes = (is_intersecting) => {
+        if (once && is_intersecting)
+          remove(child_element)
+        if (is_intersecting)
           on_intersected?.()
-        intersecting = isIntersecting
+        intersecting = is_intersecting
       }
-      add(childElement, fired_when_intersecting_changes)
-      return () => remove(childElement)
+      add(child_element, fired_when_intersecting_changes)
+      return () => remove(child_element)
     }
 
     function handler() {
-      const bcr = childElement.getBoundingClientRect()
+      const bcr = child_element.getBoundingClientRect()
       intersecting = bcr.bottom + bottom > 0 && bcr.right + right > 0 && bcr.top - top < window.innerHeight && bcr.left - left < window.innerWidth
       if (intersecting && once)
         window.removeEventListener('scroll', handler)

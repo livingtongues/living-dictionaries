@@ -1,7 +1,7 @@
 <script>
   let { onsubmit = undefined, children } = $props()
   let loading = $state(false)
-  async function submitWithLoading(event) {
+  async function submit_with_loading(event) {
     if (onsubmit) {
       loading = true
       try {
@@ -15,6 +15,6 @@
   }
 </script>
 
-<form onsubmit={(event) => { event.preventDefault(); submitWithLoading(event) }}>
+<form onsubmit={(event) => { event.preventDefault(); submit_with_loading(event) }}>
   {@render children?.({ loading })}
 </form>

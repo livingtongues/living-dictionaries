@@ -38,7 +38,7 @@
 
   const disable = $derived(disabled || loading)
 
-  async function runWithSpinner(event) {
+  async function run_with_spinner(event) {
     if (onclick) {
       loading = true
       try {
@@ -86,7 +86,7 @@
     style={inline_style}
     {type}
     {title}
-    onclick={runWithSpinner}
+    onclick={run_with_spinner}
     oncontextmenu={right_with_spinner}
     disabled={disable}
     aria-label={aria_label}>

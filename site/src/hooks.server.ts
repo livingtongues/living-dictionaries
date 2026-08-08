@@ -7,6 +7,7 @@ import { CRONS } from '$lib/db/server/crons'
 import { start_analytics_snapshot_catchup } from '$lib/db/server/analytics-snapshot'
 import { get_logs_db, split_client_logs_from_shared } from '$lib/db/server/logs-db'
 import { get_shared_db } from '$lib/db/server/shared-db'
+import { EXPIRY_SECONDS, refresh_jwt_if_stale } from '$lib/auth/jwt'
 import { is_cross_origin_form_forbidden } from '$lib/server/csrf'
 import { boot_i18n_catalog } from '$lib/server/i18n/boot'
 import { log_server_event } from '$lib/server/log-server-event'
@@ -108,7 +109,7 @@ function request_body_limit(event: Parameters<Handle>[0]['event']): number | nul
 }
 
 /** @type {import('@sveltejs/kit').Handle} */
-export function handle({ event, resolve }) {
+export async function handle({ event, resolve }) {
   // CSRF: SvelteKit's built-in guard is disabled in svelte.config.js so we can
   // exempt token-authed /api/v1 uploads. Re-apply it here (prod only, matching
   // SvelteKit — cross-origin dev tooling stays unblocked) for every other request.
@@ -129,6 +130,28 @@ export function handle({ event, resolve }) {
       })
     }
   }
+
+  // Sliding sessions: a valid `session` cookie whose JWT is >1 day old gets
+  // re-signed for a fresh 31d window, so a user active at least once every 30
+  // days never re-authenticates (at most one re-sign per client per day; a fresh
+  // token costs only one unverified `iat` decode — see `refresh_jwt_if_stale`).
+  // Set BEFORE `resolve` so the Set-Cookie rides the response, with the SAME
+  // attributes the login endpoints use. An invalid/expired token is left alone —
+  // the root `+layout.server.ts` self-clears on verify failure.
+  const session_token = event.cookies.get('session')
+  if (session_token) {
+    const refreshed = await refresh_jwt_if_stale(session_token)
+    if (refreshed) {
+      event.cookies.set('session', refreshed, {
+        path: '/',
+        httpOnly: true,
+        secure: !dev,
+        sameSite: 'lax',
+        maxAge: EXPIRY_SECONDS,
+      })
+    }
+  }
+
   return resolve(event)
 }
 

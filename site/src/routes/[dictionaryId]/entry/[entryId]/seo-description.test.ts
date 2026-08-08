@@ -1,5 +1,5 @@
 import type { EntryData } from '$lib/types'
-import { seo_description } from './seo_description'
+import { seo_description } from './seo-description'
 import type { DeepPartial } from '$lib/utils/deep-partial'
 import { english_translate } from '$lib/i18n'
 

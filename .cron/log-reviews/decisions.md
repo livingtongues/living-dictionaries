@@ -195,10 +195,14 @@ DELETE a line once its rule is obsolete. Keep it small — standing law, not a l
 - **2026-08-02 — a guard-log without its de-dupe is half a fix.** Shipping the telemetry that PROVES
   a caught `<svelte:boundary>` rendered nothing, without the one-line fix that stops it, means the
   next person still gets a blank results area — you just get to watch. Owned by
-  `.issues/entries-list-duplicate-key-blank-results.md`; **08-03: the guard fired 3 more times and
-  the duplicate is one level DOWN, in a nested keyed `each` inside `ListEntry.svelte` (prime suspect
-  `{#each first_sense.semantic_domains as domain (domain)}`, keyed by the domain STRING). Don't
-  re-verify the top-level de-dupe.**
+  `.issues/entries-list-duplicate-key-blank-results.md`, which as of 08-07 carries the PROVEN cause,
+  the offending rows and the fix — don't re-derive any of it.
+- **2026-08-07 — NEVER KEY A SVELTE `{#each}` BY USER-SUPPLIED DATA (standing engineering rule,
+  fleet-wide).** A keyed each over a value a person can enter twice is a latent WHOLE-PAGE failure,
+  not a cosmetic one: Svelte throws `each_key_duplicate` and the nearest `<svelte:boundary>` renders
+  nothing, so five rows of data blank the entries list for every visitor to those dictionaries. Key by
+  index (or de-duplicate the derived value); an id you MINT is a key, a string a user typed is not.
+  A guard at the top level does not protect a nested each one component down.
 - **2026-08-03 — `crossorigin="anonymous"` is a PER-ORIGIN decision, never a blanket one.** The
   attribute only de-opaques `Script error.` on an origin that actually returns a permissive
   `Access-Control-Allow-Origin`; on an origin that does not, it turns the load into a CORS request
@@ -317,6 +321,17 @@ DELETE a line once its rule is obsolete. Keep it small — standing law, not a l
   correctly `ok:true` — it says nothing about whose fault the slowness is. The 08-05 rule stands
   unchanged: only a leg that bypasses Cloudflare can exonerate the origin. Don't mark it done
   because the availability fix shipped.
+- **2026-08-07 — a per-route AVERAGE hides a slow route; only the per-route SPLIT of a metric that
+  isolates OUR cost finds it (standing instrument rule).** LD's homepage measured 3× the median page
+  load of every other route and nothing flagged it, because its `page_load` p95 sits on the site
+  average (a hard load bakes in network + assets + render) — it was the per-route TIME TO FIRST BYTE,
+  513 ms vs 216 ms, that isolated the server's own cost and named the cause. When a page "feels slow",
+  split the metric that excludes the client before concluding anything.
+- **2026-08-07 — a whole-fleet scan belongs on the STANDBY container, never the serving one.** The
+  blast-radius answer for the duplicate-key bug needed all ~1,315 dictionary databases opened; done in
+  `sveltekit_blue` that is exactly the request-path-blocking analytics the 07-27 law forbids. `docker
+  exec sveltekit_green nice -n 19 node` shares the same `/data` mount, serves nobody, and cost 0 ms of
+  user-visible time. Use it for any ad-hoc multi-file scan.
 - **2026-08-07 — LD's paint/uptime metric ingest was never broken; don't file it.** mustang's
   `warn: … post failed` lines are POST failures, not missing rows: LD's `logs.db` held 83/87/87
   `paint_probe` rows on 08-04/05/06 throughout. It was a ~0.5% transient loss on the

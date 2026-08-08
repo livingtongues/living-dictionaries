@@ -1,5 +1,41 @@
 # A duplicate entry id blanks the whole entries results list
 
+> ## 🔴 2026-08-07 — THE REMAINING CAUSE IS PROVEN, AND IT IS NOT THE ENTRY ID. FIX THIS.
+>
+> The top-level de-dupe below shipped and works; the guard kept firing anyway (5 rows on 2026-08-07,
+> 5 sessions, 3 anonymous visitors, `san-sebastian-del-monte-m` ×4 and `birhor` ×1). The live cause is
+> **one level down**, in <File path="site/src/routes/[dictionaryId]/entries/list/ListEntry.svelte" line="248" />:
+>
+> ```svelte
+> {#each first_sense.semantic_domains || [] as domain (domain)}
+> ```
+>
+> The key is the semantic-domain **string**, and some senses store the same domain twice. Confirmed by
+> reading the production content databases:
+>
+> ```
+> san-sebastian-del-monte-m  entry 7XtLEJMhPIqq2mifh88w  semantic_domains = ["1.5","1.5"]
+> birhor                     entry nrYYv4YFKvpbJg8VUxK8  semantic_domains = ["3","3"]
+> birhor                     entry Lnmt4eKCpKJGhdJ5eVrW  semantic_domains = ["2","2"]
+> tanacross                  2 senses (not yet observed failing — nobody browsed its list)
+> ```
+>
+> **Blast radius (all 1,315 production dictionary databases scanned, 2026-08-07): 3 dictionaries,
+> 5 senses.** Small — but for those three, EVERY visitor to the entries list gets a blank results
+> area, signed in or not, because the throw escapes to `View.svelte`'s `<svelte:boundary>` after the
+> whole page of results has been discarded.
+>
+> **Fix, in this order:**
+> 1. **Render:** key line 248 by index instead of by the domain string (or de-duplicate in the derived
+>    value). Line 224 (`Object.entries(sentence.text)` keyed by `bcp`) and line 199 (keyed by
+>    `sense.id`) are safe — checked.
+> 2. **Data:** clean the 5 offending senses.
+> 3. **Telemetry (optional):** `entries_view_render_failed` reports `dict_id`, `view`, `entry_count`
+>    and the first five entry ids — none of which name the duplicated key. Finding this took a scan of
+>    1,315 databases. Parse the offending value out of Svelte's `each_key_duplicate` message.
+>
+> *(This supersedes the 2026-08-02/08-03 "prime suspect" note in `.cron/log-reviews/decisions.md`.)*
+
 > ✅ **FIXED (uncommitted) 2026-08-03** — tracked in `.issues/nightly-fixes-2026-08-03.md` item 3.
 > `$lib/utils/dedupe-entries-list.ts` runs once in `View.svelte` before all three views consume
 > `entries`, and emits `entries_list_duplicate_key { dict_id, dup_id, view, entry_count, query }`.

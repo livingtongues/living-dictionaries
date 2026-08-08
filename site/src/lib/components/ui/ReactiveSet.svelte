@@ -5,9 +5,9 @@
 
   const set = $derived(new SvelteSet(input || []))
 
-  function update(newSet) {
+  function update(new_set) {
     set.clear()
-    for (const item of newSet || [])
+    for (const item of new_set || [])
       set.add(item)
   }
   function add(item) {

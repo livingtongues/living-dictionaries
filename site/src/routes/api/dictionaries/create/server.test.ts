@@ -9,7 +9,7 @@ vi.mock('$lib/db/server/shared-db', async () => {
   const actual = await vi.importActual<typeof import('$lib/db/server/shared-db')>('$lib/db/server/shared-db')
   return { ...actual, get_shared_db: () => db }
 })
-vi.mock('$api/email/new_dictionary/dictionary-emails', () => ({
+vi.mock('$api/email/new-dictionary/dictionary-emails', () => ({
   send_new_dictionary_creator_email: () => Promise.resolve(),
 }))
 vi.mock('$lib/server/chat/system-notifier', () => ({

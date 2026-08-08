@@ -16,13 +16,13 @@
 
   const list = $derived(typeof strings === 'string' ? [strings] : (strings || []))
 
-  function addItem() {
+  function add_item() {
     const string = prompt(promptMessage)
     if (!string)
       return
     on_valueupdated?.([...list, string.trim()])
   }
-  function removeAt(index) {
+  function remove_at(index) {
     const next = [...list]
     next.splice(index, 1)
     on_valueupdated?.(next)
@@ -38,7 +38,7 @@
             {href}
             class="badge-item"
             target="_blank"
-            onx={() => removeAt(index)}>
+            onx={() => remove_at(index)}>
             {display}
           </Badge>
           <div class="badge-gap"></div>
@@ -46,12 +46,12 @@
       </DetectUrl>
     {/each}
     {#if add}
-      {@render add({ add: addItem })}
+      {@render add({ add: add_item })}
     {:else}
       <HeadlessButton
         class="btn-ghost btn-sm badge-item"
         style="color: var(--warning); gap: 0.3rem"
-        onclick={addItem}>
+        onclick={add_item}>
         <IconFaSolidPlus />
         {addMessage}
       </HeadlessButton>

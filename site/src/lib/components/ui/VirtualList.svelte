@@ -33,7 +33,7 @@
   let top = $state(0)
   let bottom = $state(0)
   let average_height
-  async function refresh(items, viewport_height, itemHeight) {
+  async function refresh(items, viewport_height, item_height) {
     const { scrollTop } = viewport
     await tick() // wait until the DOM is up to date
     let content_height = top - scrollTop
@@ -45,7 +45,7 @@
         await tick() // render the newly visible row
         row = rows[i - start]
       }
-      const row_height = (height_map[i] = itemHeight || row.offsetHeight)
+      const row_height = (height_map[i] = item_height || row.offsetHeight)
       content_height += row_height
       i += 1
     }

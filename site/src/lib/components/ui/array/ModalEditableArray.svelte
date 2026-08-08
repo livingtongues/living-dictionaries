@@ -33,18 +33,18 @@
     heading,
   }: Props = $props()
 
-  let selectedOptions: Record<string, SelectOption> = $state({})
+  let selected_options: Record<string, SelectOption> = $state({})
 
-  function prepareSelected(values: string[], options: SelectOption[]) {
-    selectedOptions = (values || []).reduce((accumlator, value) => {
+  function prepare_selected(values: string[], options: SelectOption[]) {
+    selected_options = (values || []).reduce((accumlator, value) => {
       const option = options.find(option => option.value === value)
       accumlator[value] = option || { value, name: value }
       return accumlator
     }, {})
   }
-  prepareSelected(values, options) // seed once at init (SSR-visible); modal close re-seeds explicitly
+  prepare_selected(values, options) // seed once at init (SSR-visible); modal close re-seeds explicitly
   $effect(() => {
-    prepareSelected(values, options)
+    prepare_selected(values, options)
   })
 
   const heading_render = $derived(heading)
@@ -57,7 +57,7 @@
       class="value-display"
       onclick={() => set(can_edit)}>
       <div class="chips" onclick={() => set(can_edit)}>
-        {#each Object.values(selectedOptions) as { value, name } (value)}
+        {#each Object.values(selected_options) as { value, name } (value)}
           <div class="chip">
             {name}
           </div>
@@ -76,7 +76,7 @@
       <Modal
         noscroll
         on_close={() => {
-          prepareSelected(values, options)
+          prepare_selected(values, options)
           toggle()
         }}>
         {#snippet heading()}
@@ -86,10 +86,10 @@
         <form
           onsubmit={(e) => {
             e.preventDefault()
-            on_update(Object.keys(selectedOptions))
+            on_update(Object.keys(selected_options))
             toggle()
           }}>
-          <MultiSelect bind:selectedOptions {options} {placeholder} {canWriteIn} />
+          <MultiSelect bind:selectedOptions={selected_options} {options} {placeholder} {canWriteIn} />
           <div style="min-height: 50vh"></div>
 
           <!-- the child gaps (was `space-x-1`) are built into the global .modal-footer rules -->
@@ -97,7 +97,7 @@
             <HeadlessButton
               class="btn-ghost btn-default"
               onclick={() => {
-                prepareSelected(values, options)
+                prepare_selected(values, options)
                 toggle()
               }}>
               {page.data.t('misc.cancel')}

@@ -121,6 +121,18 @@ proposals against this lens.
 
 ## Open proposals
 
+- **★★ NEW — Time to first byte per route, added to the EXISTING `RoutePerf` rows** *(filed
+  2026-08-07 · LOW cost, MEDIUM-HIGH value · verified absent: `log-analytics.ts` has `perf.by_route`
+  / `nav_by_route` / `lcp_by_route` and `ttfb_by_country` / `ttfb_by_distance`, but NO per-route
+  TTFB).* Tonight the homepage hid in plain sight: its `page_load` p95 (4,171 ms) is
+  indistinguishable from the site average (3,947 ms), because a hard page load bakes in network +
+  assets + render. Its **first byte** — **513 ms vs 216 ms everywhere else** — isolates *our own*
+  server cost and pointed straight at the 294 server-rendered featured-word cards (587 KB of HTML,
+  159 KB of it one icon repeated 294×). `page_load` rows already carry `context.ttfb`, so this is
+  two extra percentiles on a query and a panel that both exist. The panel then answers **"which
+  routes are slow because of US"**, not just "which routes are slow". Aggregate + trendable, no error
+  list — satisfies the scope rule.
+
 - **★★★ NEW — A "Responsiveness" line on `/admin/health`'s Host resources panel: worst event-loop
   stall today, when, and what was running** *(filed 2026-08-02 · LOW-MEDIUM cost, HIGH value ·
   verified absent: ZERO occurrences of `loop_lag` in `log-analytics.ts` or `admin/health/+page.svelte`;
@@ -153,6 +165,13 @@ proposals against this lens.
   29-second freeze. The panel's success story is equally invisible today: the audio-sweep fix moved the
   MEDIAN worst-freeze-per-window from **798 ms to 98 ms** across the 01:07 deploy, and no existing panel
   can show it.
+
+  **2026-08-07 — the panel can now ATTRIBUTE a freeze, not just report one, and that is new.**
+  `blocking_ms` shipped on the sweep events, and tonight it matched the host meter to the millisecond:
+  the 02:32–02:37 window's 9,555 ms max is `snapshot_sweep_completed.blocking_ms: 9,579`; the
+  04:32–04:37 window's 4,685 ms is `blocking_ms: 4,667`. So the verdict sentence can name the job from
+  a join rather than a heuristic. Sixth consecutive night this has been the single most valuable
+  unbuilt number on the page; p99 stayed under 13 ms all day while max hit 10,813 ms.
 
 - **★★ NEW — Count telemetry inserts dropped to lock contention, and report the count on the
   `host_stats` sample** *(ported from house 2026-08-04 · LOW cost).* `insert_client_log`
@@ -628,6 +647,19 @@ proposals against this lens.
 ## Cross-pollination from sibling apps (house + tutor)
 *Added 2026-06-27 (Phase D — first cross-repo read). LD is currently the furthest-along dashboard, so
 the borrow list is short.*
+
+- **★★ Name the server-side cause behind opaque `sync_failed` clusters** *(ported from house
+  2026-08-07).* LD logged **231 `sync_failed` rows with `kind: "network"` and NO status at all**
+  across 52 sessions on 2026-08-07 — the client knows only that a `fetch` threw. house is chasing the
+  identical shape and its approach fits LD unchanged: correlate the client cluster against a
+  server-side fault row for the same dictionary + minute, and show the resolved cause rather than the
+  opaque count. Aggregate/subsystem health, not an error list.
+
+- **★ Mark the current, unfinalized day as provisional on the traffic charts** *(ported from tutor
+  2026-08-07).* LD already has the RULING — with a once-daily checkpoint the newest day is always
+  frozen at ~03:30 Pacific (decisions.md, 2026-07-31) — but nothing on the page says so, so the last
+  bar reads as a real decline every single morning. One label on the final data point of each
+  traffic/error series. Cheap, and it stops a recurring misreading.
 
 - ✅ **Error-cluster + known-noise classification on the errors panel** *(ported from tutor — SHIPPED
   2026-06-27, commit b10f813e)* — `error_clusters` now groups by `message` + `substr(stack,1,200)`

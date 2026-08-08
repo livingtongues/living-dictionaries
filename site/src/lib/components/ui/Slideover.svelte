@@ -18,10 +18,10 @@
   const close = () => on_close?.()
   let slideover = $state()
   onMount(() => {
-    const previouslyFocused = typeof document !== 'undefined' && document.activeElement
+    const previously_focused = typeof document !== 'undefined' && document.activeElement
     return () => {
-      if (previouslyFocused instanceof HTMLElement) {
-        previouslyFocused.focus()
+      if (previously_focused instanceof HTMLElement) {
+        previously_focused.focus()
       }
     }
   })
