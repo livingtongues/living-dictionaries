@@ -10,6 +10,7 @@
   import { add_periods_and_comma_separate_parts_of_speech } from '$lib/entry/format-parts-of-speech'
   import { get_local_orthographies } from '$lib/entry/get-local-orthographies'
   import { get_headword } from '$lib/orthography/orthographies'
+  import StruckText from '$lib/orthography/StruckText.svelte'
   import { photo_src } from '$lib/utils/media-url'
   import { render_markdown_to_html } from '$lib/markdown/render'
   import { sanitize_rich_text } from '$lib/markdown/sanitize-rich-text'
@@ -42,10 +43,10 @@
 </script>
 
 <div style="font-size: {fontSize}pt;">
-  <b style="font-size: {headwordSize}pt;">{headword.value}</b>
+  <b style="font-size: {headwordSize}pt;"><StruckText text={headword.value} /></b>
 
   {#if selectedFields.local_orthography}
-    <b>{get_local_orthographies(entry.main.lexeme, { exclude_code: headword.code }).join(', ')}</b>
+    <b><StruckText text={get_local_orthographies(entry.main.lexeme, { exclude_code: headword.code }).join(', ')} /></b>
   {/if}
 
   {#if selectedFields.phonetic && entry.main.phonetic}
